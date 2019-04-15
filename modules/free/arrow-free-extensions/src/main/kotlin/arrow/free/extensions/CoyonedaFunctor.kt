@@ -1,9 +1,12 @@
 package arrow.free.extensions
 
-import arrow.*
-
-import arrow.free.*
+import arrow.Kind
+import arrow.extension
+import arrow.free.Coyoneda
+import arrow.free.CoyonedaPartialOf
+import arrow.free.fix
 import arrow.typeclasses.Functor
+import arrow.undocumented
 
 @extension
 @undocumented
