@@ -25,6 +25,7 @@ import arrow.fx.extensions.io.concurrent.concurrent
 import arrow.fx.extensions.io.functor.functor
 import arrow.fx.extensions.io.monad.monad
 import arrow.fx.mtl.concurrent
+import arrow.fx.mtl.timer
 import arrow.mtl.extensions.kleisli.alternative.alternative
 import arrow.mtl.extensions.kleisli.applicative.applicative
 import arrow.mtl.extensions.kleisli.contravariant.contravariant
@@ -87,6 +88,7 @@ class KleisliTest : UnitSpec() {
       ),
       ConcurrentLaws.laws<KleisliPartialOf<IOPartialOf<Nothing>, Int>>(
         Kleisli.concurrent(IO.concurrent()),
+        Kleisli.timer(IO.concurrent()),
         Kleisli.functor(IO.functor()),
         Kleisli.applicative(IO.applicative()),
         Kleisli.monad(IO.monad()),
