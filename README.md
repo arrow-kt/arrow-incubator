@@ -1,6 +1,6 @@
 # Arrow Incubator
 
-[![Arrow Incubator logo](https://github.com/arrow-kt/arrow-site/tree/master/docs/img/incubator/arrow-incubator-brand-sidebar.svg)](https://arrow-kt.io)
+[![Arrow Incubator logo](https://raw.githubusercontent.com/arrow-kt/arrow-site/master/docs/img/incubator/arrow-incubator-brand-sidebar.svg?sanitize=true)](https://arrow-kt.io)
 
 Λrrow Incubator is part of [**Λrrow**](https://arrow-kt.io).
 
