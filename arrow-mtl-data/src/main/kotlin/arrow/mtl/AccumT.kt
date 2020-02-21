@@ -144,7 +144,7 @@ data class AccumT<S, F, A>(val accumT: AccumTFun<S, F, A>) : AccumTOf<S, F, A> {
   /**
    * Convert an accumulation (append-only) computation into a fully stateful computation.
    */
-  fun toStateT(MF: Monad<F>, MS: Monoid<S>): StateT<F, S, A> =
+  fun toStateT(MF: Monad<F>, MS: Monoid<S>): StateT<S, F, A> =
     StateT(
       AndThen.id<S>().flatMap { s: S ->
         AndThen(accumT).andThen {
