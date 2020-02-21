@@ -8,7 +8,6 @@ import arrow.core.Id
 import arrow.core.Tuple2
 import arrow.core.extensions.id.applicative.applicative
 import arrow.core.extensions.id.functor.functor
-import arrow.core.extensions.id.monad.monad
 import arrow.extension
 import arrow.mtl.ForKleisli
 import arrow.mtl.Kleisli
@@ -27,20 +26,15 @@ import arrow.typeclasses.Alternative
 import arrow.typeclasses.Applicative
 import arrow.typeclasses.ApplicativeError
 import arrow.typeclasses.Apply
-import arrow.typeclasses.Conested
 import arrow.typeclasses.Contravariant
 import arrow.typeclasses.Decidable
 import arrow.typeclasses.Divide
 import arrow.typeclasses.Divisible
-import arrow.typeclasses.Eq
-import arrow.typeclasses.EqK
 import arrow.typeclasses.Functor
 import arrow.typeclasses.Monad
 import arrow.typeclasses.MonadError
 import arrow.typeclasses.MonadSyntax
 import arrow.typeclasses.MonadThrow
-import arrow.typeclasses.conest
-import arrow.typeclasses.counnest
 import arrow.undocumented
 
 @extension
