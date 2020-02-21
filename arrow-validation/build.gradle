@@ -1,15 +1,26 @@
-apply plugin: 'kotlin-kapt'
-
-dependencies {
-    compile project(':arrow-core')
-    kapt project(':arrow-meta')
-    kaptTest project(':arrow-meta')
-    compileOnly project(':arrow-meta')
-    testCompileOnly project(':arrow-meta')
-    testRuntime("org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION")
-    testCompile "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION"
-    testCompile project(':arrow-test')
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$KOTLIN_VERSION"
+plugins {
+    id "maven-publish"
+    id "base"
+    id "org.jetbrains.kotlin.jvm"
+    id "org.jetbrains.kotlin.kapt"
+    id "net.rdrei.android.buildtimetracker"
+    id "org.jetbrains.dokka"
+    id "org.jlleitschuh.gradle.ktlint"
+    id "ru.vyarus.animalsniffer"
 }
 
-apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
+apply from: "$SUBPROJECT_CONF"
+apply from: "$DOC_CONF"
+apply from: "$PUBLISH_CONF"
+
+dependencies {
+    compile "io.arrow-kt:arrow-core:$VERSION_NAME"
+    kapt "io.arrow-kt:arrow-meta:$VERSION_NAME"
+    kaptTest "io.arrow-kt:arrow-meta:$VERSION_NAME"
+    compileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME"
+    testCompileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME"
+    testRuntime "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
+    testCompile "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION"
+    testCompile "io.arrow-kt:arrow-test:$VERSION_NAME"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$KOTLIN_VERSION"
+}
