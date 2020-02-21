@@ -1,6 +1,7 @@
 package arrow.mtl.extensions
 
 import arrow.Kind
+import arrow.Kind2
 import arrow.core.AndThen
 import arrow.core.Either
 import arrow.core.ForId
@@ -11,6 +12,7 @@ import arrow.core.left
 import arrow.core.right
 import arrow.core.toT
 import arrow.extension
+import arrow.mtl.ForStateT
 import arrow.mtl.State
 import arrow.mtl.StateApi
 import arrow.mtl.StatePartialOf
@@ -24,6 +26,7 @@ import arrow.mtl.extensions.statet.monad.monad
 import arrow.mtl.fix
 import arrow.mtl.run
 import arrow.mtl.typeclasses.MonadState
+import arrow.mtl.typeclasses.MonadTrans
 import arrow.typeclasses.Alternative
 import arrow.typeclasses.Applicative
 import arrow.typeclasses.ApplicativeError
@@ -290,4 +293,10 @@ interface StateTAlternative<S, F> : Alternative<StateTPartialOf<S, F>>, StateTMo
 
   override fun <A> StateTOf<S, F, A>.combineK(y: StateTOf<S, F, A>): StateT<S, F, A> =
     orElse(y).fix()
+}
+
+@extension
+interface StateTMonadTrans<S> : MonadTrans<Kind<ForStateT, S>> {
+  override fun <G, A> Kind<G, A>.liftT(MG: Monad<G>): Kind2<Kind<ForStateT, S>, G, A> =
+    StateT.liftF(MG, this)
 }
