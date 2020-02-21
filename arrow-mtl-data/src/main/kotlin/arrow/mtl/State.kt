@@ -47,7 +47,6 @@ fun <S, A> State<S, A>.run(initial: S): Tuple2<S, A> = runF(initial).extract()
 
 /**
  * Constructor for State.
- * State<S, A> is an alias for IndexedStateT<S, ForId, S, A>
  *
  * @param run the stateful function to wrap with [State].
  */
