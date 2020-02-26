@@ -3,6 +3,7 @@ package arrow.mtl.extensions
 import arrow.Kind
 import arrow.Kind2
 import arrow.core.Either
+import arrow.core.Eval
 import arrow.core.Tuple2
 import arrow.core.extensions.tuple2.eq.eq
 import arrow.core.left
@@ -65,12 +66,10 @@ interface WriterTApplicative<W, F> : Applicative<WriterTPartialOf<W, F>>, Writer
   override fun <A, B> WriterTOf<W, F, A>.map(f: (A) -> B): WriterT<W, F, B> =
     fix().map(AF()) { f(it) }
 
-  override fun <A, B> Kind<WriterTPartialOf<W, F>, A>.lazyAp(ff: () -> Kind<WriterTPartialOf<W, F>, (A) -> B>): Kind<WriterTPartialOf<W, F>, B> =
-    WriterT(
-      AF().run {
-        fix().value().lazyAp { ff().fix().value().map { r -> { l: Tuple2<W, A> -> Tuple2(MM().run { l.a + r.a }, r.b(l.b)) } } }
-      }
-    )
+  override fun <A, B> Kind<WriterTPartialOf<W, F>, A>.apEval(ff: Eval<Kind<WriterTPartialOf<W, F>, (A) -> B>>): Eval<Kind<WriterTPartialOf<W, F>, B>> =
+    AF().run { fix().value()
+      .apEval(ff.map { it.value().map { (w2, f) -> { (w1, a): Tuple2<W, A> -> MM().run { w1 + w2 } toT f(a) } } }) }
+      .map(::WriterT)
 }
 
 @extension
@@ -94,13 +93,6 @@ interface WriterTMonad<W, F> : Monad<WriterTPartialOf<W, F>>, WriterTApplicative
 
   override fun <A, B> WriterTOf<W, F, A>.ap(ff: WriterTOf<W, F, (A) -> B>): WriterT<W, F, B> =
     fix().ap(MF(), MM(), ff)
-
-  override fun <A, B> Kind<WriterTPartialOf<W, F>, A>.lazyAp(ff: () -> Kind<WriterTPartialOf<W, F>, (A) -> B>): Kind<WriterTPartialOf<W, F>, B> =
-    WriterT(
-      AF().run {
-        fix().value().lazyAp { ff().fix().value().map { r -> { l: Tuple2<W, A> -> Tuple2(MM().run { l.a + r.a }, r.b(l.b)) } } }
-      }
-    )
 }
 
 @extension
