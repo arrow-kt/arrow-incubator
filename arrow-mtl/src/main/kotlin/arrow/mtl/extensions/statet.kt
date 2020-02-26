@@ -4,6 +4,8 @@ import arrow.Kind
 import arrow.Kind2
 import arrow.core.AndThen
 import arrow.core.Either
+import arrow.core.Eval
+import arrow.core.Eval.Now
 import arrow.core.ForId
 import arrow.core.Id
 import arrow.core.Tuple2
@@ -71,8 +73,9 @@ interface StateTApplicative<S, F> : Applicative<StateTPartialOf<S, F>>, StateTFu
   override fun <A, B> StateTOf<S, F, A>.ap(ff: StateTOf<S, F, (A) -> B>): StateT<S, F, B> =
     fix().ap(MF(), ff)
 
-  override fun <A, B> Kind<StateTPartialOf<S, F>, A>.lazyAp(ff: () -> Kind<StateTPartialOf<S, F>, (A) -> B>): Kind<StateTPartialOf<S, F>, B> =
-    flatMap(MF()) { a -> ff().map { f -> f(a) } }
+  // Stacksafe only when `F` is stacksafe
+  override fun <A, B> Kind<StateTPartialOf<S, F>, A>.apEval(ff: Eval<Kind<StateTPartialOf<S, F>, (A) -> B>>): Eval<Kind<StateTPartialOf<S, F>, B>> =
+    fix().flatMap(MF()) { a -> ff.value().map { f -> f(a) } }.let(::Now)
 }
 
 @extension
@@ -92,15 +95,6 @@ interface StateTMonad<S, F> : Monad<StateTPartialOf<S, F>>, StateTApplicative<S,
 
   override fun <A, B> StateTOf<S, F, A>.ap(ff: StateTOf<S, F, (A) -> B>): StateT<S, F, B> =
     fix().ap(MF(), ff.fix())
-
-  override fun <A, B> Kind<StateTPartialOf<S, F>, A>.lazyAp(ff: () -> Kind<StateTPartialOf<S, F>, (A) -> B>): Kind<StateTPartialOf<S, F>, B> =
-    StateT(AndThen.id<S>().flatMap { s ->
-      AndThen(fix().runF).andThen { fa ->
-        MF().run {
-          fa.lazyAp { ff().run(s).map { (s, f) -> { (_, a): Tuple2<S, A> -> s toT f(a) } } }
-        }
-      }
-    })
 }
 
 @extension
