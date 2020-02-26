@@ -1,4 +1,4 @@
-rootProject.name = 'arrow'
+rootProject.name = 'arrow-incubator'
 
 include 'arrow-aql'
 include 'arrow-mtl'
@@ -12,3 +12,5 @@ include 'arrow-reflect'
 include 'arrow-kindedj'
 include 'arrow-validation'
 include 'arrow-fx-mtl'
+include 'arrow-incubator-test'
+include 'arrow-docs'
