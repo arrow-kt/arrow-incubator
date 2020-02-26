@@ -4,6 +4,8 @@ import arrow.Kind
 import arrow.Kind2
 import arrow.core.AndThen
 import arrow.core.Either
+import arrow.core.Eval
+import arrow.core.Eval.Now
 import arrow.core.Id
 import arrow.core.Tuple2
 import arrow.core.extensions.id.applicative.applicative
@@ -101,8 +103,13 @@ interface KleisliApply<D, F> : Apply<KleisliPartialOf<D, F>>, KleisliFunctor<D, 
   override fun <A, B> KleisliOf<D, F, A>.product(fb: KleisliOf<D, F, B>): Kleisli<D, F, Tuple2<A, B>> =
     Kleisli { AF().run { run(it).product(fb.run(it)) } }
 
-  override fun <A, B> Kind<KleisliPartialOf<D, F>, A>.lazyAp(ff: () -> Kind<KleisliPartialOf<D, F>, (A) -> B>): Kind<KleisliPartialOf<D, F>, B> =
-    Kleisli { AF().run { run(it).lazyAp { ff().run(it) } } }
+  // I am not 100% sure that this is all that stacksafe because of all the run and value calls, put it should be hard to break even if it's not
+  override fun <A, B> Kind<KleisliPartialOf<D, F>, A>.apEval(ff: Eval<Kind<KleisliPartialOf<D, F>, (A) -> B>>): Eval<Kind<KleisliPartialOf<D, F>, B>> =
+    Kleisli(AndThen.id<D>().flatMap { d ->
+      AndThen(fix().run).andThenF(AndThen<Kind<F, A>, Kind<F, B>> { fa ->
+        AF().run { fa.apEval(ff.flatMap { Eval.later { it.run(d) } }).value() }
+      })
+    }).let(::Now)
 }
 
 @extension
@@ -137,13 +144,6 @@ interface KleisliMonad<D, F> : Monad<KleisliPartialOf<D, F>>, KleisliApplicative
 
   override fun <A, B> tailRecM(a: A, f: (A) -> KleisliOf<D, F, Either<A, B>>): Kleisli<D, F, B> =
     Kleisli.tailRecM(MF(), a, f)
-
-  override fun <A, B> Kind<KleisliPartialOf<D, F>, A>.lazyAp(ff: () -> Kind<KleisliPartialOf<D, F>, (A) -> B>): Kind<KleisliPartialOf<D, F>, B> =
-    Kleisli(AndThen.id<D>().flatMap { d ->
-      AndThen(fix().run).andThen { fa ->
-        MF().run { fa.lazyAp { ff().run(d) } }
-      }
-    })
 }
 
 @extension
