@@ -26,6 +26,12 @@ import arrow.fx.extensions.io.functor.functor
 import arrow.fx.extensions.io.monad.monad
 import arrow.fx.mtl.concurrent
 import arrow.fx.mtl.timer
+import arrow.mtl.extensions.eithert.alternative.alternative
+import arrow.mtl.extensions.eithert.applicative.applicative
+import arrow.mtl.extensions.eithert.divisible.divisible
+import arrow.mtl.extensions.eithert.eqK.eqK
+import arrow.mtl.extensions.eithert.functor.functor
+import arrow.mtl.extensions.eithert.monad.monad
 import arrow.mtl.extensions.eithert.semigroupK.semigroupK
 import arrow.mtl.extensions.eithert.traverse.traverse
 import arrow.test.UnitSpec
