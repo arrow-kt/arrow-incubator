@@ -110,12 +110,10 @@ fun <A> Const.Companion.genK(genA: Gen<A>) = object : GenK<ConstPartialOf<A>> {
     }
 }
 
-fun <F, L> EitherT.Companion.genK(genkF: GenK<F>, genL: Gen<L>) =
-  object : GenK<EitherTPartialOf<F, L>> {
-    override fun <R> genK(gen: Gen<R>): Gen<Kind<EitherTPartialOf<F, L>, R>> =
-      genkF.genK(Gen.either(genL, gen)).map {
-        EitherT(it)
-      }
+fun <L, F> EitherT.Companion.genK(genkF: GenK<F>, genL: Gen<L>) =
+  object : GenK<EitherTPartialOf<L, F>> {
+    override fun <R> genK(gen: Gen<R>): Gen<Kind<EitherTPartialOf<L, F>, R>> =
+      genkF.genK(Gen.either(genL, gen)).map { EitherT(it) }
   }
 
 fun <F, G> GenK<F>.nested(GENKG: GenK<G>): GenK<Nested<F, G>> = object : GenK<Nested<F, G>> {
