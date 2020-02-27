@@ -172,7 +172,7 @@ import arrow.mtl.State
 import arrow.mtl.extensions.fx
 
 fun stackOperations() =
-  State.fx<ForId, Stack, Option<String>>(Id.monad()) {
+  State.fx<Stack, ForId, Option<String>>(Id.monad()) {
     val (a) = push("a")
     val (b) = pop()
     val (c) = pop()
@@ -213,7 +213,7 @@ fun push(s: String) = State<Stack, Unit> { stack ->
 }
 
 fun stackOperations() =
-  State.fx<ForId, Stack, Option<String>>(Id.monad()) {
+  State.fx<Stack, ForId, Option<String>>(Id.monad()) {
     val (a) = push("a")
     val (b) = pop()
     val (c) = pop()
@@ -260,7 +260,7 @@ fun push(s: String) = State<Stack, Unit> { stack ->
 }
 
 fun stackOperations() =
-  State.fx<ForId, Stack, Option<String>>(Id.monad()) {
+  State.fx<Stack, ForId, Option<String>>(Id.monad()) {
     val (a) = push("a")
     val (b) = pop()
     val (c) = pop()
@@ -309,7 +309,7 @@ fun push(s: String) = State<Stack, Unit> { stack ->
 }
 
 fun stackOperations() =
-  State.fx<ForId, Stack, Option<String>>(Id.monad()) {
+  State.fx<Stack, ForId, Option<String>>(Id.monad()) {
     val (a) = push("a")
     val (b) = pop()
     val (c) = pop()

@@ -240,18 +240,18 @@ sealed class StackError {
   object StackEmpty : StackError()
 }
 //sampleStart
-fun popS() = StateT<EitherPartialOf<StackError>, Stack, String> { stack: Stack ->
+fun popS() = StateT<Stack, EitherPartialOf<StackError>, String> { stack: Stack ->
   if (stack.isEmpty()) StackEmpty.left()
   else stack.first().let {
     stack.drop(1) toT it
   }.right()
 }
 
-fun pushS(s: String) = StateT<EitherPartialOf<StackError>, Stack, Unit> { stack: Stack ->
+fun pushS(s: String) = StateT<Stack, EitherPartialOf<StackError>, Unit> { stack: Stack ->
   (listOf(s, *stack.toTypedArray()) toT Unit).right()
 }
 
-fun stackOperationsS(): StateT<EitherPartialOf<StackError>, Stack, String> =
+fun stackOperationsS(): StateT<Stack, EitherPartialOf<StackError>, String> =
   pushS("a").flatMap(Either.monad()) { _ ->
     popS().flatMap(Either.monad()) { _ ->
       popS()
@@ -283,18 +283,18 @@ sealed class StackError {
   object StackEmpty : StackError()
 }
 
-fun popS() = StateT<EitherPartialOf<StackError>, Stack, String> { stack: Stack ->
+fun popS() = StateT<Stack, EitherPartialOf<StackError>, String> { stack: Stack ->
   if (stack.isEmpty()) StackEmpty.left()
   else stack.first().let {
     stack.drop(1) toT it
   }.right()
 }
 
-fun pushS(s: String) = StateT<EitherPartialOf<StackError>, Stack, Unit> { stack: Stack ->
+fun pushS(s: String) = StateT<Stack, EitherPartialOf<StackError>, Unit> { stack: Stack ->
   (listOf(s, *stack.toTypedArray()) toT Unit).right()
 }
 
-fun stackOperationsS(): StateT<EitherPartialOf<StackError>, Stack, String> =
+fun stackOperationsS(): StateT<Stack, EitherPartialOf<StackError>, String> =
   pushS("a").flatMap(Either.monad()) { _ ->
     popS().flatMap(Either.monad()) { _ ->
       popS()
@@ -330,19 +330,19 @@ sealed class StackError {
   object StackEmpty : StackError()
 }
 
-fun popS() = StateT<EitherPartialOf<StackError>, Stack, String> { stack: Stack ->
+fun popS() = StateT<Stack, EitherPartialOf<StackError>, String> { stack: Stack ->
   if (stack.isEmpty()) StackEmpty.left()
   else stack.first().let {
     stack.drop(1) toT it
   }.right()
 }
 
-fun pushS(s: String) = StateT<EitherPartialOf<StackError>, Stack, Unit> { stack: Stack ->
+fun pushS(s: String) = StateT<Stack, EitherPartialOf<StackError>, Unit> { stack: Stack ->
   (listOf(s, *stack.toTypedArray()) toT Unit).right()
 }
 //sampleStart
 fun stackOperationsS2() =
-  StateT.fx<EitherPartialOf<StackError>, Stack, String>(Either.monadError<StackError>()) {
+  StateT.fx<Stack, EitherPartialOf<StackError>, String>(Either.monadError<StackError>()) {
     !pushS("a")
     !popS()
     val (string) = popS()
@@ -374,19 +374,19 @@ sealed class StackError {
   object StackEmpty : StackError()
 }
 
-fun popS() = StateT<EitherPartialOf<StackError>, Stack, String> { stack: Stack ->
+fun popS() = StateT<Stack, EitherPartialOf<StackError>, String> { stack: Stack ->
   if (stack.isEmpty()) StackEmpty.left()
   else stack.first().let {
     stack.drop(1) toT it
   }.right()
 }
 
-fun pushS(s: String) = StateT<EitherPartialOf<StackError>, Stack, Unit> { stack: Stack ->
+fun pushS(s: String) = StateT<Stack, EitherPartialOf<StackError>, Unit> { stack: Stack ->
   (listOf(s, *stack.toTypedArray()) toT Unit).right()
 }
 //sampleStart
 fun stackOperationsS2() =
-  StateT.fx<EitherPartialOf<StackError>, Stack, String>(Either.monadError<StackError>()) {
+  StateT.fx<Stack, EitherPartialOf<StackError>, String>(Either.monadError<StackError>()) {
     !pushS("a")
     !popS()
     val (string) = popS()

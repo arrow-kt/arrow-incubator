@@ -208,7 +208,7 @@ import arrow.fx.rx2.ForObservableK
 import arrow.mtl.EitherT
 import arrow.fx.rx2.extensions.observablek.applicative.applicative
 
-val eitherTVal = EitherT.just<ForObservableK, BizError, Int>(ObservableK.applicative(), 1)
+val eitherTVal = EitherT.just<BizError, ForObservableK, Int>(ObservableK.applicative(), 1)
 eitherTVal
 ```
 
@@ -228,7 +228,7 @@ import arrow.fx.rx2.fix
 import arrow.mtl.extensions.eithert.monad.monad
 
 fun getCountryCode(personId: Int): ObservableK<Either<BizError, String>> =
-  EitherT.monad<ForObservableK, BizError>(ObservableK.monad()).fx.monad {
+  EitherT.monad<BizError, ForObservableK>(ObservableK.monad()).fx.monad {
     val (person) = EitherT(findPerson(personId))
     val address = !EitherT(ObservableK.just(
       person.address.toEither { AddressNotFound(personId) }
