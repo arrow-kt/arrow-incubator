@@ -9,7 +9,6 @@ import arrow.extension
 import arrow.fx.IO
 import arrow.fx.RacePair
 import arrow.fx.RaceTriple
-import arrow.fx.Ref
 import arrow.fx.Timer
 import arrow.fx.mtl.unlifted.defaultBracket
 import arrow.fx.typeclasses.Async
@@ -45,7 +44,7 @@ interface OptionTBracket<F, E> : Bracket<OptionTPartialOf<F>, E>, OptionTMonadEr
   override fun ME(): MonadError<F, E> = BR()
 
   override fun <A, B> OptionTOf<F, A>.bracketCase(release: (A, ExitCase<E>) -> OptionTOf<F, Unit>, use: (A) -> OptionTOf<F, B>): OptionTOf<F, B> =
-    defaultBracket(BR(), OptionT.monadBaseControl(MonadBaseControl.id(BR())), release,  use)
+    defaultBracket(BR(), OptionT.monadBaseControl(MonadBaseControl.id(BR())), release, use)
 }
 
 @extension

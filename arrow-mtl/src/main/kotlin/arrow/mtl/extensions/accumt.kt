@@ -18,9 +18,7 @@ import arrow.mtl.typeclasses.MonadState
 import arrow.mtl.typeclasses.MonadTrans
 import arrow.mtl.typeclasses.MonadTransControl
 import arrow.mtl.typeclasses.MonadWriter
-import arrow.mtl.typeclasses.RunInBase
 import arrow.mtl.typeclasses.RunT
-import arrow.mtl.typeclasses.StM
 import arrow.mtl.typeclasses.StT
 import arrow.typeclasses.Alternative
 import arrow.typeclasses.Applicative

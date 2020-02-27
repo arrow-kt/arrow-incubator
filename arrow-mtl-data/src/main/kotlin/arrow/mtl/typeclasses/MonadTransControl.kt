@@ -27,7 +27,7 @@ import arrow.typeclasses.Monad
  */
 interface MonadTransControl<T> : MonadTrans<T> {
 
-  fun <M, A>liftWith(MM: Monad<M>, f: (RunT<T>) -> Kind<M, A>): Kind<Kind<T, M>, A>
+  fun <M, A> liftWith(MM: Monad<M>, f: (RunT<T>) -> Kind<M, A>): Kind<Kind<T, M>, A>
 
   fun <M, A> Kind<M, StT<T, A>>.restoreT(MM: Monad<M>): Kind<Kind<T, M>, A>
 
@@ -40,4 +40,3 @@ interface RunT<T> {
 
 // TODO Can this be replaced to work entirely at the typelevel with arrow-meta?
 class StT<T, A>(val unsafeState: Any?)
-

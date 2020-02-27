@@ -341,5 +341,5 @@ fun OptionT.Companion.monadTransControl(): MonadTransControl<ForOptionT> = objec
 fun <B, M> OptionT.Companion.monadBase(MB: MonadBase<B, M>): MonadBase<B, OptionTPartialOf<M>> =
   MonadBase.defaultImpl(object : OptionTMonadTrans {}, MB)
 
-fun <B, M> OptionT.Companion.monadBaseControl(MBC: MonadBaseControl<B, M>) : MonadBaseControl<B, OptionTPartialOf<M>> =
+fun <B, M> OptionT.Companion.monadBaseControl(MBC: MonadBaseControl<B, M>): MonadBaseControl<B, OptionTPartialOf<M>> =
   MonadBaseControl.defaultImpl(object : OptionTMonadTransControl {}, MBC)
