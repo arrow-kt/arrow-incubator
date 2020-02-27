@@ -43,7 +43,7 @@ interface KleisliBracket<D, F, E> : Bracket<KleisliPartialOf<D, F>, E>, KleisliM
   override fun ME(): MonadError<F, E> = BF()
 
   override fun <A, B> Kind<KleisliPartialOf<D, F>, A>.bracketCase(release: (A, ExitCase<E>) -> Kind<KleisliPartialOf<D, F>, Unit>, use: (A) -> Kind<KleisliPartialOf<D, F>, B>): Kind<KleisliPartialOf<D, F>, B> =
-    defaultBracket(BF(), Kleisli.monadBaseControl(MonadBaseControl.id(BF())), release, use)
+    defaultBracket(BF(), Kleisli.monadBaseControl<D, F, F>(MonadBaseControl.id(BF())), release, use)
 
   override fun <A> KleisliOf<D, F, A>.uncancelable(): Kleisli<D, F, A> = BF().run {
     Kleisli { r -> this@uncancelable.run(r).uncancelable() }

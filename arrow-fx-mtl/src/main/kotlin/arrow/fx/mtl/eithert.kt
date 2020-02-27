@@ -53,6 +53,7 @@ interface EitherTBracket<L, F, E> : Bracket<EitherTPartialOf<L, F>, E>, EitherTM
 interface EitherTMonadDefer<L, F> : MonadDefer<EitherTPartialOf<L, F>>, EitherTBracket<L, F, Throwable> {
 
   fun MDF(): MonadDefer<F>
+  override fun BR(): Bracket<F, Throwable> = MDF()
 
   override fun <A> defer(fa: () -> EitherTOf<L, F, A>): EitherT<L, F, A> =
     EitherT(MDF().defer { fa().value() })
