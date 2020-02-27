@@ -31,4 +31,9 @@ interface MonadTrans<F> {
    * ```
    */
   fun <G, A> Kind<G, A>.liftT(MG: Monad<G>): Kind2<F, G, A>
+
+  /**
+   * Construct a monad instance. This adds the requirement that transformers always produce monads.
+   */
+  fun <M> monad(MM: Monad<M>): Monad<Kind<F, M>>
 }

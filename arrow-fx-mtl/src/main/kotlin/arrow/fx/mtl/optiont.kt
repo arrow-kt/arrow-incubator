@@ -11,6 +11,7 @@ import arrow.fx.RacePair
 import arrow.fx.RaceTriple
 import arrow.fx.Ref
 import arrow.fx.Timer
+import arrow.fx.mtl.unlifted.defaultBracket
 import arrow.fx.typeclasses.Async
 import arrow.fx.typeclasses.Bracket
 import arrow.fx.typeclasses.CancelToken
@@ -27,7 +28,9 @@ import arrow.mtl.OptionTOf
 import arrow.mtl.OptionTPartialOf
 import arrow.mtl.extensions.OptionTMonad
 import arrow.mtl.extensions.OptionTMonadError
+import arrow.mtl.extensions.monadBaseControl
 import arrow.mtl.extensions.optiont.monadTrans.liftT
+import arrow.mtl.typeclasses.MonadBaseControl
 import arrow.mtl.value
 import arrow.typeclasses.Monad
 import arrow.typeclasses.MonadError
@@ -36,46 +39,21 @@ import kotlin.coroutines.CoroutineContext
 
 @extension
 @undocumented
-interface OptionTBracket<F> : Bracket<OptionTPartialOf<F>, Throwable>, OptionTMonadError<F, Throwable> {
+interface OptionTBracket<F, E> : Bracket<OptionTPartialOf<F>, E>, OptionTMonadError<F, E> {
 
-  fun MD(): MonadDefer<F>
+  fun BR(): Bracket<F, E>
+  override fun ME(): MonadError<F, E> = BR()
 
-  override fun ME(): MonadError<F, Throwable> = MD()
-
-  override fun <A, B> OptionTOf<F, A>.bracketCase(release: (A, ExitCase<Throwable>) -> OptionTOf<F, Unit>, use: (A) -> OptionTOf<F, B>): OptionT<F, B> = MD().run {
-    OptionT(Ref(this, false).flatMap { ref ->
-      value().bracketCase(use = {
-        it.fold(
-          { just(None) },
-          { a -> use(a).value() }
-        )
-      }, release = { option, exitCase ->
-        option.fold(
-          { just(Unit) },
-          { a ->
-            when (exitCase) {
-              is ExitCase.Completed -> release(a, exitCase).value().flatMap {
-                it.fold({ ref.set(true) }, { just(Unit) })
-              }
-              else -> release(a, exitCase).value().unit()
-            }
-          }
-        )
-      }).flatMap { option ->
-        option.fold(
-          { just(None) },
-          { ref.get().map { b -> if (b) None else option } }
-        )
-      }
-    })
-  }
+  override fun <A, B> OptionTOf<F, A>.bracketCase(release: (A, ExitCase<E>) -> OptionTOf<F, Unit>, use: (A) -> OptionTOf<F, B>): OptionTOf<F, B> =
+    defaultBracket(BR(), OptionT.monadBaseControl(MonadBaseControl.id(BR())), release,  use)
 }
 
 @extension
 @undocumented
-interface OptionTMonadDefer<F> : MonadDefer<OptionTPartialOf<F>>, OptionTBracket<F> {
+interface OptionTMonadDefer<F> : MonadDefer<OptionTPartialOf<F>>, OptionTBracket<F, Throwable> {
 
-  override fun MD(): MonadDefer<F>
+  fun MD(): MonadDefer<F>
+  override fun BR(): Bracket<F, Throwable> = MD()
 
   override fun <A> defer(fa: () -> OptionTOf<F, A>): OptionT<F, A> =
     OptionT(MD().defer { fa().value() })
