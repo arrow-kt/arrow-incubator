@@ -32,7 +32,7 @@ interface MonadBaseControl<B, M> : MonadBase<B, M> {
       object : MonadBaseControl<B, Kind<T, M>> {
         override fun MB(): Monad<B> = MBC.MB()
         override fun MM(): Monad<Kind<T, M>> = MTC.monad(MBC.MM())
-        override fun <A> liftBaseWith(f: (RunInBase<Kind<T, M>, B>) -> Kind<B, A>): Kind<Kind<T, M>, A> = MTC.liftWith { runT ->
+        override fun <A> liftBaseWith(f: (RunInBase<Kind<T, M>, B>) -> Kind<B, A>): Kind<Kind<T, M>, A> = MTC.liftWith(MBC.MM()) { runT ->
           MBC.liftBaseWith { runMB ->
             f(object : RunInBase<Kind<T, M>, B> {
               override fun <A> invoke(fa: Kind<Kind<T, M>, A>): Kind<B, StM<Kind<T, M>, A>> =
