@@ -160,7 +160,7 @@ data class AccumT<S, F, A>(val accumT: AccumTFun<S, F, A>) : AccumTOf<S, F, A> {
 /**
  * Convert a read-only computation into an accumulation computation.
  */
-fun <F, S, A> ReaderT<F, S, A>.toAccumT(
+fun <F, S, A> ReaderT<S, F, A>.toAccumT(
   FF: Functor<F>,
   MS: Monoid<S>
 ): AccumT<S, F, A> =
