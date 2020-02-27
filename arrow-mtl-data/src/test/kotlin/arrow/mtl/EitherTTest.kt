@@ -49,15 +49,15 @@ import io.kotlintest.properties.forAll
 class EitherTTest : UnitSpec() {
 
   init {
-    val idEQK: EqK<Kind<Kind<ForEitherT, ForId>, Int>> = EitherT.eqK(Id.eqK(), Int.eq())
+    val idEQK: EqK<Kind<Kind<ForEitherT, Int>, ForId>> = EitherT.eqK(Id.eqK(), Int.eq())
 
-    val ioEQK: EqK<Kind<Kind<ForEitherT, ForIO>, String>> = EitherT.eqK(IO.eqK(), Eq.any())
+    val ioEQK: EqK<Kind<Kind<ForEitherT, String>, ForIO>> = EitherT.eqK(IO.eqK(), Eq.any())
 
-    val constEQK: EqK<Kind<Kind<ForEitherT, Kind<ForConst, Int>>, Int>> = EitherT.eqK(Const.eqK(Int.eq()), Int.eq())
+    val constEQK: EqK<Kind<Kind<ForEitherT, Int>, Kind<ForConst, Int>>> = EitherT.eqK(Const.eqK(Int.eq()), Int.eq())
 
     testLaws(
       DivisibleLaws.laws(
-        EitherT.divisible<ConstPartialOf<Int>, Int>(Const.divisible(Int.monoid())),
+        EitherT.divisible<Int, ConstPartialOf<Int>>(Const.divisible(Int.monoid())),
         EitherT.genK(Const.genK(Gen.int()), Gen.int()),
         constEQK
       ),
@@ -68,9 +68,9 @@ class EitherTTest : UnitSpec() {
         idEQK
       ),
 
-      ConcurrentLaws.laws<EitherTPartialOf<ForIO, String>>(
+      ConcurrentLaws.laws<EitherTPartialOf<String, ForIO>>(
         EitherT.concurrent(IO.concurrent()),
-        EitherT.timer<ForIO, String>(IO.concurrent()),
+        EitherT.timer(IO.concurrent()),
         EitherT.functor(IO.functor()),
         EitherT.applicative(IO.applicative()),
         EitherT.monad(IO.monad()),
@@ -78,12 +78,12 @@ class EitherTTest : UnitSpec() {
         ioEQK
       ),
 
-      TraverseLaws.laws(EitherT.traverse<ForId, Int>(Id.traverse()),
+      TraverseLaws.laws(EitherT.traverse<Int, ForId>(Id.traverse()),
         EitherT.genK(Id.genK(), Gen.int()),
         idEQK),
 
       SemigroupKLaws.laws(
-        EitherT.semigroupK<ForId, Int>(Id.monad()),
+        EitherT.semigroupK<Int, ForId>(Id.monad()),
         EitherT.genK(Id.genK(), Gen.int()),
         idEQK
       )

@@ -18,7 +18,7 @@ import arrow.typeclasses.internal.IdBimonad
 /**
  * Alias that represents stateful computation of the form `(S) -> Tuple2<S, A>`.
  */
-typealias StateFun<S, A> = StateTFun<ForId, S, A>
+typealias StateFun<S, A> = StateTFun<S, ForId, A>
 
 /**
  * Alias for StateHK
@@ -28,12 +28,12 @@ typealias ForState = ForStateT
 /**
  * Alias for StateKind
  */
-typealias StateOf<S, A> = StateTOf<ForId, S, A>
+typealias StateOf<S, A> = StateTOf<S, ForId, A>
 
 /**
  * Alias to partially apply type parameters [S] to [State]
  */
-typealias StatePartialOf<S> = StateTPartialOf<ForId, S>
+typealias StatePartialOf<S> = StateTPartialOf<S, ForId>
 
 /**
  * `State<S, A>` is a stateful computation that yields a value of type `A`.
@@ -41,20 +41,19 @@ typealias StatePartialOf<S> = StateTPartialOf<ForId, S>
  * @param S the state we are performing computation upon.
  * @param A current value of computation.
  */
-typealias State<S, A> = StateT<ForId, S, A>
+typealias State<S, A> = StateT<S, ForId, A>
 
 fun <S, A> State<S, A>.run(initial: S): Tuple2<S, A> = runF(initial).extract()
 
 /**
  * Constructor for State.
- * State<S, A> is an alias for IndexedStateT<ForId, S, S, A>
  *
  * @param run the stateful function to wrap with [State].
  */
 fun <S, A> State(run: (S) -> Tuple2<S, A>): State<S, A> = StateT(AndThen(run).andThen { Id(it) })
 
 /**
- * Syntax for constructing a `StateT<ForId, S, A>` from a function `(S) -> Tuple2<S, A>`
+ * Syntax for constructing a `StateT<S, ForId, A>` from a function `(S) -> Tuple2<S, A>`
  */
 fun <S, A> StateFun<S, A>.toState(): State<S, A> = State(this)
 
@@ -70,21 +69,21 @@ fun <S, A, B> State<S, A>.flatMap(f: (A) -> State<S, B>): State<S, B> =
   ))
 
 /**
- * Alias for [StateT.runA] `StateT<ForId, S, A>`
+ * Alias for [StateT.runA] `StateT<S, ForId, A>`
  *
  * @param initial state to start stateful computation.
  */
-fun <S, A> StateT<ForId, S, A>.runA(initial: S): A = run(initial).b
+fun <S, A> StateT<S, ForId, A>.runA(initial: S): A = run(initial).b
 
 /**
- * Alias for [StateT.runS] `StateT<ForId, S, A>`
+ * Alias for [StateT.runS] `StateT<S, ForId, A>`
  *
  * @param initial state to start stateful computation.
  */
-fun <S, A> StateT<ForId, S, A>.runS(initial: S): S = run(initial).a
+fun <S, A> StateT<S, ForId, A>.runS(initial: S): S = run(initial).a
 
 /**
- * Alias for StateId to make working with `StateT<ForId, S, A>` more elegant.
+ * Alias for StateId to make working with `StateT<S, ForId, A>` more elegant.
  */
 fun State() = StateApi
 
