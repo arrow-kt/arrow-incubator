@@ -2,13 +2,8 @@ package arrow.mtl
 
 import arrow.Kind
 import arrow.core.ForOption
-import arrow.core.ForTry
 import arrow.core.Option
-import arrow.core.Try
 import arrow.core.Tuple2
-import arrow.core.extensions.`try`.eqK.eqK
-import arrow.core.extensions.`try`.functor.functor
-import arrow.core.extensions.`try`.monad.monad
 import arrow.core.extensions.eq
 import arrow.core.extensions.option.eqK.eqK
 import arrow.core.extensions.option.functor.functor
@@ -22,7 +17,6 @@ import arrow.fx.extensions.io.async.async
 import arrow.fx.extensions.io.functor.functor
 import arrow.fx.extensions.io.monad.monad
 import arrow.fx.mtl.statet.async.async
-import arrow.mtl.extensions.StateTMonadState
 import arrow.mtl.extensions.statet.applicative.applicative
 import arrow.mtl.extensions.statet.functor.functor
 import arrow.mtl.extensions.statet.monad.monad
@@ -44,50 +38,46 @@ import io.kotlintest.properties.Gen
 
 class StateTTests : UnitSpec() {
 
-  val M: StateTMonadState<ForTry, Int> = StateT.monadState(Try.monad())
-
-  val optionStateEQK: EqK<StateTPartialOf<ForOption, Int>> = StateT.eqK(Option.eqK(), Int.eq(), Option.monad(), 1)
-  val ioStateEQK: EqK<StateTPartialOf<ForIO, Int>> = StateT.eqK(IO.eqK(), Int.eq(), IO.monad(), 1)
-  val tryStateEqK: EqK<Kind<Kind<ForStateT, ForTry>, Int>> = StateT.eqK(Try.eqK(), Int.eq(), Try.monad(), 1)
-
   init {
     testLaws(
-      MonadStateLaws.laws(
-        M,
-        StateT.functor<ForTry, Int>(Try.functor()),
-        StateT.applicative<ForTry, Int>(Try.monad()),
-        StateT.monad<ForTry, Int>(Try.monad()),
-        StateT.genK(Try.genK(), Gen.int()),
-        tryStateEqK
+      MonadStateLaws.laws<StateTPartialOf<Int, ForIO>>(
+        StateT.monadState(IO.monad()),
+        StateT.functor(IO.functor()),
+        StateT.applicative(IO.monad()),
+        StateT.monad(IO.monad()),
+        StateT.genK(IO.genK(), Gen.int()),
+        StateT.eqK(IO.eqK(), Int.eq(), IO.monad(), 0)
       ),
 
-      AsyncLaws.laws<StateTPartialOf<ForIO, Int>>(
+      AsyncLaws.laws<StateTPartialOf<Int, ForIO>>(
         StateT.async(IO.async()),
         StateT.functor(IO.functor()),
         StateT.applicative(IO.monad()),
         StateT.monad(IO.monad()),
         StateT.genK(IO.genK(), Gen.int()),
-        ioStateEQK
+        StateT.eqK(IO.eqK(), Int.eq(), IO.monad(), 0)
       ),
 
       SemigroupKLaws.laws(
-        StateT.semigroupK<ForOption, Int>(Option.semigroupK()),
+        StateT.semigroupK<Int, ForOption>(Option.semigroupK()),
         StateT.genK(Option.genK(), Gen.int()),
-        optionStateEQK),
+        StateT.eqK(Option.eqK(), Int.eq(), Option.monad(), 0)
+      ),
 
-      MonadCombineLaws.laws(
-        StateT.monadCombine<ForOption, Int>(Option.monadCombine()),
-        StateT.functor<ForOption, Int>(Option.functor()),
-        StateT.applicative<ForOption, Int>(Option.monad()),
-        StateT.monad<ForOption, Int>(Option.monad()),
+      MonadCombineLaws.laws<StateTPartialOf<Int, ForOption>>(
+        StateT.monadCombine(Option.monadCombine()),
+        StateT.functor(Option.functor()),
+        StateT.applicative(Option.monad()),
+        StateT.monad(Option.monad()),
         StateT.genK(Option.genK(), Gen.int()),
-        optionStateEQK)
+        StateT.eqK(Option.eqK(), Int.eq(), Option.monad(), 0)
+      )
     )
   }
 }
 
-internal fun <F, S> StateT.Companion.eqK(EQKF: EqK<F>, EQS: Eq<S>, M: Monad<F>, s: S) = object : EqK<StateTPartialOf<F, S>> {
-  override fun <A> Kind<StateTPartialOf<F, S>, A>.eqK(other: Kind<StateTPartialOf<F, S>, A>, EQ: Eq<A>): Boolean =
+internal fun <S, F> StateT.Companion.eqK(EQKF: EqK<F>, EQS: Eq<S>, M: Monad<F>, s: S) = object : EqK<StateTPartialOf<S, F>> {
+  override fun <A> Kind<StateTPartialOf<S, F>, A>.eqK(other: Kind<StateTPartialOf<S, F>, A>, EQ: Eq<A>): Boolean =
     (this.fix() to other.fix()).let {
       val ls = it.first.run(s)
       val rs = it.second.run(s)
@@ -98,8 +88,8 @@ internal fun <F, S> StateT.Companion.eqK(EQKF: EqK<F>, EQS: Eq<S>, M: Monad<F>, 
     }
 }
 
-internal fun <F, S> StateT.Companion.genK(genkF: GenK<F>, genS: Gen<S>) = object : GenK<StateTPartialOf<F, S>> {
-  override fun <A> genK(gen: Gen<A>): Gen<Kind<StateTPartialOf<F, S>, A>> =
+internal fun <S, F> StateT.Companion.genK(genkF: GenK<F>, genS: Gen<S>) = object : GenK<StateTPartialOf<S, F>> {
+  override fun <A> genK(gen: Gen<A>): Gen<Kind<StateTPartialOf<S, F>, A>> =
     genkF.genK(Gen.tuple2(genS, gen)).map { state ->
       StateT { _: S -> state }
     }
