@@ -41,7 +41,7 @@ interface MonadBaseControl<B, M> : MonadBase<B, M> {
           }
         }
         override fun <A> StM<Kind<T, M>, A>.restoreM(): Kind<Kind<T, M>, A> =
-          MTC.run { MBC.run { (this as StM<M, StT<T, A>>).restoreM() }.restoreT(MBC.MM()) }
+          MTC.run { MBC.run { (this@restoreM as StM<M, StT<T, A>>).restoreM() }.restoreT(MBC.MM()) }
       }
   }
 }
