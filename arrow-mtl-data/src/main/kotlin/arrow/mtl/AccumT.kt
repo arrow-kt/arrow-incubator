@@ -144,7 +144,7 @@ data class AccumT<S, F, A>(val accumT: AccumTFun<S, F, A>) : AccumTOf<S, F, A> {
   /**
    * Convert an accumulation (append-only) computation into a fully stateful computation.
    */
-  fun toStateT(MF: Monad<F>, MS: Monoid<S>): StateT<F, S, A> =
+  fun toStateT(MF: Monad<F>, MS: Monoid<S>): StateT<S, F, A> =
     StateT(
       AndThen.id<S>().flatMap { s: S ->
         AndThen(accumT).andThen {
@@ -160,7 +160,7 @@ data class AccumT<S, F, A>(val accumT: AccumTFun<S, F, A>) : AccumTOf<S, F, A> {
 /**
  * Convert a read-only computation into an accumulation computation.
  */
-fun <F, S, A> ReaderT<F, S, A>.toAccumT(
+fun <F, S, A> ReaderT<S, F, A>.toAccumT(
   FF: Functor<F>,
   MS: Monoid<S>
 ): AccumT<S, F, A> =
@@ -175,4 +175,4 @@ fun <F, S, A> ReaderT<F, S, A>.toAccumT(
 /**
  * Convert a writer computation into an accumulation computation.
  */
-fun <F, S, A> WriterT<F, S, A>.toAccumT(): AccumT<S, F, A> = AccumT { value() }
+fun <S, F, A> WriterT<S, F, A>.toAccumT(): AccumT<S, F, A> = AccumT { value() }

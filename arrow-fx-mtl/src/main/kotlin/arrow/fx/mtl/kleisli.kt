@@ -33,16 +33,16 @@ import kotlin.coroutines.CoroutineContext
 
 @extension
 @undocumented
-interface KleisliBracket<F, R, E> : Bracket<KleisliPartialOf<F, R>, E>, KleisliMonadError<F, R, E> {
+interface KleisliBracket<D, F, E> : Bracket<KleisliPartialOf<D, F>, E>, KleisliMonadError<D, F, E> {
 
   fun BF(): Bracket<F, E>
 
   override fun ME(): MonadError<F, E> = BF()
 
-  override fun <A, B> KleisliOf<F, R, A>.bracketCase(
-    release: (A, ExitCase<E>) -> KleisliOf<F, R, Unit>,
-    use: (A) -> KleisliOf<F, R, B>
-  ): Kleisli<F, R, B> = BF().run {
+  override fun <A, B> KleisliOf<D, F, A>.bracketCase(
+    release: (A, ExitCase<E>) -> KleisliOf<D, F, Unit>,
+    use: (A) -> KleisliOf<D, F, B>
+  ): Kleisli<D, F, B> = BF().run {
     Kleisli { r ->
       this@bracketCase.run(r).bracketCase({ a, br ->
         release(a, br).run(r)
@@ -52,82 +52,82 @@ interface KleisliBracket<F, R, E> : Bracket<KleisliPartialOf<F, R>, E>, KleisliM
     }
   }
 
-  override fun <A> KleisliOf<F, R, A>.uncancelable(): Kleisli<F, R, A> = BF().run {
+  override fun <A> KleisliOf<D, F, A>.uncancelable(): Kleisli<D, F, A> = BF().run {
     Kleisli { r -> this@uncancelable.run(r).uncancelable() }
   }
 }
 
 @extension
 @undocumented
-interface KleisliMonadDefer<F, R> : MonadDefer<KleisliPartialOf<F, R>>, KleisliBracket<F, R, Throwable> {
+interface KleisliMonadDefer<D, F> : MonadDefer<KleisliPartialOf<D, F>>, KleisliBracket<D, F, Throwable> {
 
   fun MDF(): MonadDefer<F>
 
   override fun BF(): Bracket<F, Throwable> = MDF()
 
-  override fun <A> defer(fa: () -> KleisliOf<F, R, A>): Kleisli<F, R, A> = MDF().run {
+  override fun <A> defer(fa: () -> KleisliOf<D, F, A>): Kleisli<D, F, A> = MDF().run {
     Kleisli { r -> defer { fa().run(r) } }
   }
 
-  override fun <A> KleisliOf<F, R, A>.handleErrorWith(f: (Throwable) -> KleisliOf<F, R, A>): Kleisli<F, R, A> = MDF().run {
+  override fun <A> KleisliOf<D, F, A>.handleErrorWith(f: (Throwable) -> KleisliOf<D, F, A>): Kleisli<D, F, A> = MDF().run {
     Kleisli { d -> defer { run(d).handleErrorWith { e -> f(e).run(d) } } }
   }
 
-  override fun <A, B> KleisliOf<F, R, A>.flatMap(f: (A) -> KleisliOf<F, R, B>): Kleisli<F, R, B> = MDF().run {
+  override fun <A, B> KleisliOf<D, F, A>.flatMap(f: (A) -> KleisliOf<D, F, B>): Kleisli<D, F, B> = MDF().run {
     Kleisli { d -> defer { run(d).flatMap { a -> f(a).run(d) } } }
   }
 
-  override fun <A> KleisliOf<F, R, A>.uncancelable(): Kleisli<F, R, A> = MDF().run {
+  override fun <A> KleisliOf<D, F, A>.uncancelable(): Kleisli<D, F, A> = MDF().run {
     Kleisli { d -> defer { run(d).uncancelable() } }
   }
 }
 
-fun <F, R> Kleisli.Companion.monadDefer(MD: MonadDefer<F>): MonadDefer<KleisliPartialOf<F, R>> =
-  object : KleisliMonadDefer<F, R> {
+fun <D, F> Kleisli.Companion.monadDefer(MD: MonadDefer<F>): MonadDefer<KleisliPartialOf<D, F>> =
+  object : KleisliMonadDefer<D, F> {
     override fun MDF(): MonadDefer<F> = MD
   }
 
 @extension
 @undocumented
-interface KleisliAsync<F, R> : Async<KleisliPartialOf<F, R>>, KleisliMonadDefer<F, R> {
+interface KleisliAsync<D, F> : Async<KleisliPartialOf<D, F>>, KleisliMonadDefer<D, F> {
 
   fun ASF(): Async<F>
 
   override fun MDF(): MonadDefer<F> = ASF()
 
-  override fun <A> async(fa: Proc<A>): Kleisli<F, R, A> =
+  override fun <A> async(fa: Proc<A>): Kleisli<D, F, A> =
     Kleisli.liftF(ASF().async(fa))
 
-  override fun <A> asyncF(k: ProcF<KleisliPartialOf<F, R>, A>): Kleisli<F, R, A> =
+  override fun <A> asyncF(k: ProcF<KleisliPartialOf<D, F>, A>): Kleisli<D, F, A> =
     Kleisli { r -> ASF().asyncF { cb -> k(cb).run(r) } }
 
-  override fun <A> KleisliOf<F, R, A>.continueOn(ctx: CoroutineContext): Kleisli<F, R, A> = ASF().run {
+  override fun <A> KleisliOf<D, F, A>.continueOn(ctx: CoroutineContext): Kleisli<D, F, A> = ASF().run {
     Kleisli(AndThen(fix().run).andThen { it.continueOn(ctx) })
   }
 }
 
-fun <F, R> Kleisli.Companion.async(AS: Async<F>): Async<KleisliPartialOf<F, R>> =
-  object : KleisliAsync<F, R> {
+fun <D, F> Kleisli.Companion.async(AS: Async<F>): Async<KleisliPartialOf<D, F>> =
+  object : KleisliAsync<D, F> {
     override fun ASF(): Async<F> = AS
   }
 
-interface KleisliConcurrent<F, R> : Concurrent<KleisliPartialOf<F, R>>, KleisliAsync<F, R> {
+interface KleisliConcurrent<D, F> : Concurrent<KleisliPartialOf<D, F>>, KleisliAsync<D, F> {
 
   fun CF(): Concurrent<F>
   override fun ASF(): Async<F> = CF()
 
-  override fun dispatchers(): Dispatchers<KleisliPartialOf<F, R>> =
-    CF().dispatchers() as Dispatchers<KleisliPartialOf<F, R>>
+  override fun dispatchers(): Dispatchers<KleisliPartialOf<D, F>> =
+    CF().dispatchers() as Dispatchers<KleisliPartialOf<D, F>>
 
-  override fun <A> cancelable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<KleisliPartialOf<F, R>>): Kleisli<F, R, A> = CF().run {
+  override fun <A> cancelable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<KleisliPartialOf<D, F>>): Kleisli<D, F, A> = CF().run {
     Kleisli { d -> cancelable { cb -> k(cb).run(d).map { Unit } } }
   }
 
-  override fun <A> KleisliOf<F, R, A>.fork(ctx: CoroutineContext): Kleisli<F, R, Fiber<KleisliPartialOf<F, R>, A>> = CF().run {
+  override fun <A> KleisliOf<D, F, A>.fork(ctx: CoroutineContext): Kleisli<D, F, Fiber<KleisliPartialOf<D, F>, A>> = CF().run {
     Kleisli { r -> run(r).fork(ctx).map(::fiberT) }
   }
 
-  override fun <A, B, C> CoroutineContext.parMapN(fa: KleisliOf<F, R, A>, fb: KleisliOf<F, R, B>, f: (A, B) -> C): Kleisli<F, R, C> = CF().run {
+  override fun <A, B, C> CoroutineContext.parMapN(fa: KleisliOf<D, F, A>, fb: KleisliOf<D, F, B>, f: (A, B) -> C): Kleisli<D, F, C> = CF().run {
     Kleisli { r ->
       just(r).flatMap { rr ->
         parMapN(fa.run(rr), fb.run(rr), f)
@@ -135,7 +135,7 @@ interface KleisliConcurrent<F, R> : Concurrent<KleisliPartialOf<F, R>>, KleisliA
     }
   }
 
-  override fun <A, B, C, D> CoroutineContext.parMapN(fa: KleisliOf<F, R, A>, fb: KleisliOf<F, R, B>, fc: KleisliOf<F, R, C>, f: (A, B, C) -> D): Kleisli<F, R, D> = CF().run {
+  override fun <A, B, C, DD> CoroutineContext.parMapN(fa: KleisliOf<D, F, A>, fb: KleisliOf<D, F, B>, fc: KleisliOf<D, F, C>, f: (A, B, C) -> DD): Kleisli<D, F, DD> = CF().run {
     Kleisli { r ->
       just(r).flatMap { rr ->
         parMapN(fa.run(rr), fb.run(rr), fc.run(rr), f)
@@ -143,7 +143,7 @@ interface KleisliConcurrent<F, R> : Concurrent<KleisliPartialOf<F, R>>, KleisliA
     }
   }
 
-  override fun <A, B> CoroutineContext.racePair(fa: KleisliOf<F, R, A>, fb: KleisliOf<F, R, B>): Kleisli<F, R, RacePair<KleisliPartialOf<F, R>, A, B>> = CF().run {
+  override fun <A, B> CoroutineContext.racePair(fa: KleisliOf<D, F, A>, fb: KleisliOf<D, F, B>): Kleisli<D, F, RacePair<KleisliPartialOf<D, F>, A, B>> = CF().run {
     Kleisli { r ->
       just(r).flatMap { rr ->
         racePair(fa.run(rr), fb.run(rr)).map { res: RacePair<F, A, B> ->
@@ -156,7 +156,7 @@ interface KleisliConcurrent<F, R> : Concurrent<KleisliPartialOf<F, R>>, KleisliA
     }
   }
 
-  override fun <A, B, C> CoroutineContext.raceTriple(fa: KleisliOf<F, R, A>, fb: KleisliOf<F, R, B>, fc: KleisliOf<F, R, C>): Kleisli<F, R, RaceTriple<KleisliPartialOf<F, R>, A, B, C>> = CF().run {
+  override fun <A, B, C> CoroutineContext.raceTriple(fa: KleisliOf<D, F, A>, fb: KleisliOf<D, F, B>, fc: KleisliOf<D, F, C>): Kleisli<D, F, RaceTriple<KleisliPartialOf<D, F>, A, B, C>> = CF().run {
     Kleisli { r ->
       just(r).flatMap { rr ->
         raceTriple(fa.run(rr), fb.run(rr), fc.run(rr)).map { res: RaceTriple<F, A, B, C> ->
@@ -170,23 +170,23 @@ interface KleisliConcurrent<F, R> : Concurrent<KleisliPartialOf<F, R>>, KleisliA
     }
   }
 
-  fun <A> fiberT(fiber: Fiber<F, A>): Fiber<KleisliPartialOf<F, R>, A> =
+  fun <A> fiberT(fiber: Fiber<F, A>): Fiber<KleisliPartialOf<D, F>, A> =
     Fiber(Kleisli.liftF(fiber.join()), Kleisli.liftF(fiber.cancel()))
 }
 
-fun <F, R> Kleisli.Companion.concurrent(CF: Concurrent<F>): Concurrent<KleisliPartialOf<F, R>> =
-  object : KleisliConcurrent<F, R> {
+fun <D, F> Kleisli.Companion.concurrent(CF: Concurrent<F>): Concurrent<KleisliPartialOf<D, F>> =
+  object : KleisliConcurrent<D, F> {
     override fun CF(): Concurrent<F> = CF
   }
 
-fun <F, R> Kleisli.Companion.timer(CF: Concurrent<F>): Timer<KleisliPartialOf<F, R>> =
-  Timer(concurrent<F, R>(CF))
+fun <D, F> Kleisli.Companion.timer(CF: Concurrent<F>): Timer<KleisliPartialOf<D, F>> =
+  Timer(concurrent<D, F>(CF))
 
 @extension
-interface KleisliMonadIO<F, R> : MonadIO<KleisliPartialOf<F, R>>, KleisliMonad<F, R> {
+interface KleisliMonadIO<D, F> : MonadIO<KleisliPartialOf<D, F>>, KleisliMonad<D, F> {
   fun FIO(): MonadIO<F>
   override fun MF(): Monad<F> = FIO()
-  override fun <A> IO<A>.liftIO(): Kind<KleisliPartialOf<F, R>, A> = FIO().run {
+  override fun <A> IO<A>.liftIO(): Kind<KleisliPartialOf<D, F>, A> = FIO().run {
     Kleisli.liftF(liftIO())
   }
 }
