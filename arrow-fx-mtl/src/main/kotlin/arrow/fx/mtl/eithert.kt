@@ -3,17 +3,14 @@ package arrow.fx.mtl
 import arrow.Kind
 import arrow.core.Either
 import arrow.core.Left
-import arrow.core.None
-import arrow.core.Option
 import arrow.core.Right
-import arrow.core.Some
 import arrow.core.flatMap
 import arrow.extension
 import arrow.fx.IO
 import arrow.fx.RacePair
 import arrow.fx.RaceTriple
-import arrow.fx.Ref
 import arrow.fx.Timer
+import arrow.fx.mtl.unlifted.defaultBracket
 import arrow.fx.typeclasses.Async
 import arrow.fx.typeclasses.Bracket
 import arrow.fx.typeclasses.CancelToken
@@ -29,7 +26,9 @@ import arrow.mtl.EitherT
 import arrow.mtl.EitherTOf
 import arrow.mtl.EitherTPartialOf
 import arrow.mtl.extensions.EitherTMonad
-import arrow.mtl.extensions.EitherTMonadThrow
+import arrow.mtl.extensions.EitherTMonadError
+import arrow.mtl.extensions.monadBaseControl
+import arrow.mtl.typeclasses.MonadBaseControl
 import arrow.mtl.value
 import arrow.typeclasses.ApplicativeError
 import arrow.typeclasses.Monad
@@ -38,55 +37,22 @@ import kotlin.coroutines.CoroutineContext
 
 @extension
 @undocumented
-interface EitherTBracket<L, F> : Bracket<EitherTPartialOf<L, F>, Throwable>, EitherTMonadThrow<L, F> {
+interface EitherTBracket<L, F, E> : Bracket<EitherTPartialOf<L, F>, E>, EitherTMonadError<L, F, E> {
 
-  fun MDF(): MonadDefer<F>
+  fun BR(): Bracket<F, E>
 
-  override fun MF(): Monad<F> = MDF()
+  override fun AE(): ApplicativeError<F, E> = BR()
+  override fun MF(): Monad<F> = BR()
 
-  override fun AE(): ApplicativeError<F, Throwable> = MDF()
-
-  override fun <A, B> EitherTOf<L, F, A>.bracketCase(
-    release: (A, ExitCase<Throwable>) -> EitherTOf<L, F, Unit>,
-    use: (A) -> EitherTOf<L, F, B>
-  ): EitherT<L, F, B> = MDF().run {
-    EitherT.liftF<L, F, Ref<F, Option<L>>>(this, Ref(None)).flatMap { ref ->
-      EitherT(value().bracketCase(use = { either ->
-        when (either) {
-          is Either.Right -> use(either.b).value()
-          is Either.Left -> just(either)
-        }
-      }, release = { either, exitCase ->
-        when (either) {
-          is Either.Right -> when (exitCase) {
-            is ExitCase.Completed -> release(either.b, ExitCase.Completed).value().flatMap {
-              it.fold({ l ->
-                ref.set(Some(l))
-              }, {
-                just(Unit)
-              })
-            }
-            else -> release(either.b, exitCase).value().unit()
-          }
-          is Either.Left -> just(Unit)
-        }
-      }).flatMap { either ->
-        when (either) {
-          is Either.Right -> ref.get().map {
-            it.fold({ either }, { left -> Left(left) })
-          }
-          is Either.Left -> just(either)
-        }
-      })
-    }
-  }
+  override fun <A, B> Kind<EitherTPartialOf<L, F>, A>.bracketCase(release: (A, ExitCase<E>) -> Kind<EitherTPartialOf<L, F>, Unit>, use: (A) -> Kind<EitherTPartialOf<L, F>, B>): Kind<EitherTPartialOf<L, F>, B> =
+    defaultBracket(BR(), EitherT.monadBaseControl<L, F, F>(MonadBaseControl.id(BR())), release, use)
 }
 
 @extension
 @undocumented
-interface EitherTMonadDefer<L, F> : MonadDefer<EitherTPartialOf<L, F>>, EitherTBracket<L, F> {
+interface EitherTMonadDefer<L, F> : MonadDefer<EitherTPartialOf<L, F>>, EitherTBracket<L, F, Throwable> {
 
-  override fun MDF(): MonadDefer<F>
+  fun MDF(): MonadDefer<F>
 
   override fun <A> defer(fa: () -> EitherTOf<L, F, A>): EitherT<L, F, A> =
     EitherT(MDF().defer { fa().value() })

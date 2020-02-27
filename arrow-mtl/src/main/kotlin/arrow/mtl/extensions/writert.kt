@@ -16,8 +16,13 @@ import arrow.mtl.WriterTOf
 import arrow.mtl.WriterTPartialOf
 import arrow.mtl.extensions.writert.monad.monad
 import arrow.mtl.fix
+import arrow.mtl.typeclasses.MonadBase
+import arrow.mtl.typeclasses.MonadBaseControl
 import arrow.mtl.typeclasses.MonadTrans
+import arrow.mtl.typeclasses.MonadTransControl
 import arrow.mtl.typeclasses.MonadWriter
+import arrow.mtl.typeclasses.RunT
+import arrow.mtl.typeclasses.StT
 import arrow.mtl.value
 import arrow.typeclasses.Alternative
 import arrow.typeclasses.Applicative
@@ -290,4 +295,41 @@ interface WriterTEqK<W, F> : EqK<WriterTPartialOf<W, F>> {
 interface WriterTMonadTrans<W> : MonadTrans<Kind<ForWriterT, W>> {
   fun MW(): Monoid<W>
   override fun <G, A> Kind<G, A>.liftT(MF: Monad<G>): Kind2<Kind<ForWriterT, W>, G, A> = WriterT(MF.run { map { MW().empty() toT it } })
+
+  override fun <M> monad(MM: Monad<M>): Monad<Kind<Kind<ForWriterT, W>, M>> = object : WriterTMonad<W, M> {
+    override fun MF(): Monad<M> = MM
+    override fun MM(): Monoid<W> = MW()
+  }
 }
+
+interface WriterTMonadTransControl<W> : MonadTransControl<Kind<ForWriterT, W>> {
+  fun MW(): Monoid<W>
+
+  override fun <M, A> liftWith(MM: Monad<M>, f: (RunT<Kind<ForWriterT, W>>) -> Kind<M, A>): Kind<Kind<Kind<ForWriterT, W>, M>, A> =
+    WriterT.liftF(f(object : RunT<Kind<ForWriterT, W>> {
+      override fun <M, A> invoke(MM: Monad<M>, fa: Kind<Kind<Kind<ForWriterT, W>, M>, A>): Kind<M, StT<Kind<ForWriterT, W>, A>> =
+        MM.run { fa.value().map { StT<Kind<ForWriterT, W>, A>(it) } }
+    }), MW(), MM)
+
+  override fun <M, A> Kind<M, StT<Kind<ForWriterT, W>, A>>.restoreT(MM: Monad<M>): Kind<Kind<Kind<ForWriterT, W>, M>, A> =
+    WriterT(MM.run { map { (it.unsafeState as Tuple2<W, A>) } })
+
+  override fun <M> monad(MM: Monad<M>): Monad<Kind<Kind<ForWriterT, W>, M>> = object : WriterTMonad<W, M> {
+    override fun MF(): Monad<M> = MM
+    override fun MM(): Monoid<W> = MW()
+  }
+}
+
+fun <W> WriterT.Companion.monadTransControl(MW: Monoid<W>): MonadTransControl<Kind<ForWriterT, W>> = object : WriterTMonadTransControl<W> {
+  override fun MW(): Monoid<W> = MW
+}
+
+fun <W, B, M> WriterT.Companion.monadBase(MW: Monoid<W>, MB: MonadBase<B, M>): MonadBase<B, WriterTPartialOf<W, M>> =
+  MonadBase.defaultImpl(object : WriterTMonadTrans<W> {
+    override fun MW(): Monoid<W> = MW
+  }, MB)
+
+fun <W, B, M> WriterT.Companion.monadBaseControl(MW: Monoid<W>, MBC: MonadBaseControl<B, M>): MonadBaseControl<B, WriterTPartialOf<W, M>> =
+  MonadBaseControl.defaultImpl(object : WriterTMonadTransControl<W> {
+    override fun MW(): Monoid<W> = MW
+  }, MBC)

@@ -8,6 +8,7 @@ import arrow.fx.IO
 import arrow.fx.RacePair
 import arrow.fx.RaceTriple
 import arrow.fx.Timer
+import arrow.fx.mtl.unlifted.defaultBracket
 import arrow.fx.typeclasses.Async
 import arrow.fx.typeclasses.Bracket
 import arrow.fx.typeclasses.CancelToken
@@ -24,8 +25,10 @@ import arrow.mtl.KleisliOf
 import arrow.mtl.KleisliPartialOf
 import arrow.mtl.extensions.KleisliMonad
 import arrow.mtl.extensions.KleisliMonadError
+import arrow.mtl.extensions.monadBaseControl
 import arrow.mtl.fix
 import arrow.mtl.run
+import arrow.mtl.typeclasses.MonadBaseControl
 import arrow.typeclasses.Monad
 import arrow.typeclasses.MonadError
 import arrow.undocumented
@@ -39,18 +42,8 @@ interface KleisliBracket<D, F, E> : Bracket<KleisliPartialOf<D, F>, E>, KleisliM
 
   override fun ME(): MonadError<F, E> = BF()
 
-  override fun <A, B> KleisliOf<D, F, A>.bracketCase(
-    release: (A, ExitCase<E>) -> KleisliOf<D, F, Unit>,
-    use: (A) -> KleisliOf<D, F, B>
-  ): Kleisli<D, F, B> = BF().run {
-    Kleisli { r ->
-      this@bracketCase.run(r).bracketCase({ a, br ->
-        release(a, br).run(r)
-      }) { a ->
-        use(a).run(r)
-      }
-    }
-  }
+  override fun <A, B> Kind<KleisliPartialOf<D, F>, A>.bracketCase(release: (A, ExitCase<E>) -> Kind<KleisliPartialOf<D, F>, Unit>, use: (A) -> Kind<KleisliPartialOf<D, F>, B>): Kind<KleisliPartialOf<D, F>, B> =
+    defaultBracket(BF(), Kleisli.monadBaseControl(MonadBaseControl.id(BF())), release, use)
 
   override fun <A> KleisliOf<D, F, A>.uncancelable(): Kleisli<D, F, A> = BF().run {
     Kleisli { r -> this@uncancelable.run(r).uncancelable() }

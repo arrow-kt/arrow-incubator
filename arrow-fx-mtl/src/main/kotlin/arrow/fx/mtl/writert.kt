@@ -3,12 +3,12 @@ package arrow.fx.mtl
 import arrow.Kind
 import arrow.core.Either
 import arrow.core.Tuple2
-import arrow.core.internal.AtomicRefW
 import arrow.extension
 import arrow.fx.IO
 import arrow.fx.RacePair
 import arrow.fx.RaceTriple
 import arrow.fx.Timer
+import arrow.fx.mtl.unlifted.defaultBracket
 import arrow.fx.typeclasses.Async
 import arrow.fx.typeclasses.Bracket
 import arrow.fx.typeclasses.CancelToken
@@ -24,7 +24,9 @@ import arrow.mtl.WriterT
 import arrow.mtl.WriterTOf
 import arrow.mtl.WriterTPartialOf
 import arrow.mtl.extensions.WriterTMonad
-import arrow.mtl.extensions.WriterTMonadThrow
+import arrow.mtl.extensions.WriterTMonadError
+import arrow.mtl.extensions.monadBaseControl
+import arrow.mtl.typeclasses.MonadBaseControl
 import arrow.mtl.value
 import arrow.typeclasses.Monad
 import arrow.typeclasses.MonadError
@@ -34,41 +36,22 @@ import kotlin.coroutines.CoroutineContext
 
 @extension
 @undocumented
-interface WriterTBracket<W, F> : Bracket<WriterTPartialOf<W, F>, Throwable>, WriterTMonadThrow<W, F> {
+interface WriterTBracket<W, F, E> : Bracket<WriterTPartialOf<W, F>, E>, WriterTMonadError<W, F, E> {
 
-  fun MD(): MonadDefer<F>
-
+  fun BR(): Bracket<F, E>
   override fun MM(): Monoid<W>
+  override fun ME(): MonadError<F, E> = BR()
 
-  override fun ME(): MonadError<F, Throwable> = MD()
-
-  override fun <A, B> WriterTOf<W, F, A>.bracketCase(
-    release: (A, ExitCase<Throwable>) -> WriterTOf<W, F, Unit>,
-    use: (A) -> WriterTOf<W, F, B>
-  ): WriterT<W, F, B> = MM().run {
-    MD().run {
-      val atomic: AtomicRefW<W> = AtomicRefW(empty())
-      WriterT(value().bracketCase(use = { wa ->
-        WriterT(wa.just()).flatMap(use).value()
-      }, release = { wa, exitCase ->
-        val r = release(wa.b, exitCase).value()
-        when (exitCase) {
-          is ExitCase.Completed -> r.flatMap { (l, _) -> later { atomic.value = l } }
-          else -> r.unit()
-        }
-      }).map { (w, b) ->
-        Tuple2(w.combine(atomic.value), b)
-      })
-    }
-  }
+  override fun <A, B> Kind<WriterTPartialOf<W, F>, A>.bracketCase(release: (A, ExitCase<E>) -> Kind<WriterTPartialOf<W, F>, Unit>, use: (A) -> Kind<WriterTPartialOf<W, F>, B>): Kind<WriterTPartialOf<W, F>, B> =
+    defaultBracket(BR(), WriterT.monadBaseControl(MM(), MonadBaseControl.id(BR())), release, use)
 }
 
 @extension
 @undocumented
-interface WriterTMonadDefer<W, F> : MonadDefer<WriterTPartialOf<W, F>>, WriterTBracket<W, F> {
+interface WriterTMonadDefer<W, F> : MonadDefer<WriterTPartialOf<W, F>>, WriterTBracket<W, F, Throwable> {
 
-  override fun MD(): MonadDefer<F>
-
+  fun MD(): MonadDefer<F>
+  override fun BR(): Bracket<F, Throwable> = MD()
   override fun MM(): Monoid<W>
 
   override fun <A> defer(fa: () -> WriterTOf<W, F, A>): WriterTOf<W, F, A> =

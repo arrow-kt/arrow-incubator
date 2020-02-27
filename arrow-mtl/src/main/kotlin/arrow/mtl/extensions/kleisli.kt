@@ -22,8 +22,13 @@ import arrow.mtl.extensions.kleisli.functor.functor
 import arrow.mtl.extensions.kleisli.monad.monad
 import arrow.mtl.fix
 import arrow.mtl.run
+import arrow.mtl.typeclasses.MonadBase
+import arrow.mtl.typeclasses.MonadBaseControl
 import arrow.mtl.typeclasses.MonadReader
 import arrow.mtl.typeclasses.MonadTrans
+import arrow.mtl.typeclasses.MonadTransControl
+import arrow.mtl.typeclasses.RunT
+import arrow.mtl.typeclasses.StT
 import arrow.typeclasses.Alternative
 import arrow.typeclasses.Applicative
 import arrow.typeclasses.ApplicativeError
@@ -224,4 +229,34 @@ fun <D, F, A> Kleisli.Companion.fx(MF: Monad<F>, c: suspend MonadSyntax<KleisliP
 interface KleisliMonadTrans<D> : MonadTrans<Kind<ForKleisli, D>> {
   override fun <G, A> Kind<G, A>.liftT(MG: Monad<G>): Kind2<Kind<ForKleisli, D>, G, A> =
     Kleisli.liftF(this)
+
+  override fun <M> monad(MM: Monad<M>): Monad<Kind<Kind<ForKleisli, D>, M>> = object : KleisliMonad<D, M> {
+    override fun MF(): Monad<M> = MM
+  }
 }
+
+interface KleisliMonadTransControl<D> : MonadTransControl<Kind<ForKleisli, D>> {
+
+  override fun <M, A> liftWith(MM: Monad<M>, f: (RunT<Kind<ForKleisli, D>>) -> Kind<M, A>): Kind<Kind<Kind<ForKleisli, D>, M>, A> =
+    Kleisli { d: D ->
+      f(object : RunT<Kind<ForKleisli, D>> {
+        override fun <M, A> invoke(MM: Monad<M>, fa: Kind<Kind<Kind<ForKleisli, D>, M>, A>): Kind<M, StT<Kind<ForKleisli, D>, A>> =
+          MM.run { fa.run(d).map { StT<Kind<ForKleisli, D>, A>(it) } }
+      })
+    }
+
+  override fun <M, A> Kind<M, StT<Kind<ForKleisli, D>, A>>.restoreT(MM: Monad<M>): Kind<Kind<Kind<ForKleisli, D>, M>, A> =
+    Kleisli { _: D -> MM.run { map { (it.unsafeState as A) } } }
+
+  override fun <M> monad(MM: Monad<M>): Monad<Kind<Kind<ForKleisli, D>, M>> = object : KleisliMonad<D, M> {
+    override fun MF(): Monad<M> = MM
+  }
+}
+
+fun <D> Kleisli.Companion.monadTransControl(): MonadTransControl<Kind<ForKleisli, D>> = object : KleisliMonadTransControl<D> {}
+
+fun <D, B, M> Kleisli.Companion.monadBase(MB: MonadBase<B, M>): MonadBase<B, KleisliPartialOf<D, M>> =
+  MonadBase.defaultImpl(object : KleisliMonadTrans<D> {}, MB)
+
+fun <D, B, M> Kleisli.Companion.monadBaseControl(MBC: MonadBaseControl<B, M>): MonadBaseControl<B, KleisliPartialOf<D, M>> =
+  MonadBaseControl.defaultImpl(object : KleisliMonadTransControl<D> {}, MBC)

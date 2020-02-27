@@ -2,28 +2,26 @@ package arrow.fx.mtl
 
 import arrow.Kind
 import arrow.core.AndThen
-import arrow.core.None
-import arrow.core.Option
-import arrow.core.Some
 import arrow.core.Tuple2
-import arrow.core.getOrElse
-import arrow.mtl.StateT
-import arrow.mtl.StateTOf
-import arrow.mtl.StateTPartialOf
-import arrow.mtl.extensions.StateTMonadThrow
-import arrow.mtl.fix
-import arrow.fx.Ref
+import arrow.extension
+import arrow.fx.IO
+import arrow.fx.mtl.unlifted.defaultBracket
 import arrow.fx.typeclasses.Async
 import arrow.fx.typeclasses.Bracket
 import arrow.fx.typeclasses.ExitCase
 import arrow.fx.typeclasses.MonadDefer
+import arrow.fx.typeclasses.MonadIO
 import arrow.fx.typeclasses.Proc
 import arrow.fx.typeclasses.ProcF
-import arrow.extension
-import arrow.fx.IO
-import arrow.fx.typeclasses.MonadIO
+import arrow.mtl.StateT
+import arrow.mtl.StateTOf
+import arrow.mtl.StateTPartialOf
 import arrow.mtl.extensions.StateTMonad
+import arrow.mtl.extensions.StateTMonadError
+import arrow.mtl.extensions.monadBaseControl
+import arrow.mtl.fix
 import arrow.mtl.run
+import arrow.mtl.typeclasses.MonadBaseControl
 import arrow.typeclasses.Monad
 import arrow.typeclasses.MonadError
 import arrow.undocumented
@@ -31,44 +29,22 @@ import kotlin.coroutines.CoroutineContext
 
 @extension
 @undocumented
-interface StateTBracket<S, F> : Bracket<StateTPartialOf<S, F>, Throwable>, StateTMonadThrow<S, F> {
+interface StateTBracket<S, F, E> : Bracket<StateTPartialOf<S, F>, E>, StateTMonadError<S, F, E> {
 
-  fun MD(): MonadDefer<F>
+  fun BR(): Bracket<F, E>
 
-  override fun ME(): MonadError<F, Throwable> = MD()
+  override fun ME(): MonadError<F, E> = BR()
 
-  override fun <A, B> StateTOf<S, F, A>.bracketCase(
-    release: (A, ExitCase<Throwable>) -> StateTOf<S, F, Unit>,
-    use: (A) -> StateTOf<S, F, B>
-  ): StateT<S, F, B> = MD().run {
-
-    StateT.liftF<S, F, Ref<F, Option<S>>>(this, Ref(this, None)).flatMap { ref ->
-      StateT<S, F, B> { startS ->
-        run(startS).bracketCase(use = { (s, a) ->
-          use(a).run(s).flatMap { sa ->
-            ref.set(Some(sa.a)).map { sa }
-          }
-        }, release = { (s0, a), exitCase ->
-          when (exitCase) {
-            is ExitCase.Completed ->
-              ref.get().map { it.getOrElse { s0 } }.flatMap { s1 ->
-                release(a, ExitCase.Completed).fix().runS(this, s1).flatMap { s2 ->
-                  ref.set(Some(s2))
-                }
-              }
-            else -> release(a, exitCase).run(s0).unit()
-          }
-        }).flatMap { (s, b) -> ref.get().map { it.getOrElse { s } }.tupleRight(b) }
-      }
-    }
-  }
+  override fun <A, B> Kind<StateTPartialOf<S, F>, A>.bracketCase(release: (A, ExitCase<E>) -> Kind<StateTPartialOf<S, F>, Unit>, use: (A) -> Kind<StateTPartialOf<S, F>, B>): Kind<StateTPartialOf<S, F>, B> =
+    defaultBracket(BR(), StateT.monadBaseControl<S, F, F>(MonadBaseControl.id(BR())), release, use)
 }
 
 @extension
 @undocumented
-interface StateTMonadDefer<S, F> : MonadDefer<StateTPartialOf<S, F>>, StateTBracket<S, F> {
+interface StateTMonadDefer<S, F> : MonadDefer<StateTPartialOf<S, F>>, StateTBracket<S, F, Throwable> {
 
-  override fun MD(): MonadDefer<F>
+  fun MD(): MonadDefer<F>
+  override fun BR(): Bracket<F, Throwable> = MD()
 
   override fun <A> defer(fa: () -> StateTOf<S, F, A>): StateT<S, F, A> = MD().run {
     StateT { s -> defer { fa().run(s) } }

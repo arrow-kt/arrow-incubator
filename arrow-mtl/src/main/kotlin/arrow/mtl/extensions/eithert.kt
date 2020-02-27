@@ -24,8 +24,13 @@ import arrow.mtl.ForEitherT
 import arrow.mtl.extensions.eithert.monadThrow.monadThrow
 import arrow.mtl.fix
 import arrow.mtl.typeclasses.ComposedTraverse
+import arrow.mtl.typeclasses.MonadBase
+import arrow.mtl.typeclasses.MonadBaseControl
 import arrow.mtl.typeclasses.MonadTrans
+import arrow.mtl.typeclasses.MonadTransControl
 import arrow.mtl.typeclasses.Nested
+import arrow.mtl.typeclasses.RunT
+import arrow.mtl.typeclasses.StT
 import arrow.mtl.typeclasses.compose
 import arrow.mtl.typeclasses.unnest
 import arrow.mtl.value
@@ -351,4 +356,36 @@ interface EitherTEqK<L, F> : EqK<EitherTPartialOf<L, F>> {
 interface EitherTMonadTrans<L> : MonadTrans<Kind<ForEitherT, L>> {
   override fun <G, A> Kind<G, A>.liftT(MG: Monad<G>): Kind2<Kind<ForEitherT, L>, G, A> =
     EitherT.liftF(MG, this)
+
+  override fun <M> monad(MM: Monad<M>): Monad<Kind<Kind<ForEitherT, L>, M>> = object : EitherTMonad<L, M> {
+    override fun MF(): Monad<M> = MM
+  }
 }
+
+interface EitherTMonadTransControl<L> : MonadTransControl<Kind<ForEitherT, L>> {
+
+  override fun <M, A> liftWith(MM: Monad<M>, f: (RunT<Kind<ForEitherT, L>>) -> Kind<M, A>): Kind<Kind<Kind<ForEitherT, L>, M>, A> =
+    EitherT(
+      MM.run {
+        f(object : RunT<Kind<ForEitherT, L>> {
+          override fun <M, A> invoke(MM: Monad<M>, fa: Kind<Kind<Kind<ForEitherT, L>, M>, A>): Kind<M, StT<Kind<ForEitherT, L>, A>> =
+            MM.run { fa.value().map { StT<Kind<ForEitherT, L>, A>(it) } }
+        }).map { it.right() }
+      }
+    )
+
+  override fun <M, A> Kind<M, StT<Kind<ForEitherT, L>, A>>.restoreT(MM: Monad<M>): Kind<Kind<Kind<ForEitherT, L>, M>, A> =
+    EitherT(MM.run { map { (it.unsafeState as Either<L, A>) } })
+
+  override fun <M> monad(MM: Monad<M>): Monad<Kind<Kind<ForEitherT, L>, M>> = object : EitherTMonad<L, M> {
+    override fun MF(): Monad<M> = MM
+  }
+}
+
+fun <L> EitherT.Companion.monadTransControl(): MonadTransControl<Kind<ForEitherT, L>> = object : EitherTMonadTransControl<L> {}
+
+fun <L, B, M> EitherT.Companion.monadBase(MB: MonadBase<B, M>): MonadBase<B, EitherTPartialOf<L, M>> =
+  MonadBase.defaultImpl(object : EitherTMonadTrans<L> {}, MB)
+
+fun <L, B, M> EitherT.Companion.monadBaseControl(MBC: MonadBaseControl<B, M>): MonadBaseControl<B, EitherTPartialOf<L, M>> =
+  MonadBaseControl.defaultImpl(object : EitherTMonadTransControl<L> {}, MBC)
