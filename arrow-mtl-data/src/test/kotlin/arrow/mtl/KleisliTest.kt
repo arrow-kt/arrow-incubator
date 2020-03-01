@@ -5,13 +5,17 @@ import arrow.core.Const
 import arrow.core.ConstPartialOf
 import arrow.core.ForConst
 import arrow.core.ForId
+import arrow.core.ForListK
 import arrow.core.ForOption
 import arrow.core.Id
+import arrow.core.ListK
 import arrow.core.Option
 import arrow.core.extensions.const.divisible.divisible
 import arrow.core.extensions.const.eqK.eqK
 import arrow.core.extensions.eq
 import arrow.core.extensions.id.monad.monad
+import arrow.core.extensions.listk.eqK.eqK
+import arrow.core.extensions.listk.monadLogic.monadLogic
 import arrow.core.extensions.monoid
 import arrow.core.extensions.option.alternative.alternative
 import arrow.core.extensions.option.eqK.eqK
@@ -28,12 +32,14 @@ import arrow.mtl.extensions.kleisli.applicative.applicative
 import arrow.mtl.extensions.kleisli.divisible.divisible
 import arrow.mtl.extensions.kleisli.functor.functor
 import arrow.mtl.extensions.kleisli.monad.monad
+import arrow.mtl.extensions.kleisli.monadLogic.monadLogic
 import arrow.test.UnitSpec
 import arrow.test.generators.GenK
 import arrow.test.generators.genK
 import arrow.test.laws.AlternativeLaws
 import arrow.test.laws.ConcurrentLaws
 import arrow.test.laws.DivisibleLaws
+import arrow.test.laws.MonadLogicLaws
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
 import io.kotlintest.properties.Gen
@@ -85,6 +91,11 @@ class KleisliTest : UnitSpec() {
         Kleisli.divisible<Int, ConstPartialOf<Int>>(Const.divisible(Int.monoid())),
         genK<Int, ConstPartialOf<Int>>(Const.genK(Gen.int())),
         constEQK
+      ),
+      MonadLogicLaws.laws(
+        Kleisli.monadLogic<Int, ForListK>(ListK.monadLogic()),
+        genK<Int, ForListK>(ListK.genK()),
+        Kleisli.eqK(ListK.eqK(), 0)
       )
     )
 

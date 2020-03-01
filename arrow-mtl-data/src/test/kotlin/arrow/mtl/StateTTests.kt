@@ -1,10 +1,15 @@
 package arrow.mtl
 
 import arrow.Kind
+import arrow.core.ForListK
 import arrow.core.ForOption
+import arrow.core.ListK
 import arrow.core.Option
 import arrow.core.Tuple2
 import arrow.core.extensions.eq
+import arrow.core.extensions.listk.eqK.eqK
+import arrow.core.extensions.listk.monad.monad
+import arrow.core.extensions.listk.monadLogic.monadLogic
 import arrow.core.extensions.option.eqK.eqK
 import arrow.core.extensions.option.functor.functor
 import arrow.core.extensions.option.monad.monad
@@ -21,6 +26,7 @@ import arrow.mtl.extensions.statet.applicative.applicative
 import arrow.mtl.extensions.statet.functor.functor
 import arrow.mtl.extensions.statet.monad.monad
 import arrow.mtl.extensions.statet.monadCombine.monadCombine
+import arrow.mtl.extensions.statet.monadLogic.monadLogic
 import arrow.mtl.extensions.statet.monadState.monadState
 import arrow.mtl.extensions.statet.semigroupK.semigroupK
 import arrow.test.UnitSpec
@@ -29,6 +35,7 @@ import arrow.test.generators.genK
 import arrow.test.generators.tuple2
 import arrow.test.laws.AsyncLaws
 import arrow.test.laws.MonadCombineLaws
+import arrow.test.laws.MonadLogicLaws
 import arrow.test.laws.MonadStateLaws
 import arrow.test.laws.SemigroupKLaws
 import arrow.typeclasses.Eq
@@ -71,6 +78,12 @@ class StateTTests : UnitSpec() {
         StateT.monad(Option.monad()),
         StateT.genK(Option.genK(), Gen.int()),
         StateT.eqK(Option.eqK(), Int.eq(), Option.monad(), 0)
+      ),
+
+      MonadLogicLaws.laws(
+        StateT.monadLogic<Int, ForListK>(ListK.monadLogic()),
+        StateT.genK(ListK.genK(withMaxSize = 20), Gen.int()),
+        StateT.eqK(ListK.eqK(), Int.eq(), ListK.monad(), 1), 50
       )
     )
   }
