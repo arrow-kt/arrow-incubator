@@ -17,14 +17,14 @@ dependencies {
     compile project(":arrow-free")
     compile project(":arrow-mtl") // For Composed and composing functors
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$KOTLIN_VERSION"
-    compile "io.arrow-kt:arrow-annotations:$VERSION_NAME"
-    compile "io.arrow-kt:arrow-core:$VERSION_NAME"
-    kapt "io.arrow-kt:arrow-meta:$VERSION_NAME"
-    kaptTest "io.arrow-kt:arrow-meta:$VERSION_NAME"
-    compileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME"
-    testCompileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME"
+    compile "io.arrow-kt:arrow-annotations:$VERSION_NAME", excludeArrow
+    compile "io.arrow-kt:arrow-core:$VERSION_NAME", excludeArrow
+    kapt "io.arrow-kt:arrow-meta:$VERSION_NAME", excludeArrow
+    kaptTest "io.arrow-kt:arrow-meta:$VERSION_NAME", excludeArrow
+    compileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME", excludeArrow
+    testCompileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME", excludeArrow
     testRuntime "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
-    testCompile "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION"
+    testCompile "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION", excludeArrow
     testCompile project(":arrow-incubator-test")
     testCompile project(":arrow-recursion")
 }
