@@ -1,4 +1,4 @@
-rootProject.name = 'arrow-incubator'
+rootProject.name = 'arrow-incubator-lib'
 
 include 'arrow-aql'
 include 'arrow-mtl'
