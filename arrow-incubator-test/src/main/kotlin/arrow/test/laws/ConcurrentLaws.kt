@@ -163,7 +163,7 @@ object ConcurrentLaws {
           use = { a -> startLatch.complete(Unit).flatMap { never<Int>() } },
           release = { r, exitCase ->
             when (exitCase) {
-              is ExitCase.Canceled -> exitLatch.complete(r) // Fulfil promise that `release` was executed with Canceled
+              is ExitCase.Cancelled -> exitLatch.complete(r) // Fulfil promise that `release` was executed with Canceled
               else -> unit()
             }
           }
@@ -219,7 +219,7 @@ object ConcurrentLaws {
         val (_, cancel) = startLatch.complete(Unit).flatMap { never<Int>() }
           .guaranteeCase { exitCase ->
             when (exitCase) {
-              is ExitCase.Canceled -> exitLatch.complete(i) // Fulfil promise that `release` was executed with Canceled
+              is ExitCase.Cancelled -> exitLatch.complete(i) // Fulfil promise that `release` was executed with Canceled
               else -> unit()
             }
           }.fork(ctx).bind() // Fork execution, allowing us to cancel it later
