@@ -3,6 +3,7 @@ package arrow.fx.mtl
 import arrow.Kind
 import arrow.core.Either
 import arrow.core.Tuple2
+import arrow.core.Tuple3
 import arrow.core.internal.AtomicRefW
 import arrow.extension
 import arrow.fx.IO
@@ -120,15 +121,20 @@ interface WriterTConcurrent<W, F> : Concurrent<WriterTPartialOf<W, F>>, WriterTA
     WriterT(fork)
   }
 
-  override fun <A, B, C> CoroutineContext.parMapN(fa: WriterTOf<W, F, A>, fb: WriterTOf<W, F, B>, f: (A, B) -> C): WriterT<W, F, C> = CF().run {
-    WriterT(parMapN(fa.value(), fb.value()) { (w, a), (ww, b) ->
-      Tuple2(MM().run { w.combine(ww) }, f(a, b))
+  override fun <A, B> parTupledN(ctx: CoroutineContext, fa: WriterTOf<W, F, A>, fb: WriterTOf<W, F, B>): WriterT<W, F, Tuple2<A, B>> = CF().run {
+    WriterT(parMapN(ctx, fa.value(), fb.value()) { (wa, wb) ->
+      val (w, a) = wa
+      val (ww, b) = wb
+      Tuple2(MM().run { w.combine(ww) }, Tuple2(a, b))
     })
   }
 
-  override fun <A, B, C, D> CoroutineContext.parMapN(fa: WriterTOf<W, F, A>, fb: WriterTOf<W, F, B>, fc: WriterTOf<W, F, C>, f: (A, B, C) -> D): WriterT<W, F, D> = CF().run {
-    WriterT(parMapN(fa.value(), fb.value(), fc.value()) { (w, a), (ww, b), (www, c) ->
-      Tuple2(MM().run { w.combine(ww).combine(www) }, f(a, b, c))
+  override fun <A, B, C> parTupledN(ctx: CoroutineContext, fa: WriterTOf<W, F, A>, fb: WriterTOf<W, F, B>, fc: WriterTOf<W, F, C>): WriterT<W, F, Tuple3<A, B, C>> = CF().run {
+    WriterT(parMapN(ctx, fa.value(), fb.value(), fc.value()) { (wa, wb, wc) ->
+      val (w, a) = wa
+      val (ww, b) = wb
+      val (www, c) = wc
+      Tuple2(MM().run { w.combine(ww).combine(www) }, Tuple3(a, b, c))
     })
   }
 
