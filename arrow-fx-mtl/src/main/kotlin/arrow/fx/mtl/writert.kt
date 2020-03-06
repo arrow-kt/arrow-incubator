@@ -122,19 +122,19 @@ interface WriterTConcurrent<W, F> : Concurrent<WriterTPartialOf<W, F>>, WriterTA
   }
 
   override fun <A, B> parTupledN(ctx: CoroutineContext, fa: WriterTOf<W, F, A>, fb: WriterTOf<W, F, B>): WriterT<W, F, Tuple2<A, B>> = CF().run {
-    WriterT(parMapN(fa.value(), fb.value()) { (wa, wb) ->
+    WriterT(parMapN(ctx, fa.value(), fb.value()) { (wa, wb) ->
       val (w, a) = wa
       val (ww, b) = wb
-      Tuple2(MM().run { w.combine(ww) }, f(a, b))
+      Tuple2(MM().run { w.combine(ww) }, Tuple2(a, b))
     })
   }
 
   override fun <A, B, C> parTupledN(ctx: CoroutineContext, fa: WriterTOf<W, F, A>, fb: WriterTOf<W, F, B>, fc: WriterTOf<W, F, C>): WriterT<W, F, Tuple3<A, B, C>> = CF().run {
-    WriterT(parMapN(fa.value(), fb.value(), fc.value()) { (wa, wb, wc) ->
+    WriterT(parMapN(ctx, fa.value(), fb.value(), fc.value()) { (wa, wb, wc) ->
       val (w, a) = wa
       val (ww, b) = wb
-      val (ww2, c) = wc
-      Tuple2(MM().run { w.combine(ww).combine(www) }, f(a, b, c))
+      val (www, c) = wc
+      Tuple2(MM().run { w.combine(ww).combine(www) }, Tuple3(a, b, c))
     })
   }
 

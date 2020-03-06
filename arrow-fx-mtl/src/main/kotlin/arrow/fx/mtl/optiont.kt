@@ -123,7 +123,7 @@ interface OptionTConcurrent<F> : Concurrent<OptionTPartialOf<F>>, OptionTAsync<F
     OptionT(parMapN(ctx, fa.value(), fb.value()) { (a, b) ->
       a.flatMap { aa ->
         b.map { bb ->
-          f(aa, bb)
+          Tuple2(aa, bb)
         }
       }
     })
@@ -133,7 +133,7 @@ interface OptionTConcurrent<F> : Concurrent<OptionTPartialOf<F>>, OptionTAsync<F
     OptionT(parMapN(ctx, fa.value(), fb.value(), fc.value()) { (a, b, c) ->
       a.flatMap { aa ->
         b.flatMap { bb ->
-          c.map { cc -> f(aa, bb, cc) }
+          c.map { cc -> Tuple3(aa, bb, cc) }
         }
       }
     })

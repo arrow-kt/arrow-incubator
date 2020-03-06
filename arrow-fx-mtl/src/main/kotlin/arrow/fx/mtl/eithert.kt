@@ -135,7 +135,7 @@ interface EitherTConcurrent<L, F> : Concurrent<EitherTPartialOf<L, F>>, EitherTA
   override fun <A, B> parTupledN(ctx: CoroutineContext, fa: EitherTOf<L, F, A>, fb: EitherTOf<L, F, B>): Kind<EitherTPartialOf<L, F>, Tuple2<A, B>> = CF().run {
     EitherT(parMapN(ctx, fa.value(), fb.value()) { (a, b) ->
       a.flatMap { aa ->
-        b.map { bb -> f(aa, bb) }
+        b.map { bb -> Tuple2(aa, bb) }
       }
     })
   }
@@ -145,7 +145,7 @@ interface EitherTConcurrent<L, F> : Concurrent<EitherTPartialOf<L, F>>, EitherTA
       a.flatMap { aa ->
         b.flatMap { bb ->
           c.map { cc ->
-            f(aa, bb, cc)
+            Tuple3(aa, bb, cc)
           }
         }
       }
