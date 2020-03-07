@@ -7,6 +7,8 @@ import arrow.core.None
 import arrow.core.Option
 import arrow.core.Right
 import arrow.core.Some
+import arrow.core.Tuple2
+import arrow.core.Tuple3
 import arrow.core.flatMap
 import arrow.extension
 import arrow.fx.IO
@@ -38,7 +40,7 @@ import kotlin.coroutines.CoroutineContext
 
 @extension
 @undocumented
-interface EitherTBracket<F, L> : Bracket<EitherTPartialOf<F, L>, Throwable>, EitherTMonadThrow<F, L> {
+interface EitherTBracket<L, F> : Bracket<EitherTPartialOf<L, F>, Throwable>, EitherTMonadThrow<L, F> {
 
   fun MDF(): MonadDefer<F>
 
@@ -46,11 +48,11 @@ interface EitherTBracket<F, L> : Bracket<EitherTPartialOf<F, L>, Throwable>, Eit
 
   override fun AE(): ApplicativeError<F, Throwable> = MDF()
 
-  override fun <A, B> EitherTOf<F, L, A>.bracketCase(
-    release: (A, ExitCase<Throwable>) -> EitherTOf<F, L, Unit>,
-    use: (A) -> EitherTOf<F, L, B>
-  ): EitherT<F, L, B> = MDF().run {
-    EitherT.liftF<F, L, Ref<F, Option<L>>>(this, Ref(None)).flatMap { ref ->
+  override fun <A, B> EitherTOf<L, F, A>.bracketCase(
+    release: (A, ExitCase<Throwable>) -> EitherTOf<L, F, Unit>,
+    use: (A) -> EitherTOf<L, F, B>
+  ): EitherT<L, F, B> = MDF().run {
+    EitherT.liftF<L, F, Ref<F, Option<L>>>(this, Ref(None)).flatMap { ref ->
       EitherT(value().bracketCase(use = { either ->
         when (either) {
           is Either.Right -> use(either.b).value()
@@ -84,74 +86,74 @@ interface EitherTBracket<F, L> : Bracket<EitherTPartialOf<F, L>, Throwable>, Eit
 
 @extension
 @undocumented
-interface EitherTMonadDefer<F, L> : MonadDefer<EitherTPartialOf<F, L>>, EitherTBracket<F, L> {
+interface EitherTMonadDefer<L, F> : MonadDefer<EitherTPartialOf<L, F>>, EitherTBracket<L, F> {
 
   override fun MDF(): MonadDefer<F>
 
-  override fun <A> defer(fa: () -> EitherTOf<F, L, A>): EitherT<F, L, A> =
+  override fun <A> defer(fa: () -> EitherTOf<L, F, A>): EitherT<L, F, A> =
     EitherT(MDF().defer { fa().value() })
 }
 
 @extension
 @undocumented
-interface EitherTAsync<F, L> : Async<EitherTPartialOf<F, L>>, EitherTMonadDefer<F, L> {
+interface EitherTAsync<L, F> : Async<EitherTPartialOf<L, F>>, EitherTMonadDefer<L, F> {
 
   fun ASF(): Async<F>
 
   override fun MDF(): MonadDefer<F> = ASF()
 
-  override fun <A> async(fa: Proc<A>): EitherT<F, L, A> = ASF().run {
+  override fun <A> async(fa: Proc<A>): EitherT<L, F, A> = ASF().run {
     EitherT.liftF(this, async(fa))
   }
 
-  override fun <A> asyncF(k: ProcF<EitherTPartialOf<F, L>, A>): EitherT<F, L, A> = ASF().run {
+  override fun <A> asyncF(k: ProcF<EitherTPartialOf<L, F>, A>): EitherT<L, F, A> = ASF().run {
     EitherT.liftF(this, asyncF { cb -> k(cb).value().unit() })
   }
 
-  override fun <A> EitherTOf<F, L, A>.continueOn(ctx: CoroutineContext): EitherT<F, L, A> = ASF().run {
+  override fun <A> EitherTOf<L, F, A>.continueOn(ctx: CoroutineContext): EitherT<L, F, A> = ASF().run {
     EitherT(value().continueOn(ctx))
   }
 }
 
-interface EitherTConcurrent<F, L> : Concurrent<EitherTPartialOf<F, L>>, EitherTAsync<F, L> {
+interface EitherTConcurrent<L, F> : Concurrent<EitherTPartialOf<L, F>>, EitherTAsync<L, F> {
 
   fun CF(): Concurrent<F>
 
   override fun ASF(): Async<F> = CF()
 
-  override fun dispatchers(): Dispatchers<EitherTPartialOf<F, L>> =
-    CF().dispatchers() as Dispatchers<EitherTPartialOf<F, L>>
+  override fun dispatchers(): Dispatchers<EitherTPartialOf<L, F>> =
+    CF().dispatchers() as Dispatchers<EitherTPartialOf<L, F>>
 
-  override fun <A> cancellable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<EitherTPartialOf<F, L>>): EitherT<F, L, A> = CF().run {
+  override fun <A> cancellable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<EitherTPartialOf<L, F>>): EitherT<L, F, A> = CF().run {
     EitherT.liftF(this, cancellable { cb -> k(cb).value().map { Unit } })
   }
 
-  override fun <A> EitherTOf<F, L, A>.fork(ctx: CoroutineContext): EitherT<F, L, Fiber<EitherTPartialOf<F, L>, A>> = CF().run {
+  override fun <A> EitherTOf<L, F, A>.fork(ctx: CoroutineContext): EitherT<L, F, Fiber<EitherTPartialOf<L, F>, A>> = CF().run {
     EitherT.liftF(this, value().fork(ctx).map(::fiberT))
   }
 
-  override fun <A, B, C> CoroutineContext.parMapN(fa: EitherTOf<F, L, A>, fb: EitherTOf<F, L, B>, f: (A, B) -> C): Kind<EitherTPartialOf<F, L>, C> = CF().run {
-    EitherT(parMapN(fa.value(), fb.value()) { a, b ->
+  override fun <A, B> parTupledN(ctx: CoroutineContext, fa: EitherTOf<L, F, A>, fb: EitherTOf<L, F, B>): Kind<EitherTPartialOf<L, F>, Tuple2<A, B>> = CF().run {
+    EitherT(parMapN(ctx, fa.value(), fb.value()) { (a, b) ->
       a.flatMap { aa ->
-        b.map { bb -> f(aa, bb) }
+        b.map { bb -> Tuple2(aa, bb) }
       }
     })
   }
 
-  override fun <A, B, C, D> CoroutineContext.parMapN(fa: EitherTOf<F, L, A>, fb: EitherTOf<F, L, B>, fc: EitherTOf<F, L, C>, f: (A, B, C) -> D): EitherT<F, L, D> = CF().run {
-    EitherT(parMapN(fa.value(), fb.value(), fc.value()) { a, b, c ->
+  override fun <A, B, C> parTupledN(ctx: CoroutineContext, fa: EitherTOf<L, F, A>, fb: EitherTOf<L, F, B>, fc: EitherTOf<L, F, C>): EitherT<L, F, Tuple3<A, B, C>> = CF().run {
+    EitherT(parMapN(ctx, fa.value(), fb.value(), fc.value()) { (a, b, c) ->
       a.flatMap { aa ->
         b.flatMap { bb ->
           c.map { cc ->
-            f(aa, bb, cc)
+            Tuple3(aa, bb, cc)
           }
         }
       }
     })
   }
 
-  override fun <A, B> CoroutineContext.racePair(fa: EitherTOf<F, L, A>, fb: EitherTOf<F, L, B>): EitherT<F, L, RacePair<EitherTPartialOf<F, L>, A, B>> = CF().run {
-    val racePair: Kind<F, Either<L, RacePair<EitherTPartialOf<F, L>, A, B>>> =
+  override fun <A, B> CoroutineContext.racePair(fa: EitherTOf<L, F, A>, fb: EitherTOf<L, F, B>): EitherT<L, F, RacePair<EitherTPartialOf<L, F>, A, B>> = CF().run {
+    val racePair: Kind<F, Either<L, RacePair<EitherTPartialOf<L, F>, A, B>>> =
       racePair(fa.value(), fb.value()).flatMap { res: RacePair<F, Either<L, A>, Either<L, B>> ->
         when (res) {
           is RacePair.First -> when (val winner = res.winner) {
@@ -168,11 +170,11 @@ interface EitherTConcurrent<F, L> : Concurrent<EitherTPartialOf<F, L>>, EitherTA
   }
 
   override fun <A, B, C> CoroutineContext.raceTriple(
-    fa: EitherTOf<F, L, A>,
-    fb: EitherTOf<F, L, B>,
-    fc: EitherTOf<F, L, C>
-  ): EitherT<F, L, RaceTriple<EitherTPartialOf<F, L>, A, B, C>> = CF().run {
-    val raceTriple: Kind<F, Either<L, RaceTriple<EitherTPartialOf<F, L>, A, B, C>>> =
+    fa: EitherTOf<L, F, A>,
+    fb: EitherTOf<L, F, B>,
+    fc: EitherTOf<L, F, C>
+  ): EitherT<L, F, RaceTriple<EitherTPartialOf<L, F>, A, B, C>> = CF().run {
+    val raceTriple: Kind<F, Either<L, RaceTriple<EitherTPartialOf<L, F>, A, B, C>>> =
       raceTriple(fa.value(), fb.value(), fc.value()).flatMap { res: RaceTriple<F, Either<L, A>, Either<L, B>, Either<L, C>> ->
         when (res) {
           is RaceTriple.First -> when (val winner = res.winner) {
@@ -192,22 +194,22 @@ interface EitherTConcurrent<F, L> : Concurrent<EitherTPartialOf<F, L>>, EitherTA
     EitherT(raceTriple)
   }
 
-  fun <A> fiberT(fiber: Fiber<F, Either<L, A>>): Fiber<EitherTPartialOf<F, L>, A> =
+  fun <A> fiberT(fiber: Fiber<F, Either<L, A>>): Fiber<EitherTPartialOf<L, F>, A> =
     Fiber(EitherT(fiber.join()), EitherT.liftF(ASF(), fiber.cancel()))
 }
 
-fun <F, L> EitherT.Companion.concurrent(CF: Concurrent<F>): Concurrent<EitherTPartialOf<F, L>> =
-  object : EitherTConcurrent<F, L> {
+fun <L, F> EitherT.Companion.concurrent(CF: Concurrent<F>): Concurrent<EitherTPartialOf<L, F>> =
+  object : EitherTConcurrent<L, F> {
     override fun CF(): Concurrent<F> = CF
   }
 
-fun <F, L> EitherT.Companion.timer(CF: Concurrent<F>): Timer<EitherTPartialOf<F, L>> =
-  Timer(concurrent<F, L>(CF))
+fun <L, F> EitherT.Companion.timer(CF: Concurrent<F>): Timer<EitherTPartialOf<L, F>> =
+  Timer(concurrent<L, F>(CF))
 
-interface EitherTMonadIO<F, L> : MonadIO<EitherTPartialOf<F, L>>, EitherTMonad<F, L> {
+interface EitherTMonadIO<L, F> : MonadIO<EitherTPartialOf<L, F>>, EitherTMonad<L, F> {
   fun FIO(): MonadIO<F>
   override fun MF(): Monad<F> = FIO()
-  override fun <A> IO<Nothing, A>.liftIO(): Kind<EitherTPartialOf<F, L>, A> = FIO().run {
+  override fun <A> IO<Nothing, A>.liftIO(): Kind<EitherTPartialOf<L, F>, A> = FIO().run {
     EitherT.liftF(this, liftIO())
   }
 }

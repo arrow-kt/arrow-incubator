@@ -1,0 +1,52 @@
+buildscript {
+    repositories {
+        maven { url "https://oss.jfrog.org/artifactory/oss-snapshot-local/" }
+    }
+    dependencies {
+        classpath "io.arrow-kt:arrow-ank-gradle:$VERSION_NAME"
+    }
+}
+
+plugins {
+    id "base"
+    id "org.jetbrains.kotlin.jvm"
+    id "org.jetbrains.kotlin.kapt"
+    id "net.rdrei.android.buildtimetracker"
+    id "org.jlleitschuh.gradle.ktlint"
+    id "ru.vyarus.animalsniffer"
+}
+
+apply from: "$SUBPROJECT_CONF"
+
+dependencies {
+    compileOnly "io.arrow-kt:arrow-annotations:$VERSION_NAME", excludeArrow
+    compileOnly "io.arrow-kt:arrow-core:$VERSION_NAME", excludeArrow
+    compileOnly "io.arrow-kt:arrow-core-data:$VERSION_NAME", excludeArrow
+    compileOnly "io.arrow-kt:arrow-optics:$VERSION_NAME", excludeArrow
+    compileOnly "io.arrow-kt:arrow-optics-mtl:$VERSION_NAME", excludeArrow
+    compileOnly "io.arrow-kt:arrow-ui:$VERSION_NAME", excludeArrow
+    compileOnly "io.arrow-kt:arrow-ui-data:$VERSION_NAME", excludeArrow
+    compileOnly "io.arrow-kt:arrow-fx:$VERSION_NAME", excludeArrow
+    compileOnly "io.arrow-kt:arrow-fx-reactor:$VERSION_NAME", excludeArrow
+    compileOnly "io.arrow-kt:arrow-fx-kotlinx-coroutines:$VERSION_NAME", excludeArrow
+    compileOnly "org.jetbrains.kotlin:kotlin-reflect:$KOTLIN_VERSION"
+    kapt "io.arrow-kt:arrow-meta:$VERSION_NAME", excludeArrow
+    implementation project(":arrow-generic")
+    implementation project(":arrow-aql")
+    implementation project(":arrow-reflect")
+    implementation project(":arrow-mtl")
+    implementation project(":arrow-mtl-data")
+    implementation project(":arrow-recursion")
+    implementation project(":arrow-validation")
+    implementation "io.arrow-kt:arrow-syntax:$VERSION_NAME", excludeArrow
+    implementation "io.arrow-kt:arrow-fx-rx2:$VERSION_NAME", excludeArrow
+    implementation "io.github.classgraph:classgraph:$CLASSGRAPH_VERSION"
+}
+
+apply plugin: 'ank-gradle-plugin'
+
+ank {
+    source = file("${projectDir}/docs")
+    target = file("${projectDir}/build/site")
+    classpath = sourceSets.main.runtimeClasspath
+}
