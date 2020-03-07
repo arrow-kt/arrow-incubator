@@ -21,6 +21,7 @@ dependencies {
     compileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME", excludeArrow
     kapt "io.arrow-kt:arrow-meta:$VERSION_NAME", excludeArrow
     kaptTest "io.arrow-kt:arrow-meta:$VERSION_NAME", excludeArrow
+
     testCompile project(":arrow-incubator-test")
     testCompileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME", excludeArrow
     testCompile "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION", excludeArrow

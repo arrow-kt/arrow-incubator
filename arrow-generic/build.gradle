@@ -24,6 +24,6 @@ dependencies {
     testCompileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME", excludeArrow
     testCompileOnly "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION", excludeArrow
     testCompileOnly "io.arrow-kt:arrow-syntax:$VERSION_NAME", excludeArrow
-    testImplementation project(":arrow-incubator-test")
+    testCompile project(":arrow-incubator-test")
     testRuntime "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
 }
