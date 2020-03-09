@@ -41,17 +41,17 @@ import arrow.mtl.extensions.writert.monadFilter.monadFilter
 import arrow.mtl.extensions.writert.monadTrans.monadTrans
 import arrow.mtl.extensions.writert.monadWriter.monadWriter
 import arrow.mtl.extensions.writert.monoidK.monoidK
-import arrow.test.UnitSpec
-import arrow.test.generators.GenK
-import arrow.test.generators.genK
-import arrow.test.generators.tuple2
-import arrow.test.laws.AlternativeLaws
-import arrow.test.laws.ConcurrentLaws
-import arrow.test.laws.DivisibleLaws
-import arrow.test.laws.MonadFilterLaws
-import arrow.test.laws.MonadTransLaws
-import arrow.test.laws.MonadWriterLaws
-import arrow.test.laws.MonoidKLaws
+import arrow.core.test.UnitSpec
+import arrow.core.test.generators.GenK
+import arrow.core.test.generators.genK
+import arrow.core.test.generators.tuple2
+import arrow.core.test.laws.AlternativeLaws
+import arrow.core.test.laws.ConcurrentLaws
+import arrow.core.test.laws.DivisibleLaws
+import arrow.core.test.laws.MonadFilterLaws
+import arrow.mtl.test.MonadTransLaws
+import arrow.mtl.test.MonadWriterLaws
+import arrow.core.test.laws.MonoidKLaws
 import io.kotlintest.properties.Gen
 
 class WriterTTest : UnitSpec() {

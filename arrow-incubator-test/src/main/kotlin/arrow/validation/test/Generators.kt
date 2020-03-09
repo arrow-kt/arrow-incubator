@@ -1,4 +1,4 @@
-package arrow.test.generators
+package arrow.validation.test
 
 import io.kotlintest.properties.Gen
 

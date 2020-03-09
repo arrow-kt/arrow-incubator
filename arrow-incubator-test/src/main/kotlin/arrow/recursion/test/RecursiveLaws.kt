@@ -1,4 +1,4 @@
-package arrow.test.laws
+package arrow.recursion.test
 
 import arrow.core.Eval
 import arrow.core.ForEval
@@ -8,6 +8,7 @@ import arrow.recursion.Algebra
 import arrow.recursion.AlgebraM
 import arrow.recursion.hylo
 import arrow.recursion.typeclasses.Recursive
+import arrow.core.test.laws.Law
 import arrow.typeclasses.Traverse
 import io.kotlintest.properties.Gen
 

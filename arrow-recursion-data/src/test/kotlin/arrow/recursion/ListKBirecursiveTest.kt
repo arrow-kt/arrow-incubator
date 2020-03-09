@@ -9,9 +9,9 @@ import arrow.recursion.extensions.listf.traverse.traverse
 import arrow.recursion.extensions.listk.birecursive.birecursive
 import arrow.recursion.pattern.ListF
 import arrow.recursion.pattern.fix
-import arrow.test.UnitSpec
-import arrow.test.generators.listK
-import arrow.test.laws.BirecursiveLaws
+import arrow.core.test.UnitSpec
+import arrow.core.test.generators.listK
+import arrow.recursion.test.BirecursiveLaws
 import io.kotlintest.properties.Gen
 
 class ListKBirecursiveTest : UnitSpec() {

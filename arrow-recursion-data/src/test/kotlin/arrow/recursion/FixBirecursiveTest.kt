@@ -10,11 +10,10 @@ import arrow.core.extensions.option.traverse.traverse
 import arrow.core.fix
 import arrow.core.none
 import arrow.core.some
-import arrow.core.value
 import arrow.recursion.data.Fix
 import arrow.recursion.extensions.fix.birecursive.birecursive
-import arrow.test.UnitSpec
-import arrow.test.laws.BirecursiveLaws
+import arrow.core.test.UnitSpec
+import arrow.recursion.test.BirecursiveLaws
 import arrow.typeclasses.Eq
 import io.kotlintest.properties.Gen
 

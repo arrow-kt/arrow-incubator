@@ -5,7 +5,7 @@ import arrow.core.Tuple2
 import arrow.core.toT
 import arrow.core.extensions.id.functor.functor
 import arrow.core.extensions.list.foldable.foldLeft
-import arrow.test.UnitSpec
+import arrow.core.test.UnitSpec
 import io.kotlintest.shouldBe
 
 class StateTests : UnitSpec() {

@@ -1,7 +1,7 @@
 package arrow.validation
 
 import arrow.core.Either
-import arrow.test.UnitSpec
+import arrow.core.test.UnitSpec
 import io.kotlintest.shouldBe
 
 data class ExampleForValidation(val number: Int, val text: String)

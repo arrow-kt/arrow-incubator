@@ -1,7 +1,7 @@
 package arrow.free
 
 import arrow.free.extensions.fx
-import arrow.test.UnitSpec
+import arrow.core.test.UnitSpec
 import io.kotlintest.shouldBe
 
 class TrampolineTest : UnitSpec() {

@@ -1,7 +1,7 @@
 package arrow.mtl
 
 import arrow.core.toT
-import arrow.test.UnitSpec
+import arrow.core.test.UnitSpec
 import io.kotlintest.properties.Gen
 import io.kotlintest.properties.forAll
 import io.kotlintest.shouldBe

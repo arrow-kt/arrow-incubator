@@ -3,7 +3,7 @@ package arrow.mtl
 import arrow.core.Id
 import arrow.core.Tuple2
 import arrow.core.value
-import arrow.test.UnitSpec
+import arrow.core.test.UnitSpec
 import io.kotlintest.shouldBe
 
 class ReaderTest : UnitSpec() {

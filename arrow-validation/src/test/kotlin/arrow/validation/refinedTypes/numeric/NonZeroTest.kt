@@ -1,8 +1,8 @@
 package arrow.validation.refinedTypes.numeric
 
 import arrow.core.extensions.eq
-import arrow.test.UnitSpec
-import arrow.test.generators.nonZeroInt
+import arrow.core.test.UnitSpec
+import arrow.core.test.generators.nonZeroInt
 import arrow.validation.refinedTypes.numeric.validated.nonZero.nonZero
 import io.kotlintest.properties.Gen
 import io.kotlintest.properties.forAll

@@ -36,24 +36,22 @@ import arrow.mtl.extensions.statet.monadState.monadState
 import arrow.mtl.extensions.writert.eqK.eqK
 import arrow.mtl.extensions.writert.monad.monad
 import arrow.mtl.extensions.writert.monadWriter.monadWriter
-import arrow.test.UnitSpec
-import arrow.test.generators.GenK
-import arrow.test.generators.genK
-import arrow.test.generators.throwable
-import arrow.test.generators.tuple2
-import arrow.test.laws.AlternativeLaws
-import arrow.test.laws.MonadErrorLaws
-import arrow.test.laws.MonadStateLaws
-import arrow.test.laws.MonadTransLaws
-import arrow.test.laws.MonadWriterLaws
-import arrow.test.laws.equalUnderTheLaw
+import arrow.core.test.UnitSpec
+import arrow.core.test.generators.GenK
+import arrow.core.test.generators.genK
+import arrow.core.test.generators.throwable
+import arrow.core.test.generators.tuple2
+import arrow.core.test.laws.AlternativeLaws
+import arrow.core.test.laws.MonadErrorLaws
+import arrow.mtl.test.MonadStateLaws
+import arrow.mtl.test.MonadTransLaws
+import arrow.mtl.test.MonadWriterLaws
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
 import arrow.typeclasses.Monad
 import arrow.typeclasses.Monoid
 import io.kotlintest.properties.Gen
 import io.kotlintest.properties.forAll
-import io.kotlintest.shouldBe
 
 class AccumTTest : UnitSpec() {
   init {

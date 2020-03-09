@@ -12,9 +12,9 @@ import arrow.core.extensions.option.functor.functor
 import arrow.core.fix
 import arrow.core.identity
 import arrow.free.extensions.coyoneda.functor.functor
-import arrow.test.UnitSpec
-import arrow.test.generators.GenK
-import arrow.test.laws.FunctorLaws
+import arrow.core.test.UnitSpec
+import arrow.core.test.generators.GenK
+import arrow.core.test.laws.FunctorLaws
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
 import io.kotlintest.properties.Gen

@@ -6,7 +6,7 @@ import arrow.core.IdOf
 import arrow.core.identity
 import arrow.core.value
 import arrow.core.extensions.id.comonad.comonad
-import arrow.test.UnitSpec
+import arrow.core.test.UnitSpec
 import io.kotlintest.properties.forAll
 import io.kotlintest.shouldBe
 

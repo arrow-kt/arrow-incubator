@@ -1,10 +1,13 @@
-package arrow.test.laws
+package arrow.mtl.test
 
 import arrow.Kind
 import arrow.core.extensions.eq
 import arrow.mtl.typeclasses.MonadState
-import arrow.test.generators.GenK
-import arrow.test.generators.intSmall
+import arrow.core.test.generators.GenK
+import arrow.core.test.generators.intSmall
+import arrow.core.test.laws.Law
+import arrow.core.test.laws.MonadLaws
+import arrow.core.test.laws.equalUnderTheLaw
 import arrow.typeclasses.Apply
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK

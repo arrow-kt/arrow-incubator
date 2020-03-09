@@ -10,7 +10,7 @@ import arrow.fx.extensions.io.concurrent.waitFor
 import arrow.fx.fix
 import arrow.fx.typeclasses.Duration
 import arrow.fx.typeclasses.seconds
-import arrow.test.generators.GenK
+import arrow.core.test.generators.GenK
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
 import io.kotlintest.properties.Gen

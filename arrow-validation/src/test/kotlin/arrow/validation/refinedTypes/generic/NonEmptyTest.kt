@@ -1,7 +1,7 @@
 package arrow.validation.refinedTypes.generic
 
-import arrow.test.UnitSpec
-import arrow.test.generators.nonEmptyString
+import arrow.core.test.UnitSpec
+import arrow.core.test.generators.nonEmptyString
 import arrow.validation.refinedTypes.generic.validated.nonEmpty.nonEmpty
 import io.kotlintest.properties.Gen
 import io.kotlintest.properties.forAll
