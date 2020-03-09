@@ -33,8 +33,8 @@ import arrow.mtl.EitherTPartialOf
 import arrow.mtl.extensions.EitherTMonad
 import arrow.mtl.extensions.EitherTMonadThrow
 import arrow.mtl.value
-import arrow.typeclasses.ApplicativeError
 import arrow.typeclasses.Monad
+import arrow.typeclasses.MonadThrow
 import arrow.undocumented
 import kotlin.coroutines.CoroutineContext
 
@@ -43,10 +43,7 @@ import kotlin.coroutines.CoroutineContext
 interface EitherTBracket<L, F> : Bracket<EitherTPartialOf<L, F>, Throwable>, EitherTMonadThrow<L, F> {
 
   fun MDF(): MonadDefer<F>
-
-  override fun MF(): Monad<F> = MDF()
-
-  override fun AE(): ApplicativeError<F, Throwable> = MDF()
+  override fun MT(): MonadThrow<F> = MDF()
 
   override fun <A, B> EitherTOf<L, F, A>.bracketCase(
     release: (A, ExitCase<Throwable>) -> EitherTOf<L, F, Unit>,

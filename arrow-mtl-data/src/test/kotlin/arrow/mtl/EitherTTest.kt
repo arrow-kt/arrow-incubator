@@ -28,19 +28,22 @@ import arrow.fx.mtl.concurrent
 import arrow.fx.mtl.timer
 import arrow.mtl.extensions.eithert.alternative.alternative
 import arrow.mtl.extensions.eithert.applicative.applicative
+import arrow.mtl.extensions.eithert.apply.apply
 import arrow.mtl.extensions.eithert.divisible.divisible
 import arrow.mtl.extensions.eithert.eqK.eqK
 import arrow.mtl.extensions.eithert.functor.functor
 import arrow.mtl.extensions.eithert.monad.monad
-import arrow.mtl.extensions.eithert.semigroupK.semigroupK
+import arrow.mtl.extensions.eithert.monadError.monadError
 import arrow.mtl.extensions.eithert.traverse.traverse
 import arrow.test.UnitSpec
 import arrow.test.generators.genK
+import arrow.test.generators.throwable
 import arrow.test.laws.AlternativeLaws
 import arrow.test.laws.ConcurrentLaws
 import arrow.test.laws.DivisibleLaws
-import arrow.test.laws.SemigroupKLaws
+import arrow.test.laws.MonadErrorLaws
 import arrow.test.laws.TraverseLaws
+import arrow.test.laws.throwableEq
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
 import io.kotlintest.properties.Gen
@@ -80,12 +83,16 @@ class EitherTTest : UnitSpec() {
 
       TraverseLaws.laws(EitherT.traverse<Int, ForId>(Id.traverse()),
         EitherT.genK(Id.genK(), Gen.int()),
-        idEQK),
-
-      SemigroupKLaws.laws(
-        EitherT.semigroupK<Int, ForId>(Id.monad()),
-        EitherT.genK(Id.genK(), Gen.int()),
         idEQK
+      ),
+
+      MonadErrorLaws.laws<EitherTPartialOf<Throwable, ForId>>(
+        EitherT.monadError(Id.monad()),
+        EitherT.functor(Id.monad()),
+        EitherT.apply(Id.monad()),
+        EitherT.monad(Id.monad()),
+        EitherT.genK(Id.genK(), Gen.throwable()),
+        EitherT.eqK(Id.eqK(), throwableEq())
       )
     )
 
