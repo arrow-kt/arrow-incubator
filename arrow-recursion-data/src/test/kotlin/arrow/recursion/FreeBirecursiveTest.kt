@@ -18,6 +18,7 @@ import arrow.recursion.pattern.FreeF
 import arrow.recursion.pattern.fix
 import arrow.core.test.UnitSpec
 import arrow.core.test.generators.intSmall
+import arrow.core.value
 import arrow.recursion.test.BirecursiveLaws
 import io.kotlintest.properties.Gen
 

@@ -11,3 +11,5 @@ fun Gen.Companion.greaterThan(min: Int): Gen<Int> = Gen.int().filter { it > min 
 fun Gen.Companion.greaterEqual(min: Int): Gen<Int> = Gen.int().filter { it >= min }
 
 fun Gen.Companion.greaterOrEqThan(max: Int): Gen<Int> = Gen.int().filter { it >= max }
+
+fun Gen.Companion.nonEmptyString(): Gen<String> = Gen.string().filter { it.isNotEmpty() }

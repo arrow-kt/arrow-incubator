@@ -13,6 +13,7 @@ import arrow.core.some
 import arrow.recursion.data.Fix
 import arrow.recursion.extensions.fix.birecursive.birecursive
 import arrow.core.test.UnitSpec
+import arrow.core.value
 import arrow.recursion.test.BirecursiveLaws
 import arrow.typeclasses.Eq
 import io.kotlintest.properties.Gen

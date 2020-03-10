@@ -18,6 +18,7 @@ import arrow.recursion.extensions.cofreef.traverse.traverse
 import arrow.recursion.pattern.CofreeF
 import arrow.recursion.pattern.fix
 import arrow.core.test.UnitSpec
+import arrow.core.value
 import arrow.recursion.test.BirecursiveLaws
 import arrow.typeclasses.Eq
 import io.kotlintest.properties.Gen
