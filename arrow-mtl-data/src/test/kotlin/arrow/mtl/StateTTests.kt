@@ -27,10 +27,10 @@ import arrow.core.test.UnitSpec
 import arrow.core.test.generators.GenK
 import arrow.core.test.generators.genK
 import arrow.core.test.generators.tuple2
-import arrow.core.test.laws.AsyncLaws
 import arrow.core.test.laws.MonadCombineLaws
 import arrow.mtl.test.MonadStateLaws
 import arrow.core.test.laws.SemigroupKLaws
+import arrow.fx.test.laws.AsyncLaws
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
 import arrow.typeclasses.Monad

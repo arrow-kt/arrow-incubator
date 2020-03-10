@@ -42,13 +42,13 @@ import arrow.core.test.generators.GenK
 import arrow.core.test.generators.genK
 import arrow.core.test.generators.nested
 import arrow.core.test.generators.option
-import arrow.core.test.laws.ConcurrentLaws
 import arrow.core.test.laws.DivisibleLaws
 import arrow.core.test.laws.FunctorFilterLaws
 import arrow.mtl.test.MonadTransLaws
 import arrow.core.test.laws.MonoidKLaws
 import arrow.core.test.laws.SemigroupKLaws
 import arrow.core.test.laws.TraverseFilterLaws
+import arrow.fx.test.laws.ConcurrentLaws
 import arrow.typeclasses.Monad
 import io.kotlintest.properties.Gen
 import io.kotlintest.properties.forAll

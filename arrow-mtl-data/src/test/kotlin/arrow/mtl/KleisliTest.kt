@@ -32,8 +32,8 @@ import arrow.core.test.UnitSpec
 import arrow.core.test.generators.GenK
 import arrow.core.test.generators.genK
 import arrow.core.test.laws.AlternativeLaws
-import arrow.core.test.laws.ConcurrentLaws
 import arrow.core.test.laws.DivisibleLaws
+import arrow.fx.test.laws.ConcurrentLaws
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
 import io.kotlintest.properties.Gen

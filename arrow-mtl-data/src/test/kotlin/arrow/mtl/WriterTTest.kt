@@ -46,7 +46,7 @@ import arrow.core.test.generators.GenK
 import arrow.core.test.generators.genK
 import arrow.core.test.generators.tuple2
 import arrow.core.test.laws.AlternativeLaws
-import arrow.core.test.laws.ConcurrentLaws
+import arrow.fx.test.laws.ConcurrentLaws
 import arrow.core.test.laws.DivisibleLaws
 import arrow.core.test.laws.MonadFilterLaws
 import arrow.mtl.test.MonadTransLaws

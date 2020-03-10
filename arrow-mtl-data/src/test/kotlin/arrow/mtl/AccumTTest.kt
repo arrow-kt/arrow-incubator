@@ -43,6 +43,7 @@ import arrow.core.test.generators.throwable
 import arrow.core.test.generators.tuple2
 import arrow.core.test.laws.AlternativeLaws
 import arrow.core.test.laws.MonadErrorLaws
+import arrow.core.test.laws.equalUnderTheLaw
 import arrow.mtl.test.MonadStateLaws
 import arrow.mtl.test.MonadTransLaws
 import arrow.mtl.test.MonadWriterLaws
@@ -52,6 +53,7 @@ import arrow.typeclasses.Monad
 import arrow.typeclasses.Monoid
 import io.kotlintest.properties.Gen
 import io.kotlintest.properties.forAll
+import io.kotlintest.shouldBe
 
 class AccumTTest : UnitSpec() {
   init {

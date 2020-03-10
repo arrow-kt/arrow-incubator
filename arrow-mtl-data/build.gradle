@@ -27,5 +27,6 @@ dependencies {
     testCompile "io.arrow-kt:arrow-syntax:$VERSION_NAME", excludeArrow
     testCompile project(":arrow-mtl")
     testCompile project(":arrow-fx-mtl")
+    testCompile "io.arrow-kt:arrow-fx-test:$VERSION_NAME"
     testRuntime "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
 }
