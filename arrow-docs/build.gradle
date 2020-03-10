@@ -24,7 +24,6 @@ dependencies {
     compileOnly "io.arrow-kt:arrow-fx:$VERSION_NAME"
     compileOnly "io.arrow-kt:arrow-fx-reactor:$VERSION_NAME"
     compileOnly "io.arrow-kt:arrow-fx-kotlinx-coroutines:$VERSION_NAME"
-    compileOnly "io.arrow-kt:arrow-syntax:$VERSION_NAME"
     compileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME"
     kapt "io.arrow-kt:arrow-meta:$VERSION_NAME"
     implementation project(":arrow-generic")
@@ -34,6 +33,7 @@ dependencies {
     implementation project(":arrow-mtl-data")
     implementation project(":arrow-recursion")
     implementation project(":arrow-validation")
+    implementation "io.arrow-kt:arrow-syntax:$VERSION_NAME"
     implementation "io.arrow-kt:arrow-fx-rx2:$VERSION_NAME"
 }
 
