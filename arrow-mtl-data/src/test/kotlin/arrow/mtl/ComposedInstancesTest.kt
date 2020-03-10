@@ -49,7 +49,6 @@ import arrow.core.test.generators.GenK
 import arrow.core.test.generators.GenK2
 import arrow.core.test.generators.functionAToB
 import arrow.core.test.generators.genK
-import arrow.core.test.generators.nested
 import arrow.core.test.laws.ApplicativeLaws
 import arrow.core.test.laws.BifunctorLaws
 import arrow.core.test.laws.FoldableLaws
@@ -58,6 +57,7 @@ import arrow.core.test.laws.InvariantLaws
 import arrow.core.test.laws.MonoidKLaws
 import arrow.core.test.laws.SemigroupKLaws
 import arrow.core.test.laws.TraverseLaws
+import arrow.mtl.test.generators.nested
 import arrow.typeclasses.Conested
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK

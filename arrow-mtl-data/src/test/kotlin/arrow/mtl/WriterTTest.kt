@@ -22,6 +22,14 @@ import arrow.core.extensions.option.functor.functor
 import arrow.core.extensions.option.monad.monad
 import arrow.core.extensions.option.monadFilter.monadFilter
 import arrow.core.k
+import arrow.core.test.UnitSpec
+import arrow.core.test.generators.GenK
+import arrow.core.test.generators.genK
+import arrow.core.test.generators.tuple2
+import arrow.core.test.laws.AlternativeLaws
+import arrow.core.test.laws.DivisibleLaws
+import arrow.core.test.laws.MonadFilterLaws
+import arrow.core.test.laws.MonoidKLaws
 import arrow.fx.ForIO
 import arrow.fx.IO
 import arrow.fx.extensions.io.applicative.applicative
@@ -30,6 +38,7 @@ import arrow.fx.extensions.io.functor.functor
 import arrow.fx.extensions.io.monad.monad
 import arrow.fx.mtl.concurrent
 import arrow.fx.mtl.timer
+import arrow.fx.test.laws.ConcurrentLaws
 import arrow.mtl.extensions.WriterTEqK
 import arrow.mtl.extensions.writert.alternative.alternative
 import arrow.mtl.extensions.writert.applicative.applicative
@@ -41,17 +50,10 @@ import arrow.mtl.extensions.writert.monadFilter.monadFilter
 import arrow.mtl.extensions.writert.monadTrans.monadTrans
 import arrow.mtl.extensions.writert.monadWriter.monadWriter
 import arrow.mtl.extensions.writert.monoidK.monoidK
-import arrow.core.test.UnitSpec
-import arrow.core.test.generators.GenK
-import arrow.core.test.generators.genK
-import arrow.core.test.generators.tuple2
-import arrow.core.test.laws.AlternativeLaws
-import arrow.fx.test.laws.ConcurrentLaws
-import arrow.core.test.laws.DivisibleLaws
-import arrow.core.test.laws.MonadFilterLaws
 import arrow.mtl.test.MonadTransLaws
 import arrow.mtl.test.MonadWriterLaws
-import arrow.core.test.laws.MonoidKLaws
+import arrow.mtl.test.eq.eqK
+import arrow.mtl.test.generators.genK
 import io.kotlintest.properties.Gen
 
 class WriterTTest : UnitSpec() {
