@@ -1,4 +1,4 @@
-package arrow.mtl
+package arrow.mtl.test
 
 import arrow.core.Id
 import arrow.core.Tuple2
@@ -6,6 +6,12 @@ import arrow.core.toT
 import arrow.core.extensions.id.functor.functor
 import arrow.core.extensions.list.foldable.foldLeft
 import arrow.core.test.UnitSpec
+import arrow.mtl.State
+import arrow.mtl.StateApi
+import arrow.mtl.flatMap
+import arrow.mtl.run
+import arrow.mtl.runA
+import arrow.mtl.runS
 import io.kotlintest.shouldBe
 
 class StateTests : UnitSpec() {

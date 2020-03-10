@@ -1,4 +1,4 @@
-package arrow.mtl
+package arrow.mtl.test
 
 import arrow.Kind
 import arrow.core.Const
@@ -39,6 +39,8 @@ import arrow.fx.extensions.io.monad.monad
 import arrow.fx.mtl.concurrent
 import arrow.fx.mtl.timer
 import arrow.fx.test.laws.ConcurrentLaws
+import arrow.mtl.WriterT
+import arrow.mtl.WriterTPartialOf
 import arrow.mtl.extensions.WriterTEqK
 import arrow.mtl.extensions.writert.alternative.alternative
 import arrow.mtl.extensions.writert.applicative.applicative
@@ -50,8 +52,6 @@ import arrow.mtl.extensions.writert.monadFilter.monadFilter
 import arrow.mtl.extensions.writert.monadTrans.monadTrans
 import arrow.mtl.extensions.writert.monadWriter.monadWriter
 import arrow.mtl.extensions.writert.monoidK.monoidK
-import arrow.mtl.test.MonadTransLaws
-import arrow.mtl.test.MonadWriterLaws
 import arrow.mtl.test.eq.eqK
 import arrow.mtl.test.generators.genK
 import io.kotlintest.properties.Gen

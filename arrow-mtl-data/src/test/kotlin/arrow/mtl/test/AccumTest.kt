@@ -1,7 +1,12 @@
-package arrow.mtl
+package arrow.mtl.test
 
 import arrow.core.toT
 import arrow.core.test.UnitSpec
+import arrow.mtl.accum
+import arrow.mtl.evalAccum
+import arrow.mtl.execAccum
+import arrow.mtl.mapAccum
+import arrow.mtl.runAccum
 import io.kotlintest.properties.Gen
 import io.kotlintest.properties.forAll
 import io.kotlintest.shouldBe

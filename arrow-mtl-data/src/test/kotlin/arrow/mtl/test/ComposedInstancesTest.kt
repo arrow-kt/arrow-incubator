@@ -1,4 +1,4 @@
-package arrow.mtl
+package arrow.mtl.test
 
 import arrow.Kind
 import arrow.Kind2

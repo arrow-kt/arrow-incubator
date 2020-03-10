@@ -1,4 +1,4 @@
-package arrow.mtl
+package arrow.mtl.test
 
 import arrow.Kind
 import arrow.core.ForOption
@@ -24,13 +24,16 @@ import arrow.fx.extensions.io.functor.functor
 import arrow.fx.extensions.io.monad.monad
 import arrow.fx.mtl.statet.async.async
 import arrow.fx.test.laws.AsyncLaws
+import arrow.mtl.StateT
+import arrow.mtl.StateTPartialOf
 import arrow.mtl.extensions.statet.applicative.applicative
 import arrow.mtl.extensions.statet.functor.functor
 import arrow.mtl.extensions.statet.monad.monad
 import arrow.mtl.extensions.statet.monadCombine.monadCombine
 import arrow.mtl.extensions.statet.monadState.monadState
 import arrow.mtl.extensions.statet.semigroupK.semigroupK
-import arrow.mtl.test.MonadStateLaws
+import arrow.mtl.fix
+import arrow.mtl.run
 import arrow.mtl.test.eq.eqK
 import arrow.mtl.test.generators.genK
 import arrow.typeclasses.Eq

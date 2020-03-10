@@ -1,4 +1,4 @@
-package arrow.mtl
+package arrow.mtl.test
 
 import arrow.core.ForId
 import arrow.core.Id
@@ -7,6 +7,10 @@ import arrow.core.identity
 import arrow.core.value
 import arrow.core.extensions.id.comonad.comonad
 import arrow.core.test.UnitSpec
+import arrow.mtl.Cokleisli
+import arrow.mtl.Coreader
+import arrow.mtl.coreader
+import arrow.mtl.runId
 import io.kotlintest.properties.forAll
 import io.kotlintest.shouldBe
 
@@ -23,7 +27,7 @@ class CoreaderTest : UnitSpec() {
 
       "flatMap should map over the inner value" {
         forAll { num: Int ->
-          invoke<Int, Int> { it * 2 }.flatMap { a -> Coreader.just<Int, Int>(Id.comonad(), a * 3) }
+          invoke<Int, Int> { it * 2 }.flatMap { a -> just<Int, Int>(Id.comonad(), a * 3) }
             .runId(num) == num * 6
         }
       }

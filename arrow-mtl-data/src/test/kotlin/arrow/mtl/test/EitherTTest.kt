@@ -1,4 +1,4 @@
-package arrow.mtl
+package arrow.mtl.test
 
 import arrow.Kind
 import arrow.core.Const
@@ -35,6 +35,9 @@ import arrow.fx.mtl.concurrent
 import arrow.fx.mtl.timer
 import arrow.fx.test.eq.throwableEq
 import arrow.fx.test.laws.ConcurrentLaws
+import arrow.mtl.EitherT
+import arrow.mtl.EitherTPartialOf
+import arrow.mtl.ForEitherT
 import arrow.mtl.extensions.eithert.alternative.alternative
 import arrow.mtl.extensions.eithert.applicative.applicative
 import arrow.mtl.extensions.eithert.apply.apply

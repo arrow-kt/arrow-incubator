@@ -1,9 +1,16 @@
-package arrow.mtl
+package arrow.mtl.test
 
 import arrow.core.Id
 import arrow.core.Tuple2
 import arrow.core.value
 import arrow.core.test.UnitSpec
+import arrow.mtl.Kleisli
+import arrow.mtl.ReaderApi
+import arrow.mtl.flatMap
+import arrow.mtl.map
+import arrow.mtl.reader
+import arrow.mtl.runId
+import arrow.mtl.zip
 import io.kotlintest.shouldBe
 
 class ReaderTest : UnitSpec() {

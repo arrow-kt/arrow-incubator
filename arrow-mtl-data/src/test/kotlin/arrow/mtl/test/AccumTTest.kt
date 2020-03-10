@@ -1,4 +1,4 @@
-package arrow.mtl
+package arrow.mtl.test
 
 import arrow.Kind
 import arrow.core.Either
@@ -32,6 +32,11 @@ import arrow.fx.extensions.io.monadIO.monadIO
 import arrow.fx.fix
 import arrow.fx.mtl.accumt.monadIO.monadIO
 import arrow.fx.test.laws.equalUnderTheLaw
+import arrow.mtl.AccumT
+import arrow.mtl.AccumTPartialOf
+import arrow.mtl.StateT
+import arrow.mtl.StateTPartialOf
+import arrow.mtl.WriterT
 import arrow.mtl.extensions.accumt.alternative.alternative
 import arrow.mtl.extensions.accumt.functor.functor
 import arrow.mtl.extensions.accumt.monad.monad
@@ -44,9 +49,7 @@ import arrow.mtl.extensions.statet.monadState.monadState
 import arrow.mtl.extensions.writert.eqK.eqK
 import arrow.mtl.extensions.writert.monad.monad
 import arrow.mtl.extensions.writert.monadWriter.monadWriter
-import arrow.mtl.test.MonadStateLaws
-import arrow.mtl.test.MonadTransLaws
-import arrow.mtl.test.MonadWriterLaws
+import arrow.mtl.fix
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
 import arrow.typeclasses.Monad

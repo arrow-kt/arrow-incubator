@@ -1,4 +1,4 @@
-package arrow.mtl
+package arrow.mtl.test
 
 import arrow.Kind
 import arrow.core.Const
@@ -35,6 +35,10 @@ import arrow.fx.extensions.io.monad.monad
 import arrow.fx.mtl.concurrent
 import arrow.fx.mtl.timer
 import arrow.fx.test.laws.ConcurrentLaws
+import arrow.mtl.EitherT
+import arrow.mtl.ForOptionT
+import arrow.mtl.OptionT
+import arrow.mtl.OptionTPartialOf
 import arrow.mtl.extensions.ComposedFunctorFilter
 import arrow.mtl.extensions.nested
 import arrow.mtl.extensions.optiont.applicative.applicative
@@ -47,7 +51,6 @@ import arrow.mtl.extensions.optiont.monadTrans.monadTrans
 import arrow.mtl.extensions.optiont.monoidK.monoidK
 import arrow.mtl.extensions.optiont.semigroupK.semigroupK
 import arrow.mtl.extensions.optiont.traverseFilter.traverseFilter
-import arrow.mtl.test.MonadTransLaws
 import arrow.mtl.test.eq.eqK
 import arrow.mtl.test.generators.genK
 import arrow.mtl.test.generators.nested
@@ -125,8 +128,7 @@ class OptionTTest : UnitSpec() {
 
     "toLeft for Some should build a correct EitherT" {
       forAll { a: Int, b: String ->
-        OptionT
-          .fromOption(NELM, Some(a))
+        OptionT.fromOption(NELM, Some(a))
           .toLeft(NELM) { b } == EitherT.left<Int, ForNonEmptyList, String>(NELM, a)
       }
     }
@@ -139,8 +141,7 @@ class OptionTTest : UnitSpec() {
 
     "toRight for Some should build a correct EitherT" {
       forAll { a: Int, b: String ->
-        OptionT
-          .fromOption(NELM, Some(b))
+        OptionT.fromOption(NELM, Some(b))
           .toRight(NELM) { a } == EitherT.right<Int, ForNonEmptyList, String>(NELM, b)
       }
     }

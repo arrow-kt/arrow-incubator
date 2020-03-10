@@ -1,4 +1,4 @@
-package arrow.mtl
+package arrow.mtl.test
 
 import arrow.Kind
 import arrow.core.Const
@@ -29,11 +29,15 @@ import arrow.fx.extensions.io.monad.monad
 import arrow.fx.mtl.concurrent
 import arrow.fx.mtl.timer
 import arrow.fx.test.laws.ConcurrentLaws
+import arrow.mtl.ForKleisli
+import arrow.mtl.Kleisli
+import arrow.mtl.KleisliPartialOf
 import arrow.mtl.extensions.kleisli.alternative.alternative
 import arrow.mtl.extensions.kleisli.applicative.applicative
 import arrow.mtl.extensions.kleisli.divisible.divisible
 import arrow.mtl.extensions.kleisli.functor.functor
 import arrow.mtl.extensions.kleisli.monad.monad
+import arrow.mtl.fix
 import arrow.mtl.test.eq.eqK
 import arrow.mtl.test.generators.genK
 import arrow.typeclasses.Eq
