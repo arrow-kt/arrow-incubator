@@ -7,6 +7,8 @@ import arrow.core.None
 import arrow.core.Option
 import arrow.core.Right
 import arrow.core.Some
+import arrow.core.Tuple2
+import arrow.core.Tuple3
 import arrow.core.flatMap
 import arrow.extension
 import arrow.fx.IO
@@ -31,8 +33,8 @@ import arrow.mtl.EitherTPartialOf
 import arrow.mtl.extensions.EitherTMonad
 import arrow.mtl.extensions.EitherTMonadThrow
 import arrow.mtl.value
-import arrow.typeclasses.ApplicativeError
 import arrow.typeclasses.Monad
+import arrow.typeclasses.MonadThrow
 import arrow.undocumented
 import kotlin.coroutines.CoroutineContext
 
@@ -41,10 +43,7 @@ import kotlin.coroutines.CoroutineContext
 interface EitherTBracket<L, F> : Bracket<EitherTPartialOf<L, F>, Throwable>, EitherTMonadThrow<L, F> {
 
   fun MDF(): MonadDefer<F>
-
-  override fun MF(): Monad<F> = MDF()
-
-  override fun AE(): ApplicativeError<F, Throwable> = MDF()
+  override fun MT(): MonadThrow<F> = MDF()
 
   override fun <A, B> EitherTOf<L, F, A>.bracketCase(
     release: (A, ExitCase<Throwable>) -> EitherTOf<L, F, Unit>,
@@ -130,20 +129,20 @@ interface EitherTConcurrent<L, F> : Concurrent<EitherTPartialOf<L, F>>, EitherTA
     EitherT.liftF(this, value().fork(ctx).map(::fiberT))
   }
 
-  override fun <A, B, C> CoroutineContext.parMapN(fa: EitherTOf<L, F, A>, fb: EitherTOf<L, F, B>, f: (A, B) -> C): Kind<EitherTPartialOf<L, F>, C> = CF().run {
-    EitherT(parMapN(fa.value(), fb.value()) { a, b ->
+  override fun <A, B> parTupledN(ctx: CoroutineContext, fa: EitherTOf<L, F, A>, fb: EitherTOf<L, F, B>): Kind<EitherTPartialOf<L, F>, Tuple2<A, B>> = CF().run {
+    EitherT(parMapN(ctx, fa.value(), fb.value()) { (a, b) ->
       a.flatMap { aa ->
-        b.map { bb -> f(aa, bb) }
+        b.map { bb -> Tuple2(aa, bb) }
       }
     })
   }
 
-  override fun <A, B, C, D> CoroutineContext.parMapN(fa: EitherTOf<L, F, A>, fb: EitherTOf<L, F, B>, fc: EitherTOf<L, F, C>, f: (A, B, C) -> D): EitherT<L, F, D> = CF().run {
-    EitherT(parMapN(fa.value(), fb.value(), fc.value()) { a, b, c ->
+  override fun <A, B, C> parTupledN(ctx: CoroutineContext, fa: EitherTOf<L, F, A>, fb: EitherTOf<L, F, B>, fc: EitherTOf<L, F, C>): EitherT<L, F, Tuple3<A, B, C>> = CF().run {
+    EitherT(parMapN(ctx, fa.value(), fb.value(), fc.value()) { (a, b, c) ->
       a.flatMap { aa ->
         b.flatMap { bb ->
           c.map { cc ->
-            f(aa, bb, cc)
+            Tuple3(aa, bb, cc)
           }
         }
       }

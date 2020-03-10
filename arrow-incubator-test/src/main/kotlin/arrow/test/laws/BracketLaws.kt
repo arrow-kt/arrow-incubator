@@ -94,7 +94,7 @@ object BracketLaws {
   ): Unit =
     forAll(Gen.int().applicativeError(this)) { fa: Kind<F, Int> ->
       just(Unit).bracketCase(use = { fa }, release = { _, b ->
-        if (b == ExitCase.Canceled) onCancel else onFinish
+        if (b == ExitCase.Cancelled) onCancel else onFinish
       }).uncancelable().equalUnderTheLaw(fa.guarantee(onFinish), EQ)
     }
 
