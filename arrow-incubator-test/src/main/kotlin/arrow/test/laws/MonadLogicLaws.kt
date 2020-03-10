@@ -16,9 +16,6 @@ import io.kotlintest.properties.Gen
 import io.kotlintest.properties.forAll
 import io.kotlintest.shouldBe
 
-// TODO this is from arrow-core
-// should not be merged
-
 object MonadLogicLaws {
 
   fun <F> laws(

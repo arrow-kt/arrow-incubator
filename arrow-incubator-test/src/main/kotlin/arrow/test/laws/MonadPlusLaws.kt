@@ -9,9 +9,6 @@ import arrow.typeclasses.MonadPlus
 import io.kotlintest.properties.Gen
 import io.kotlintest.properties.forAll
 
-// TODO this is from arrow-core
-// should not be merged
-
 object MonadPlusLaws {
 
   fun <F> laws(MP: MonadPlus<F>, GK: GenK<F>, EQK: EqK<F>): List<Law> {
