@@ -298,7 +298,6 @@ interface StateTMonadTrans<S> : MonadTrans<Kind<ForStateT, S>> {
     StateT.liftF(MG, this)
 }
 
-
 @extension
 interface StateTMonadPlus<S, F> : MonadPlus<StateTPartialOf<S, F>>, StateTMonad<S, F>, StateTAlternative<S, F> {
   override fun MF(): Monad<F>
