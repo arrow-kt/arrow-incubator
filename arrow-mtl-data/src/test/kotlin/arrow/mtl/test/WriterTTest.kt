@@ -1,6 +1,5 @@
 package arrow.mtl.test
 
-import arrow.Kind
 import arrow.core.Const
 import arrow.core.ConstPartialOf
 import arrow.core.ForListK
@@ -23,17 +22,15 @@ import arrow.core.extensions.option.monad.monad
 import arrow.core.extensions.option.monadFilter.monadFilter
 import arrow.core.k
 import arrow.core.test.UnitSpec
-import arrow.core.test.generators.GenK
 import arrow.core.test.generators.genK
-import arrow.core.test.generators.tuple2
 import arrow.core.test.laws.AlternativeLaws
 import arrow.core.test.laws.DivisibleLaws
 import arrow.core.test.laws.MonadFilterLaws
 import arrow.core.test.laws.MonoidKLaws
 import arrow.fx.ForIO
 import arrow.fx.IO
+import arrow.fx.test.eq.eqK
 import arrow.mtl.WriterT
-import arrow.mtl.WriterTPartialOf
 import arrow.mtl.extensions.WriterTEqK
 import arrow.mtl.extensions.writert.alternative.alternative
 import arrow.mtl.extensions.writert.applicative.applicative
@@ -45,7 +42,10 @@ import arrow.mtl.extensions.writert.monadFilter.monadFilter
 import arrow.mtl.extensions.writert.monadTrans.monadTrans
 import arrow.mtl.extensions.writert.monadWriter.monadWriter
 import arrow.mtl.extensions.writert.monoidK.monoidK
-import arrow.mtl.test.eq.eqK
+import arrow.mtl.test.generators.genK
+import arrow.mtl.test.laws.MonadStateLaws
+import arrow.mtl.test.laws.MonadTransLaws
+import arrow.mtl.test.laws.MonadWriterLaws
 import io.kotlintest.properties.Gen
 
 class WriterTTest : UnitSpec() {
@@ -94,12 +94,8 @@ class WriterTTest : UnitSpec() {
       ),
 
       MonadWriterLaws.laws(
-        WriterT.monad(Option.monad(), ListK.monoid<Int>()),
         WriterT.monadWriter(Option.monad(), ListK.monoid<Int>()),
-        ListK.monoid<Int>(),
-        WriterT.functor<ListK<Int>, ForOption>(Option.functor()),
-        WriterT.applicative(Option.applicative(), ListK.monoid<Int>()),
-        WriterT.monad(Option.monad(), ListK.monoid<Int>()),
+        ListK.monoid(),
         Gen.list(Gen.int()).map { it.k() },
         WriterT.genK(Option.genK(), Gen.list(Gen.int()).map { it.k() }),
         optionEQK(),
@@ -116,12 +112,4 @@ class WriterTTest : UnitSpec() {
       )
     )
   }
-}
-
-fun <W, F> WriterT.Companion.genK(
-  GENKF: GenK<F>,
-  GENW: Gen<W>
-) = object : GenK<WriterTPartialOf<W, F>> {
-  override fun <A> genK(gen: Gen<A>): Gen<Kind<WriterTPartialOf<W, F>, A>> =
-    GENKF.genK(Gen.tuple2(GENW, gen)).map(::WriterT)
 }

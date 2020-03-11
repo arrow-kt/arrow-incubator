@@ -34,6 +34,8 @@ import arrow.fx.mtl.accumt.monadIO.monadIO
 import arrow.fx.test.laws.equalUnderTheLaw
 import arrow.mtl.AccumT
 import arrow.mtl.AccumTPartialOf
+import arrow.mtl.Kleisli
+import arrow.mtl.KleisliPartialOf
 import arrow.mtl.StateT
 import arrow.mtl.StateTPartialOf
 import arrow.mtl.WriterT
@@ -41,15 +43,23 @@ import arrow.mtl.extensions.accumt.alternative.alternative
 import arrow.mtl.extensions.accumt.functor.functor
 import arrow.mtl.extensions.accumt.monad.monad
 import arrow.mtl.extensions.accumt.monadError.monadError
+import arrow.mtl.extensions.accumt.monadReader.monadReader
 import arrow.mtl.extensions.accumt.monadState.monadState
 import arrow.mtl.extensions.accumt.monadTrans.monadTrans
 import arrow.mtl.extensions.accumt.monadWriter.monadWriter
+import arrow.mtl.extensions.kleisli.monadReader.monadReader
 import arrow.mtl.extensions.statet.monad.monad
 import arrow.mtl.extensions.statet.monadState.monadState
 import arrow.mtl.extensions.writert.eqK.eqK
 import arrow.mtl.extensions.writert.monad.monad
 import arrow.mtl.extensions.writert.monadWriter.monadWriter
 import arrow.mtl.fix
+import arrow.mtl.test.eq.eqK
+import arrow.mtl.test.generators.genK
+import arrow.mtl.test.laws.MonadReaderLaws
+import arrow.mtl.test.laws.MonadStateLaws
+import arrow.mtl.test.laws.MonadTransLaws
+import arrow.mtl.test.laws.MonadWriterLaws
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
 import arrow.typeclasses.Monad
@@ -68,13 +78,13 @@ class AccumTTest : UnitSpec() {
         Id.monad(),
         AccumT.monad(String.monoid(), Id.monad()),
         Id.genK(),
-        AccumT.eqK(Id.monad(), Id.eqK(), String.eq(), "hello")
+        AccumT.eqK(Id.eqK(), String.eq(), "hello")
       ),
 
       AlternativeLaws.laws(
         AccumT.alternative(Option.alternative(), Option.monad(), Int.monoid()),
         AccumT.genK(Option.genK(), Gen.int()),
-        AccumT.eqK(Option.monad(), Option.eqK(), Int.eq(), 10)
+        AccumT.eqK(Option.eqK(), Int.eq(), 10)
       ),
 
       MonadErrorLaws.laws<AccumTPartialOf<Int, EitherPartialOf<Throwable>>>(
@@ -83,28 +93,33 @@ class AccumTTest : UnitSpec() {
         AccumT.monad(Int.monoid(), Either.monad()),
         AccumT.monad(Int.monoid(), Either.monad()),
         AccumT.genK(Either.genK(Gen.throwable()), Gen.int()),
-        AccumT.eqK(Either.monad(), Either.eqK(Eq.any()) as EqK<EitherPartialOf<Throwable>>, Int.eq(), 10)
+        AccumT.eqK(Either.eqK(Eq.any()) as EqK<EitherPartialOf<Throwable>>, Int.eq(), 10)
       ),
 
       MonadStateLaws.laws(
         AccumT.monadState<Int, Int, StateTPartialOf<Int, ForId>>(StateT.monadState(Id.monad()), Int.monoid()),
         AccumT.genK(StateT.genK(Id.genK(), Gen.int()), Gen.int()),
+        Gen.int(),
         AccumT.eqK<Int, StateTPartialOf<Int, ForId>>(
-          StateT.monad(Id.monad()),
           StateT.eqK(Id.eqK(), Int.eq(), Id.monad(), 1),
           Int.eq(),
           1
-        )
+        ),
+        Int.eq()
       ),
 
       MonadWriterLaws.laws(
         AccumT.monadWriter(WriterT.monadWriter(Id.monad(), String.monoid()), String.monoid()),
-        AccumT.monadWriter(WriterT.monadWriter(Id.monad(), String.monoid()), String.monoid()),
-        String.monoid(),
-        Gen.string(),
+        String.monoid(), Gen.string(),
         AccumT.genK(WriterT.genK(Id.genK(), Gen.string()), Gen.string()),
-        AccumT.eqK(WriterT.monad(Id.monad(), String.monoid()), WriterT.eqK(Id.eqK(), String.eq()), String.eq(), ""),
+        AccumT.eqK(WriterT.eqK(Id.eqK(), String.eq()), String.eq(), ""),
         String.eq()
+      ),
+
+      MonadReaderLaws.laws(
+        AccumT.monadReader(Kleisli.monadReader<String, ForId>(Id.monad()), String.monoid()),
+        AccumT.genK(Kleisli.genK<String, ForId>(Id.genK()), Gen.string()),
+        Gen.string(), AccumT.eqK(Kleisli.eqK(Id.eqK(), ""), String.eq(), ""), String.eq()
       )
     )
 
@@ -181,24 +196,4 @@ private fun <S, F, A> apCombinesState(
     val rs = MF.just(MS.run { s1.combine(s2) })
 
     ls.equalUnderTheLaw(rs, eq)
-  }
-
-private fun <S, F> AccumT.Companion.genK(genkF: GenK<F>, genS: Gen<S>) =
-  object : GenK<AccumTPartialOf<S, F>> {
-    override fun <A> genK(gen: Gen<A>): Gen<Kind<AccumTPartialOf<S, F>, A>> =
-      genkF.genK(Gen.tuple2(genS, gen)).map {
-        AccumT { _: S -> it }
-      }
-  }
-
-private fun <S, F> AccumT.Companion.eqK(MF: Monad<F>, eqkF: EqK<F>, eqS: Eq<S>, s: S) =
-  object : EqK<AccumTPartialOf<S, F>> {
-    override fun <A> Kind<AccumTPartialOf<S, F>, A>.eqK(other: Kind<AccumTPartialOf<S, F>, A>, EQ: Eq<A>): Boolean =
-      (this.fix() to other.fix()).let {
-        it.first.runAccumT(s) to it.second.runAccumT(s)
-      }.let {
-        eqkF.liftEq(Tuple2.eq(eqS, EQ)).run {
-          it.first.eqv(it.second)
-        }
-      }
   }

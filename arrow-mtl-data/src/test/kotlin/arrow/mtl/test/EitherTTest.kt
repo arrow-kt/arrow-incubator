@@ -27,6 +27,7 @@ import arrow.core.test.laws.MonadErrorLaws
 import arrow.core.test.laws.TraverseLaws
 import arrow.fx.ForIO
 import arrow.fx.IO
+import arrow.fx.test.eq.eqK
 import arrow.fx.test.eq.throwableEq
 import arrow.mtl.EitherT
 import arrow.mtl.EitherTPartialOf
@@ -39,7 +40,6 @@ import arrow.mtl.extensions.eithert.functor.functor
 import arrow.mtl.extensions.eithert.monad.monad
 import arrow.mtl.extensions.eithert.monadError.monadError
 import arrow.mtl.extensions.eithert.traverse.traverse
-import arrow.mtl.test.eq.eqK
 import arrow.mtl.test.generators.genK
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK

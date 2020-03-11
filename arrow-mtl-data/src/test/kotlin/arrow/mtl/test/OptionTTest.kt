@@ -20,17 +20,15 @@ import arrow.core.extensions.option.eqK.eqK
 import arrow.core.extensions.option.monad.monad
 import arrow.core.extensions.option.traverseFilter.traverseFilter
 import arrow.core.test.UnitSpec
-import arrow.core.test.generators.GenK
 import arrow.core.test.generators.genK
-import arrow.core.test.generators.option
 import arrow.core.test.laws.DivisibleLaws
 import arrow.core.test.laws.FunctorFilterLaws
 import arrow.core.test.laws.MonoidKLaws
 import arrow.core.test.laws.SemigroupKLaws
 import arrow.core.test.laws.TraverseFilterLaws
 import arrow.fx.IO
+import arrow.fx.test.eq.eqK
 import arrow.mtl.EitherT
-import arrow.mtl.ForOptionT
 import arrow.mtl.OptionT
 import arrow.mtl.OptionTPartialOf
 import arrow.mtl.extensions.ComposedFunctorFilter
@@ -44,8 +42,9 @@ import arrow.mtl.extensions.optiont.monadTrans.monadTrans
 import arrow.mtl.extensions.optiont.monoidK.monoidK
 import arrow.mtl.extensions.optiont.semigroupK.semigroupK
 import arrow.mtl.extensions.optiont.traverseFilter.traverseFilter
-import arrow.mtl.test.eq.eqK
+import arrow.mtl.test.generators.genK
 import arrow.mtl.test.generators.nested
+import arrow.mtl.test.laws.MonadTransLaws
 import arrow.typeclasses.Monad
 import io.kotlintest.properties.Gen
 import io.kotlintest.properties.forAll
@@ -143,11 +142,5 @@ class OptionTTest : UnitSpec() {
         OptionT.fromOption<ForNonEmptyList, String>(NELM, None).toRight(NELM) { a } == EitherT.left<Int, ForNonEmptyList, String>(NELM, a)
       }
     }
-  }
-}
-
-fun <F> OptionT.Companion.genK(genkF: GenK<F>) = object : GenK<Kind<ForOptionT, F>> {
-  override fun <A> genK(gen: Gen<A>): Gen<Kind<Kind<ForOptionT, F>, A>> = genkF.genK(Gen.option(gen)).map {
-    OptionT(it)
   }
 }
