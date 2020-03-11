@@ -33,8 +33,6 @@ import arrow.mtl.Kleisli
 import arrow.mtl.KleisliPartialOf
 import arrow.mtl.extensions.kleisli.alternative.alternative
 import arrow.mtl.extensions.kleisli.divisible.divisible
-import arrow.mtl.extensions.kleisli.functor.functor
-import arrow.mtl.extensions.kleisli.monad.monad
 import arrow.mtl.extensions.kleisli.monadLogic.monadLogic
 import arrow.mtl.fix
 import arrow.typeclasses.Eq
