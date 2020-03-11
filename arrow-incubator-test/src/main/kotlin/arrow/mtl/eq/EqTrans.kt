@@ -1,8 +1,6 @@
 package arrow.mtl.eq
 
 import arrow.Kind
-import arrow.Kind2
-import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
 import arrow.typeclasses.Monad
 

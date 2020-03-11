@@ -79,7 +79,7 @@ class EvalTest : UnitSpec() {
     val genK = object : GenK<ForEval> {
       override fun <A> genK(gen: Gen<A>): Gen<Kind<ForEval, A>> = gen.map(::Now)
     }
-    val eqK = object: EqK<ForEval> {
+    val eqK = object : EqK<ForEval> {
       override fun <A> Kind<ForEval, A>.eqK(other: Kind<ForEval, A>, EQ: Eq<A>): Boolean =
         EQ.run { value().eqv(other.value()) }
     }

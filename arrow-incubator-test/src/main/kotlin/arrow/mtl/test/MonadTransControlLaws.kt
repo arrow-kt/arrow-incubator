@@ -112,5 +112,4 @@ object MonadTransControlLaws {
       }
     }
   }
-
 }
