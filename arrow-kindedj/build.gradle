@@ -21,7 +21,7 @@ dependencies {
 
     testCompile project(":arrow-incubator-test")
     testRuntime "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
-    testCompile "io.kotlintest:kotlintest-runner-junit4:$KOTLIN_TEST_VERSION"
+    testCompile "io.kotlintest:kotlintest-runner-junit4:$KOTLIN_TEST_VERSION", excludeArrow
 
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$KOTLIN_VERSION"
 }

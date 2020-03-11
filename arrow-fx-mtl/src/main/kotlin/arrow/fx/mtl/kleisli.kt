@@ -3,6 +3,8 @@ package arrow.fx.mtl
 import arrow.Kind
 import arrow.core.AndThen
 import arrow.core.Either
+import arrow.core.Tuple2
+import arrow.core.Tuple3
 import arrow.extension
 import arrow.fx.IO
 import arrow.fx.RacePair
@@ -120,18 +122,18 @@ interface KleisliConcurrent<D, F> : Concurrent<KleisliPartialOf<D, F>>, KleisliA
     Kleisli { r -> run(r).fork(ctx).map(::fiberT) }
   }
 
-  override fun <A, B, C> CoroutineContext.parMapN(fa: KleisliOf<D, F, A>, fb: KleisliOf<D, F, B>, f: (A, B) -> C): Kleisli<D, F, C> = CF().run {
+  override fun <A, B> parTupledN(ctx: CoroutineContext, fa: KleisliOf<D, F, A>, fb: KleisliOf<D, F, B>): Kleisli<D, F, Tuple2<A, B>> = CF().run {
     Kleisli { r ->
       just(r).flatMap { rr ->
-        parMapN(fa.run(rr), fb.run(rr), f)
+        parTupledN(ctx, fa.run(rr), fb.run(rr))
       }
     }
   }
 
-  override fun <A, B, C, DD> CoroutineContext.parMapN(fa: KleisliOf<D, F, A>, fb: KleisliOf<D, F, B>, fc: KleisliOf<D, F, C>, f: (A, B, C) -> DD): Kleisli<D, F, DD> = CF().run {
+  override fun <A, B, C> parTupledN(ctx: CoroutineContext, fa: KleisliOf<D, F, A>, fb: KleisliOf<D, F, B>, fc: KleisliOf<D, F, C>): Kleisli<D, F, Tuple3<A, B, C>> = CF().run {
     Kleisli { r ->
       just(r).flatMap { rr ->
-        parMapN(fa.run(rr), fb.run(rr), fc.run(rr), f)
+        parTupledN(ctx, fa.run(rr), fb.run(rr), fc.run(rr))
       }
     }
   }

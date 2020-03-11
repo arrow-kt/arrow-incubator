@@ -8,9 +8,9 @@ import arrow.core.extensions.option.foldable.fold
 import arrow.core.extensions.option.foldable.foldRight
 import arrow.core.extensions.option.traverse.traverse
 import arrow.recursion.extensions.birecursive
-import arrow.test.UnitSpec
-import arrow.test.generators.intSmall
-import arrow.test.laws.BirecursiveLaws
+import arrow.core.test.UnitSpec
+import arrow.core.test.generators.intSmall
+import arrow.recursion.test.BirecursiveLaws
 import io.kotlintest.properties.Gen
 
 class IntBirecursive : UnitSpec() {

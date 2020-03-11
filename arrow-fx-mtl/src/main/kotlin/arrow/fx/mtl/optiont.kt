@@ -5,6 +5,8 @@ import arrow.core.Either
 import arrow.core.None
 import arrow.core.Option
 import arrow.core.Some
+import arrow.core.Tuple2
+import arrow.core.Tuple3
 import arrow.extension
 import arrow.fx.IO
 import arrow.fx.RacePair
@@ -94,21 +96,21 @@ interface OptionTConcurrent<F> : Concurrent<OptionTPartialOf<F>>, OptionTAsync<F
     OptionT.liftF(this, value().fork(ctx).map(::fiberT))
   }
 
-  override fun <A, B, C> CoroutineContext.parMapN(fa: OptionTOf<F, A>, fb: OptionTOf<F, B>, f: (A, B) -> C): OptionT<F, C> = CF().run {
-    OptionT(parMapN(fa.value(), fb.value()) { a, b ->
+  override fun <A, B> parTupledN(ctx: CoroutineContext, fa: OptionTOf<F, A>, fb: OptionTOf<F, B>): OptionT<F, Tuple2<A, B>> = CF().run {
+    OptionT(parMapN(ctx, fa.value(), fb.value()) { (a, b) ->
       a.flatMap { aa ->
         b.map { bb ->
-          f(aa, bb)
+          Tuple2(aa, bb)
         }
       }
     })
   }
 
-  override fun <A, B, C, D> CoroutineContext.parMapN(fa: OptionTOf<F, A>, fb: OptionTOf<F, B>, fc: OptionTOf<F, C>, f: (A, B, C) -> D): OptionT<F, D> = CF().run {
-    OptionT(parMapN(fa.value(), fb.value(), fc.value()) { a, b, c ->
+  override fun <A, B, C> parTupledN(ctx: CoroutineContext, fa: OptionTOf<F, A>, fb: OptionTOf<F, B>, fc: OptionTOf<F, C>): OptionT<F, Tuple3<A, B, C>> = CF().run {
+    OptionT(parMapN(ctx, fa.value(), fb.value(), fc.value()) { (a, b, c) ->
       a.flatMap { aa ->
         b.flatMap { bb ->
-          c.map { cc -> f(aa, bb, cc) }
+          c.map { cc -> Tuple3(aa, bb, cc) }
         }
       }
     })

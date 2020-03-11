@@ -9,8 +9,8 @@ import arrow.recursion.extensions.listf.traverse.traverse
 import arrow.recursion.extensions.sequencek.birecursive.birecursive
 import arrow.recursion.pattern.ListF
 import arrow.recursion.pattern.fix
-import arrow.test.UnitSpec
-import arrow.test.laws.BirecursiveLaws
+import arrow.core.test.UnitSpec
+import arrow.recursion.test.BirecursiveLaws
 import io.kotlintest.properties.Gen
 
 class SequenceKBirecursiveTest : UnitSpec() {

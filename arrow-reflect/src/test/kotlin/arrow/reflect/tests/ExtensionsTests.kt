@@ -12,7 +12,7 @@ import arrow.reflect.extensions
 import arrow.reflect.hierarchy
 import arrow.reflect.supportedDataTypes
 import arrow.reflect.supportedTypeClasses
-import arrow.test.UnitSpec
+import arrow.core.test.UnitSpec
 import arrow.typeclasses.Functor
 import arrow.typeclasses.Invariant
 import arrow.typeclasses.MonadError
