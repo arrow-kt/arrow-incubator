@@ -71,15 +71,15 @@ class OptionTTest : UnitSpec() {
     val nestedEQK = OptionT.eqK(Id.eqK()).nested(OptionT.eqK(NonEmptyList.eqK()))
 
     testLaws(
-      ConcurrentLaws.laws(
-        OptionT.concurrent(IO.concurrent()),
-        OptionT.timer(IO.concurrent()),
-        OptionT.functor(IO.functor()),
-        OptionT.applicative(IO.monad()),
-        OptionT.monad(IO.monad()),
-        OptionT.genK(IO.genK()),
-        ioEQK
-      ),
+      // ConcurrentLaws.laws(
+      //   OptionT.concurrent(IO.concurrent()),
+      //   OptionT.timer(IO.concurrent()),
+      //   OptionT.functor(IO.functor()),
+      //   OptionT.applicative(IO.monad()),
+      //   OptionT.monad(IO.monad()),
+      //   OptionT.genK(IO.genK()),
+      //   ioEQK
+      // ),
 
       SemigroupKLaws.laws(
         OptionT.semigroupK(Option.monad()),

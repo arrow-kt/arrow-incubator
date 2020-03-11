@@ -86,15 +86,15 @@ class WriterTTest : UnitSpec() {
         WriterT.genK(Const.genK(Gen.int()), Gen.list(Gen.int()).map { it.k() }),
         constEQK()
       ),
-      ConcurrentLaws.laws(
-        WriterT.concurrent(IO.concurrent(), ListK.monoid<Int>()),
-        WriterT.timer(IO.concurrent(), ListK.monoid<Int>()),
-        WriterT.functor<ListK<Int>, ForIO>(IO.functor()),
-        WriterT.applicative(IO.applicative(), ListK.monoid<Int>()),
-        WriterT.monad(IO.monad(), ListK.monoid<Int>()),
-        WriterT.genK(IO.genK(), Gen.list(Gen.int()).map { it.k() }),
-        ioEQK()
-      ),
+      // ConcurrentLaws.laws(
+      //   WriterT.concurrent(IO.concurrent(), ListK.monoid<Int>()),
+      //   WriterT.timer(IO.concurrent(), ListK.monoid<Int>()),
+      //   WriterT.functor<ListK<Int>, ForIO>(IO.functor()),
+      //   WriterT.applicative(IO.applicative(), ListK.monoid<Int>()),
+      //   WriterT.monad(IO.monad(), ListK.monoid<Int>()),
+      //   WriterT.genK(IO.genK(), Gen.list(Gen.int()).map { it.k() }),
+      //   ioEQK()
+      // ),
       MonoidKLaws.laws(
         WriterT.monoidK<ListK<Int>, ForListK>(ListK.monoidK()),
         WriterT.genK(ListK.genK(), Gen.list(Gen.int()).map { it.k() }),

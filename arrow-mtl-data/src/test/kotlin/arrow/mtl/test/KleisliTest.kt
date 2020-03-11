@@ -78,15 +78,15 @@ class KleisliTest : UnitSpec() {
         genK<Int, ForOption>(Option.genK()),
         optionEQK
       ),
-      ConcurrentLaws.laws<KleisliPartialOf<Int, ForIO>>(
-        Kleisli.concurrent(IO.concurrent()),
-        Kleisli.timer(IO.concurrent()),
-        Kleisli.functor(IO.functor()),
-        Kleisli.applicative(IO.applicative()),
-        Kleisli.monad(IO.monad()),
-        genK(IO.genK()),
-        ioEQK
-      ),
+      // ConcurrentLaws.laws<KleisliPartialOf<Int, ForIO>>(
+      //   Kleisli.concurrent(IO.concurrent()),
+      //   Kleisli.timer(IO.concurrent()),
+      //   Kleisli.functor(IO.functor()),
+      //   Kleisli.applicative(IO.applicative()),
+      //   Kleisli.monad(IO.monad()),
+      //   genK(IO.genK()),
+      //   ioEQK
+      // ),
       DivisibleLaws.laws(
         Kleisli.divisible<Int, ConstPartialOf<Int>>(Const.divisible(Int.monoid())),
         genK<Int, ConstPartialOf<Int>>(Const.genK(Gen.int())),

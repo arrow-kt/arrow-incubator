@@ -76,15 +76,15 @@ class EitherTTest : UnitSpec() {
         idEQK
       ),
 
-      ConcurrentLaws.laws<EitherTPartialOf<String, ForIO>>(
-        EitherT.concurrent(IO.concurrent()),
-        EitherT.timer(IO.concurrent()),
-        EitherT.functor(IO.functor()),
-        EitherT.applicative(IO.applicative()),
-        EitherT.monad(IO.monad()),
-        EitherT.genK(IO.genK(), Gen.string()),
-        ioEQK
-      ),
+      // ConcurrentLaws.laws<EitherTPartialOf<String, ForIO>>(
+      //   EitherT.concurrent(IO.concurrent()),
+      //   EitherT.timer(IO.concurrent()),
+      //   EitherT.functor(IO.functor()),
+      //   EitherT.applicative(IO.applicative()),
+      //   EitherT.monad(IO.monad()),
+      //   EitherT.genK(IO.genK(), Gen.string()),
+      //   ioEQK
+      // ),
 
       TraverseLaws.laws(EitherT.traverse<Int, ForId>(Id.traverse()),
         EitherT.genK(Id.genK(), Gen.int()),
