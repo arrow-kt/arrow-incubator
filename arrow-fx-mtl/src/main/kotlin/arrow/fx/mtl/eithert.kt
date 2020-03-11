@@ -26,23 +26,27 @@ import arrow.mtl.EitherT
 import arrow.mtl.EitherTOf
 import arrow.mtl.EitherTPartialOf
 import arrow.mtl.extensions.EitherTMonad
-import arrow.mtl.extensions.EitherTMonadError
 import arrow.mtl.extensions.monadBaseControl
+import arrow.mtl.fix
 import arrow.mtl.typeclasses.MonadBaseControl
 import arrow.mtl.value
 import arrow.typeclasses.Monad
-import arrow.typeclasses.MonadThrow
 import arrow.undocumented
 import kotlin.coroutines.CoroutineContext
 
 @extension
 @undocumented
-interface EitherTBracket<L, F, E> : Bracket<EitherTPartialOf<L, F>, E>, EitherTMonadError<L, F, E> {
+interface EitherTBracket<L, F, E> : Bracket<EitherTPartialOf<L, F>, E>, EitherTMonad<L, F> {
 
   fun BR(): Bracket<F, E>
 
-  override fun AE(): ApplicativeError<F, E> = BR()
   override fun MF(): Monad<F> = BR()
+
+  override fun <A> Kind<EitherTPartialOf<L, F>, A>.handleErrorWith(f: (E) -> Kind<EitherTPartialOf<L, F>, A>): Kind<EitherTPartialOf<L, F>, A> =
+    EitherT(BR().run { fix().value().handleErrorWith { e -> f(e).value() } })
+
+  override fun <A> raiseError(e: E): Kind<EitherTPartialOf<L, F>, A> =
+    EitherT.liftF(BR(), BR().raiseError(e))
 
   override fun <A, B> Kind<EitherTPartialOf<L, F>, A>.bracketCase(release: (A, ExitCase<E>) -> Kind<EitherTPartialOf<L, F>, Unit>, use: (A) -> Kind<EitherTPartialOf<L, F>, B>): Kind<EitherTPartialOf<L, F>, B> =
     defaultBracket(BR(), EitherT.monadBaseControl<L, F, F>(MonadBaseControl.id(BR())), release, use)
