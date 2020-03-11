@@ -34,13 +34,6 @@ import arrow.core.test.laws.MonadFilterLaws
 import arrow.core.test.laws.MonoidKLaws
 import arrow.fx.ForIO
 import arrow.fx.IO
-import arrow.fx.extensions.io.applicative.applicative
-import arrow.fx.extensions.io.concurrent.concurrent
-import arrow.fx.extensions.io.functor.functor
-import arrow.fx.extensions.io.monad.monad
-import arrow.fx.mtl.concurrent
-import arrow.fx.mtl.timer
-import arrow.fx.test.laws.ConcurrentLaws
 import arrow.mtl.ForWriterT
 import arrow.mtl.WriterT
 import arrow.mtl.WriterTPartialOf
@@ -60,7 +53,6 @@ import arrow.mtl.extensions.writert.monadWriter.monadWriter
 import arrow.mtl.extensions.writert.monoidK.monoidK
 import arrow.mtl.generators.GenTrans
 import arrow.mtl.test.eq.eqK
-import arrow.mtl.test.generators.genK
 import arrow.typeclasses.EqK
 import arrow.typeclasses.Monad
 import io.kotlintest.properties.Gen
@@ -105,15 +97,15 @@ class WriterTTest : UnitSpec() {
         WriterT.genK(Const.genK(Gen.int()), Gen.list(Gen.int()).map { it.k() }),
         constEQK()
       ),
-      ConcurrentLaws.laws(
-        WriterT.concurrent(IO.concurrent(), ListK.monoid<Int>()),
-        WriterT.timer(IO.concurrent(), ListK.monoid<Int>()),
-        WriterT.functor<ListK<Int>, ForIO>(IO.functor()),
-        WriterT.applicative(IO.applicative(), ListK.monoid<Int>()),
-        WriterT.monad(IO.monad(), ListK.monoid<Int>()),
-        WriterT.genK(IO.genK(), Gen.list(Gen.int()).map { it.k() }),
-        ioEQK()
-      ),
+      // ConcurrentLaws.laws(
+      //   WriterT.concurrent(IO.concurrent(), ListK.monoid<Int>()),
+      //   WriterT.timer(IO.concurrent(), ListK.monoid<Int>()),
+      //   WriterT.functor<ListK<Int>, ForIO>(IO.functor()),
+      //   WriterT.applicative(IO.applicative(), ListK.monoid<Int>()),
+      //   WriterT.monad(IO.monad(), ListK.monoid<Int>()),
+      //   WriterT.genK(IO.genK(), Gen.list(Gen.int()).map { it.k() }),
+      //   ioEQK()
+      // ),
       MonoidKLaws.laws(
         WriterT.monoidK<ListK<Int>, ForListK>(ListK.monoidK()),
         WriterT.genK(ListK.genK(), Gen.list(Gen.int()).map { it.k() }),

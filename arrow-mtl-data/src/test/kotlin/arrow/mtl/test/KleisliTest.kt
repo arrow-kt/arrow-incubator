@@ -23,29 +23,18 @@ import arrow.core.test.laws.AlternativeLaws
 import arrow.core.test.laws.DivisibleLaws
 import arrow.fx.ForIO
 import arrow.fx.IO
-import arrow.fx.extensions.io.applicative.applicative
-import arrow.fx.extensions.io.concurrent.concurrent
-import arrow.fx.extensions.io.functor.functor
-import arrow.fx.extensions.io.monad.monad
-import arrow.fx.mtl.concurrent
-import arrow.fx.mtl.timer
-import arrow.fx.test.laws.ConcurrentLaws
 import arrow.mtl.ForKleisli
 import arrow.mtl.Kleisli
 import arrow.mtl.KleisliPartialOf
 import arrow.mtl.eq.EqTrans
 import arrow.mtl.extensions.core.monadBaseControl
 import arrow.mtl.extensions.kleisli.alternative.alternative
-import arrow.mtl.extensions.kleisli.applicative.applicative
 import arrow.mtl.extensions.kleisli.divisible.divisible
-import arrow.mtl.extensions.kleisli.functor.functor
-import arrow.mtl.extensions.kleisli.monad.monad
 import arrow.mtl.extensions.monadBaseControl
 import arrow.mtl.extensions.monadTransControl
 import arrow.mtl.fix
 import arrow.mtl.generators.GenTrans
 import arrow.mtl.test.eq.eqK
-import arrow.mtl.test.generators.genK
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
 import arrow.typeclasses.Monad
@@ -100,15 +89,15 @@ class KleisliTest : UnitSpec() {
         genK<Int, ForOption>(Option.genK()),
         optionEQK
       ),
-      ConcurrentLaws.laws<KleisliPartialOf<Int, ForIO>>(
-        Kleisli.concurrent(IO.concurrent()),
-        Kleisli.timer(IO.concurrent()),
-        Kleisli.functor(IO.functor()),
-        Kleisli.applicative(IO.applicative()),
-        Kleisli.monad(IO.monad()),
-        genK(IO.genK()),
-        ioEQK
-      ),
+      // ConcurrentLaws.laws<KleisliPartialOf<Int, ForIO>>(
+      //   Kleisli.concurrent(IO.concurrent()),
+      //   Kleisli.timer(IO.concurrent()),
+      //   Kleisli.functor(IO.functor()),
+      //   Kleisli.applicative(IO.applicative()),
+      //   Kleisli.monad(IO.monad()),
+      //   genK(IO.genK()),
+      //   ioEQK
+      // ),
       DivisibleLaws.laws(
         Kleisli.divisible<Int, ConstPartialOf<Int>>(Const.divisible(Int.monoid())),
         genK<Int, ConstPartialOf<Int>>(Const.genK(Gen.int())),
