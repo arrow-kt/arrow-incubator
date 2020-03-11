@@ -316,15 +316,16 @@ interface StateTMonadLogic<S, F> : MonadLogic<StateTPartialOf<S, F>>, StateTMona
         ML().run {
           AndThen.id<S>().flatMap { s ->
             AndThen(fa.runF).andThen {
-              it.splitM().flatMap { option ->
-                option.fold({ just(s toT Option.empty<Tuple2<Kind<StateTPartialOf<S, F>, A>, A>>()) }, { (fa, tupleSA) ->
+              it.splitM().map { option ->
+                option.fold({ s toT Option.empty<Tuple2<Kind<StateTPartialOf<S, F>, A>, A>>() }, { (fa, tupleSA) ->
                   val (s1, a) = tupleSA
-                  just(s1 toT Option.just(StateT { _: S -> fa } toT a))
+                  s1 toT Option.just(StateT { _: S -> fa } toT a)
                 })
               }
             }
           }
-        })
+        }
+      )
     }
 
   override fun <A> Kind<StateTPartialOf<S, F>, A>.interleave(other: Kind<StateTPartialOf<S, F>, A>): Kind<StateTPartialOf<S, F>, A> =
@@ -332,8 +333,10 @@ interface StateTMonadLogic<S, F> : MonadLogic<StateTPartialOf<S, F>>, StateTMona
       StateT(
         ML().run {
           AndThen.id<S>().flatMap { s ->
-            AndThen(left.runF).andThen {
-              it.interleave(right.run(s))
+            AndThen(left.runF).flatMap { fa ->
+              AndThen(right.runF).andThen {
+                fa.interleave(it)
+              }
             }
           }
         }
@@ -349,17 +352,20 @@ interface StateTMonadLogic<S, F> : MonadLogic<StateTPartialOf<S, F>>, StateTMona
               ffa(a).run(s1)
             }
           }
-        })
+        }
+      )
     }
 
   override fun <A, B> Kind<StateTPartialOf<S, F>, A>.ifThen(fb: Kind<StateTPartialOf<S, F>, B>, ffa: (A) -> Kind<StateTPartialOf<S, F>, B>): Kind<StateTPartialOf<S, F>, B> =
-    (this.fix() to fb.fix()).let { (fa, fb) ->
+    (this.fix() to fb.fix()).let { (left, right) ->
       StateT(
         ML().run {
           AndThen.id<S>().flatMap { s ->
-            AndThen(fa.runF).andThen {
-              it.ifThen(fb.run(s)) { (s1, a) ->
-                ffa(a).run(s1)
+            AndThen(left.runF).flatMap { fa ->
+              AndThen(right.runF).andThen {
+                fa.ifThen(it) { (s1, a) ->
+                  ffa(a).run(s1)
+                }
               }
             }
           }

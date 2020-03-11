@@ -21,6 +21,7 @@ import arrow.core.test.generators.GenK
 import arrow.core.test.generators.genK
 import arrow.core.test.generators.tuple2
 import arrow.core.test.laws.MonadCombineLaws
+import arrow.core.test.laws.MonadLogicLaws
 import arrow.core.test.laws.SemigroupKLaws
 import arrow.fx.ForIO
 import arrow.fx.IO

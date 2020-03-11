@@ -248,9 +248,9 @@ interface KleisliMonadLogic<D, F> : MonadLogic<KleisliPartialOf<D, F>>, KleisliM
       Kleisli(
         AndThen(kleisli.run).andThen {
           ML().run {
-            it.splitM().flatMap { option ->
-              option.fold({ just(Option.empty<Tuple2<Kind<KleisliPartialOf<D, F>, A>, A>>()) },
-                { (fa, a) -> just(Option.just(Kleisli.liftF<D, F, A>(fa) toT a)) })
+            it.splitM().map { option ->
+              option.fold({ Option.empty<Tuple2<Kind<KleisliPartialOf<D, F>, A>, A>>() },
+                { (fa, a) -> Option.just(Kleisli.liftF<D, F, A>(fa) toT a) })
             }
           }
         }
