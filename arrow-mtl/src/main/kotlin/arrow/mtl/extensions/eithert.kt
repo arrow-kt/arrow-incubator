@@ -323,7 +323,7 @@ interface EitherTMonadTrans<L> : MonadTrans<Kind<ForEitherT, L>> {
   override fun <G, A> Kind<G, A>.liftT(MG: Monad<G>): Kind2<Kind<ForEitherT, L>, G, A> =
     EitherT.liftF(MG, this)
 
-  override fun <M> monad(MM: Monad<M>): Monad<Kind<Kind<ForEitherT, L>, M>> = object : EitherTMonad<L, M> {
+  override fun <M> liftMonad(MM: Monad<M>): Monad<Kind<Kind<ForEitherT, L>, M>> = object : EitherTMonad<L, M> {
     override fun MF(): Monad<M> = MM
   }
 }
@@ -343,7 +343,7 @@ interface EitherTMonadTransControl<L> : MonadTransControl<Kind<ForEitherT, L>> {
   override fun <M, A> Kind<M, StT<Kind<ForEitherT, L>, A>>.restoreT(MM: Monad<M>): Kind<Kind<Kind<ForEitherT, L>, M>, A> =
     EitherT(MM.run { map { (it.unsafeState as Either<L, A>) } })
 
-  override fun <M> monad(MM: Monad<M>): Monad<Kind<Kind<ForEitherT, L>, M>> = object : EitherTMonad<L, M> {
+  override fun <M> liftMonad(MM: Monad<M>): Monad<Kind<Kind<ForEitherT, L>, M>> = object : EitherTMonad<L, M> {
     override fun MF(): Monad<M> = MM
   }
 }

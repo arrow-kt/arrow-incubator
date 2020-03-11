@@ -19,6 +19,7 @@ import arrow.core.extensions.id.traverse.traverse
 import arrow.core.extensions.monoid
 import arrow.core.extensions.option.functor.functor
 import arrow.core.test.UnitSpec
+import arrow.core.test.generators.GenK
 import arrow.core.test.generators.genK
 import arrow.core.test.generators.throwable
 import arrow.core.test.laws.AlternativeLaws
@@ -38,6 +39,8 @@ import arrow.fx.test.laws.ConcurrentLaws
 import arrow.mtl.EitherT
 import arrow.mtl.EitherTPartialOf
 import arrow.mtl.ForEitherT
+import arrow.mtl.eq.EqTrans
+import arrow.mtl.extensions.core.monadBaseControl
 import arrow.mtl.extensions.eithert.alternative.alternative
 import arrow.mtl.extensions.eithert.applicative.applicative
 import arrow.mtl.extensions.eithert.apply.apply
@@ -47,10 +50,14 @@ import arrow.mtl.extensions.eithert.functor.functor
 import arrow.mtl.extensions.eithert.monad.monad
 import arrow.mtl.extensions.eithert.monadError.monadError
 import arrow.mtl.extensions.eithert.traverse.traverse
+import arrow.mtl.extensions.monadBaseControl
+import arrow.mtl.extensions.monadTransControl
+import arrow.mtl.generators.GenTrans
 import arrow.mtl.test.eq.eqK
 import arrow.mtl.test.generators.genK
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
+import arrow.typeclasses.Monad
 import io.kotlintest.properties.Gen
 import io.kotlintest.properties.forAll
 
@@ -64,6 +71,25 @@ class EitherTTest : UnitSpec() {
     val constEQK: EqK<Kind<Kind<ForEitherT, Int>, Kind<ForConst, Int>>> = EitherT.eqK(Const.eqK(Int.eq()), Int.eq())
 
     testLaws(
+      MonadTransControlLaws.laws(
+        EitherT.monadTransControl(),
+        object : GenTrans<Kind<ForEitherT, String>> {
+          override fun <F> liftGenK(MF: Monad<F>, genK: GenK<F>): GenK<Kind<Kind<ForEitherT, String>, F>> =
+            EitherT.genK(genK, Gen.string())
+        },
+        object : EqTrans<Kind<ForEitherT, String>> {
+          override fun <F> liftEqK(MF: Monad<F>, eqK: EqK<F>): EqK<Kind<Kind<ForEitherT, String>, F>> =
+            EitherT.eqK(eqK, String.eq())
+        }
+      ),
+
+      MonadBaseControlLaws.laws<ForId, EitherTPartialOf<String, ForId>>(
+        EitherT.monadBaseControl(Id.monadBaseControl()),
+        EitherT.genK(Id.genK(), Gen.string()),
+        Id.genK(),
+        EitherT.eqK(Id.eqK(), String.eq())
+      ),
+
       DivisibleLaws.laws(
         EitherT.divisible<Int, ConstPartialOf<Int>>(Const.divisible(Int.monoid())),
         EitherT.genK(Const.genK(Gen.int()), Gen.int()),

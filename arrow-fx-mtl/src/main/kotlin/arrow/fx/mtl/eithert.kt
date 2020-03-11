@@ -4,6 +4,8 @@ import arrow.Kind
 import arrow.core.Either
 import arrow.core.Left
 import arrow.core.Right
+import arrow.core.Tuple2
+import arrow.core.Tuple3
 import arrow.core.flatMap
 import arrow.extension
 import arrow.fx.IO

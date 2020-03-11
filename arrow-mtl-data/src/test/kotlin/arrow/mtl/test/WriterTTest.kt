@@ -5,11 +5,13 @@ import arrow.core.Const
 import arrow.core.ConstPartialOf
 import arrow.core.ForListK
 import arrow.core.ForOption
+import arrow.core.Id
 import arrow.core.ListK
 import arrow.core.Option
 import arrow.core.extensions.const.divisible.divisible
 import arrow.core.extensions.const.eqK.eqK
 import arrow.core.extensions.eq
+import arrow.core.extensions.id.eqK.eqK
 import arrow.core.extensions.listk.eq.eq
 import arrow.core.extensions.listk.eqK.eqK
 import arrow.core.extensions.listk.monoid.monoid
@@ -39,9 +41,14 @@ import arrow.fx.extensions.io.monad.monad
 import arrow.fx.mtl.concurrent
 import arrow.fx.mtl.timer
 import arrow.fx.test.laws.ConcurrentLaws
+import arrow.mtl.ForWriterT
 import arrow.mtl.WriterT
 import arrow.mtl.WriterTPartialOf
+import arrow.mtl.eq.EqTrans
 import arrow.mtl.extensions.WriterTEqK
+import arrow.mtl.extensions.core.monadBaseControl
+import arrow.mtl.extensions.monadBaseControl
+import arrow.mtl.extensions.monadTransControl
 import arrow.mtl.extensions.writert.alternative.alternative
 import arrow.mtl.extensions.writert.applicative.applicative
 import arrow.mtl.extensions.writert.divisible.divisible
@@ -52,8 +59,11 @@ import arrow.mtl.extensions.writert.monadFilter.monadFilter
 import arrow.mtl.extensions.writert.monadTrans.monadTrans
 import arrow.mtl.extensions.writert.monadWriter.monadWriter
 import arrow.mtl.extensions.writert.monoidK.monoidK
+import arrow.mtl.generators.GenTrans
 import arrow.mtl.test.eq.eqK
 import arrow.mtl.test.generators.genK
+import arrow.typeclasses.EqK
+import arrow.typeclasses.Monad
 import io.kotlintest.properties.Gen
 
 class WriterTTest : UnitSpec() {
@@ -69,12 +79,22 @@ class WriterTTest : UnitSpec() {
   init {
 
     testLaws(
-      MonadTransLaws.laws(
-        WriterT.monadTrans(String.monoid()),
-        Option.monad(),
-        WriterT.monad(Option.monad(), String.monoid()),
-        Option.genK(),
-        WriterT.eqK(Option.eqK(), String.eq())
+      MonadTransControlLaws.laws(
+        WriterT.monadTransControl(String.monoid()),
+        object : GenTrans<Kind<ForWriterT, String>> {
+          override fun <F> liftGenK(MF: Monad<F>, genK: GenK<F>): GenK<Kind<Kind<ForWriterT, String>, F>> =
+            WriterT.genK(genK, Gen.string())
+        },
+        object : EqTrans<Kind<ForWriterT, String>> {
+          override fun <F> liftEqK(MF: Monad<F>, eqK: EqK<F>): EqK<Kind<Kind<ForWriterT, String>, F>> =
+            WriterT.eqK(eqK, String.eq())
+        }
+      ),
+      MonadBaseControlLaws.laws(
+        WriterT.monadBaseControl(String.monoid(), Id.monadBaseControl()),
+        WriterT.genK(Id.genK(), Gen.string()),
+        Id.genK(),
+        WriterT.eqK(Id.eqK(), String.eq())
       ),
       AlternativeLaws.laws(
         WriterT.alternative(ListK.monoid<Int>(), Option.alternative()),

@@ -82,7 +82,7 @@ interface AccumtTMonadTrans<S> : MonadTrans<Kind<ForAccumT, S>> {
       }
     }
 
-  override fun <M> monad(MM: Monad<M>): Monad<Kind<Kind<ForAccumT, S>, M>> = object : AccumTMonad<S, M> {
+  override fun <M> liftMonad(MM: Monad<M>): Monad<Kind<Kind<ForAccumT, S>, M>> = object : AccumTMonad<S, M> {
     override fun MF(): Monad<M> = MM
     override fun MS(): Monoid<S> = this@AccumtTMonadTrans.MS()
   }
@@ -104,7 +104,7 @@ interface AccumTMonadTransControl<S> : MonadTransControl<Kind<ForAccumT, S>> {
   override fun <M, A> Kind<M, StT<Kind<ForAccumT, S>, A>>.restoreT(MM: Monad<M>): Kind<Kind<Kind<ForAccumT, S>, M>, A> =
     AccumT { _: S -> MM.run { map { it.unsafeState as Tuple2<S, A> } } }
 
-  override fun <M> monad(MM: Monad<M>): Monad<Kind<Kind<ForAccumT, S>, M>> = object : AccumTMonad<S, M> {
+  override fun <M> liftMonad(MM: Monad<M>): Monad<Kind<Kind<ForAccumT, S>, M>> = object : AccumTMonad<S, M> {
     override fun MF(): Monad<M> = MM
     override fun MS(): Monoid<S> = this@AccumTMonadTransControl.MS()
   }

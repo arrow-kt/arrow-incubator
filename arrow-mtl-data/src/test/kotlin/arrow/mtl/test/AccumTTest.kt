@@ -34,22 +34,27 @@ import arrow.fx.mtl.accumt.monadIO.monadIO
 import arrow.fx.test.laws.equalUnderTheLaw
 import arrow.mtl.AccumT
 import arrow.mtl.AccumTPartialOf
+import arrow.mtl.ForAccumT
 import arrow.mtl.StateT
 import arrow.mtl.StateTPartialOf
 import arrow.mtl.WriterT
+import arrow.mtl.eq.EqTrans
 import arrow.mtl.extensions.accumt.alternative.alternative
 import arrow.mtl.extensions.accumt.functor.functor
 import arrow.mtl.extensions.accumt.monad.monad
 import arrow.mtl.extensions.accumt.monadError.monadError
 import arrow.mtl.extensions.accumt.monadState.monadState
-import arrow.mtl.extensions.accumt.monadTrans.monadTrans
 import arrow.mtl.extensions.accumt.monadWriter.monadWriter
+import arrow.mtl.extensions.core.monadBaseControl
+import arrow.mtl.extensions.monadBaseControl
+import arrow.mtl.extensions.monadTransControl
 import arrow.mtl.extensions.statet.monad.monad
 import arrow.mtl.extensions.statet.monadState.monadState
 import arrow.mtl.extensions.writert.eqK.eqK
 import arrow.mtl.extensions.writert.monad.monad
 import arrow.mtl.extensions.writert.monadWriter.monadWriter
 import arrow.mtl.fix
+import arrow.mtl.generators.GenTrans
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
 import arrow.typeclasses.Monad
@@ -62,13 +67,23 @@ class AccumTTest : UnitSpec() {
   init {
 
     testLaws(
+      MonadTransControlLaws.laws(
+        AccumT.monadTransControl(String.monoid()),
+        object : GenTrans<Kind<ForAccumT, String>> {
+          override fun <F> liftGenK(MF: Monad<F>, genK: GenK<F>): GenK<Kind<Kind<ForAccumT, String>, F>> =
+            AccumT.genK(genK, Gen.string())
+        },
+        object : EqTrans<Kind<ForAccumT, String>> {
+          override fun <F> liftEqK(MF: Monad<F>, eqK: EqK<F>): EqK<Kind<Kind<ForAccumT, String>, F>> =
+            AccumT.eqK(MF, eqK, String.eq(), "")
+        }
+      ),
 
-      MonadTransLaws.laws(
-        AccumT.monadTrans(String.monoid()),
-        Id.monad(),
-        AccumT.monad(String.monoid(), Id.monad()),
+      MonadBaseControlLaws.laws(
+        AccumT.monadBaseControl(Id.monadBaseControl(), String.monoid()),
+        AccumT.genK(Id.genK(), Gen.string()),
         Id.genK(),
-        AccumT.eqK(Id.monad(), Id.eqK(), String.eq(), "hello")
+        AccumT.eqK(Id.monad(), Id.eqK(), String.eq(), "")
       ),
 
       AlternativeLaws.laws(

@@ -314,7 +314,7 @@ interface OptionTMonadTrans : MonadTrans<ForOptionT> {
   override fun <F, A> Kind<F, A>.liftT(MF: Monad<F>): Kind2<ForOptionT, F, A> =
     OptionT.liftF(MF, this)
 
-  override fun <M> monad(MM: Monad<M>): Monad<Kind<ForOptionT, M>> = object : OptionTMonad<M> {
+  override fun <M> liftMonad(MM: Monad<M>): Monad<Kind<ForOptionT, M>> = object : OptionTMonad<M> {
     override fun MF(): Monad<M> = MM
   }
 }
@@ -331,7 +331,7 @@ interface OptionTMonadTransControl : MonadTransControl<ForOptionT> {
   override fun <M, A> Kind<M, StT<ForOptionT, A>>.restoreT(MM: Monad<M>): Kind<Kind<ForOptionT, M>, A> =
     OptionT(MM.run { map { (it.unsafeState as Option<A>) } })
 
-  override fun <M> monad(MM: Monad<M>): Monad<Kind<ForOptionT, M>> = object : OptionTMonad<M> {
+  override fun <M> liftMonad(MM: Monad<M>): Monad<Kind<ForOptionT, M>> = object : OptionTMonad<M> {
     override fun MF(): Monad<M> = MM
   }
 }

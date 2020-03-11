@@ -11,6 +11,7 @@ import arrow.core.Option
 import arrow.core.extensions.const.divisible.divisible
 import arrow.core.extensions.const.eqK.eqK
 import arrow.core.extensions.eq
+import arrow.core.extensions.id.eqK.eqK
 import arrow.core.extensions.id.monad.monad
 import arrow.core.extensions.monoid
 import arrow.core.extensions.option.alternative.alternative
@@ -32,16 +33,22 @@ import arrow.fx.test.laws.ConcurrentLaws
 import arrow.mtl.ForKleisli
 import arrow.mtl.Kleisli
 import arrow.mtl.KleisliPartialOf
+import arrow.mtl.eq.EqTrans
+import arrow.mtl.extensions.core.monadBaseControl
 import arrow.mtl.extensions.kleisli.alternative.alternative
 import arrow.mtl.extensions.kleisli.applicative.applicative
 import arrow.mtl.extensions.kleisli.divisible.divisible
 import arrow.mtl.extensions.kleisli.functor.functor
 import arrow.mtl.extensions.kleisli.monad.monad
+import arrow.mtl.extensions.monadBaseControl
+import arrow.mtl.extensions.monadTransControl
 import arrow.mtl.fix
+import arrow.mtl.generators.GenTrans
 import arrow.mtl.test.eq.eqK
 import arrow.mtl.test.generators.genK
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
+import arrow.typeclasses.Monad
 import io.kotlintest.properties.Gen
 import io.kotlintest.shouldBe
 
@@ -73,6 +80,21 @@ class KleisliTest : UnitSpec() {
     val constEQK: EqK<Kind<Kind<ForKleisli, Int>, Kind<ForConst, Int>>> = Kleisli.eqK(Const.eqK(Int.eq()), 1)
 
     testLaws(
+      MonadTransControlLaws.laws(
+        Kleisli.monadTransControl(),
+        object : GenTrans<Kind<ForKleisli, Int>> {
+          override fun <F> liftGenK(MF: Monad<F>, genK: GenK<F>): GenK<Kind<Kind<ForKleisli, Int>, F>> = genK(genK)
+        },
+        object : EqTrans<Kind<ForKleisli, Int>> {
+          override fun <F> liftEqK(MF: Monad<F>, eqK: EqK<F>): EqK<Kind<Kind<ForKleisli, Int>, F>> = Kleisli.eqK(eqK, 1)
+        }
+      ),
+      MonadBaseControlLaws.laws<ForId, KleisliPartialOf<Int, ForId>>(
+        Kleisli.monadBaseControl(Id.monadBaseControl()),
+        genK(Id.genK()),
+        Id.genK(),
+        Kleisli.eqK(Id.eqK(), 1)
+      ),
       AlternativeLaws.laws(
         Kleisli.alternative<Int, ForOption>(Option.alternative()),
         genK<Int, ForOption>(Option.genK()),

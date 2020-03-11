@@ -296,7 +296,7 @@ interface WriterTMonadTrans<W> : MonadTrans<Kind<ForWriterT, W>> {
   fun MW(): Monoid<W>
   override fun <G, A> Kind<G, A>.liftT(MF: Monad<G>): Kind2<Kind<ForWriterT, W>, G, A> = WriterT(MF.run { map { MW().empty() toT it } })
 
-  override fun <M> monad(MM: Monad<M>): Monad<Kind<Kind<ForWriterT, W>, M>> = object : WriterTMonad<W, M> {
+  override fun <M> liftMonad(MM: Monad<M>): Monad<Kind<Kind<ForWriterT, W>, M>> = object : WriterTMonad<W, M> {
     override fun MF(): Monad<M> = MM
     override fun MM(): Monoid<W> = MW()
   }
@@ -314,7 +314,7 @@ interface WriterTMonadTransControl<W> : MonadTransControl<Kind<ForWriterT, W>> {
   override fun <M, A> Kind<M, StT<Kind<ForWriterT, W>, A>>.restoreT(MM: Monad<M>): Kind<Kind<Kind<ForWriterT, W>, M>, A> =
     WriterT(MM.run { map { (it.unsafeState as Tuple2<W, A>) } })
 
-  override fun <M> monad(MM: Monad<M>): Monad<Kind<Kind<ForWriterT, W>, M>> = object : WriterTMonad<W, M> {
+  override fun <M> liftMonad(MM: Monad<M>): Monad<Kind<Kind<ForWriterT, W>, M>> = object : WriterTMonad<W, M> {
     override fun MF(): Monad<M> = MM
     override fun MM(): Monoid<W> = MW()
   }

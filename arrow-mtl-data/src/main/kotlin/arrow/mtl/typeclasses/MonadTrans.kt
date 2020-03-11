@@ -35,5 +35,5 @@ interface MonadTrans<F> {
   /**
    * Construct a monad instance. This adds the requirement that transformers always produce monads.
    */
-  fun <M> monad(MM: Monad<M>): Monad<Kind<F, M>>
+  fun <M> liftMonad(MM: Monad<M>): Monad<Kind<F, M>>
 }

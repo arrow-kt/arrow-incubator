@@ -3,6 +3,7 @@ package arrow.fx.mtl
 import arrow.Kind
 import arrow.core.Either
 import arrow.core.Tuple2
+import arrow.core.Tuple3
 import arrow.extension
 import arrow.fx.IO
 import arrow.fx.RacePair

@@ -1,10 +1,14 @@
 package arrow.mtl.test
 
 import arrow.Kind
+import arrow.core.ForId
 import arrow.core.ForOption
+import arrow.core.Id
 import arrow.core.Option
 import arrow.core.Tuple2
 import arrow.core.extensions.eq
+import arrow.core.extensions.id.eqK.eqK
+import arrow.core.extensions.id.monad.monad
 import arrow.core.extensions.option.eqK.eqK
 import arrow.core.extensions.option.functor.functor
 import arrow.core.extensions.option.monad.monad
@@ -24,8 +28,13 @@ import arrow.fx.extensions.io.functor.functor
 import arrow.fx.extensions.io.monad.monad
 import arrow.fx.mtl.statet.async.async
 import arrow.fx.test.laws.AsyncLaws
+import arrow.mtl.ForStateT
 import arrow.mtl.StateT
 import arrow.mtl.StateTPartialOf
+import arrow.mtl.eq.EqTrans
+import arrow.mtl.extensions.core.monadBaseControl
+import arrow.mtl.extensions.monadBaseControl
+import arrow.mtl.extensions.monadTransControl
 import arrow.mtl.extensions.statet.applicative.applicative
 import arrow.mtl.extensions.statet.functor.functor
 import arrow.mtl.extensions.statet.monad.monad
@@ -33,6 +42,7 @@ import arrow.mtl.extensions.statet.monadCombine.monadCombine
 import arrow.mtl.extensions.statet.monadState.monadState
 import arrow.mtl.extensions.statet.semigroupK.semigroupK
 import arrow.mtl.fix
+import arrow.mtl.generators.GenTrans
 import arrow.mtl.run
 import arrow.mtl.test.eq.eqK
 import arrow.mtl.test.generators.genK
@@ -76,6 +86,25 @@ class StateTTests : UnitSpec() {
         StateT.monad(Option.monad()),
         StateT.genK(Option.genK(), Gen.int()),
         StateT.eqK(Option.eqK(), Int.eq(), Option.monad(), 0)
+      ),
+
+      MonadTransControlLaws.laws(
+        StateT.monadTransControl(),
+        object : GenTrans<Kind<ForStateT, Int>> {
+          override fun <F> liftGenK(MF: Monad<F>, genK: GenK<F>): GenK<Kind<Kind<ForStateT, Int>, F>> =
+            StateT.genK(genK, Gen.int())
+        },
+        object : EqTrans<Kind<ForStateT, Int>> {
+          override fun <F> liftEqK(MF: Monad<F>, eqK: EqK<F>): EqK<Kind<Kind<ForStateT, Int>, F>> =
+            StateT.eqK(eqK, Int.eq(), MF, 1)
+        }
+      ),
+
+      MonadBaseControlLaws.laws<ForId, StateTPartialOf<Int, ForId>>(
+        StateT.monadBaseControl(Id.monadBaseControl()),
+        StateT.genK(Id.genK(), Gen.int()),
+        Id.genK(),
+        StateT.eqK(Id.eqK(), Int.eq(), Id.monad(), 1)
       )
     )
   }

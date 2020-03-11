@@ -21,7 +21,7 @@ interface MonadBase<B, M> {
 
     fun <T, B, M> defaultImpl(MT: MonadTrans<T>, MB: MonadBase<B, M>): MonadBase<B, Kind<T, M>> = object : MonadBase<B, Kind<T, M>> {
       override fun MB(): Monad<B> = MB.MB()
-      override fun MM(): Monad<Kind<T, M>> = MT.monad(MB.MM())
+      override fun MM(): Monad<Kind<T, M>> = MT.liftMonad(MB.MM())
 
       override fun <A> Kind<B, A>.liftBase(): Kind<Kind<T, M>, A> =
         MB.run { MT.run { liftBase().liftT(MB.MM()) } }

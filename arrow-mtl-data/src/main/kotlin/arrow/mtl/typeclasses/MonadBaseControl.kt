@@ -31,7 +31,7 @@ interface MonadBaseControl<B, M> : MonadBase<B, M> {
     fun <T, M, B> defaultImpl(MTC: MonadTransControl<T>, MBC: MonadBaseControl<B, M>): MonadBaseControl<B, Kind<T, M>> =
       object : MonadBaseControl<B, Kind<T, M>> {
         override fun MB(): Monad<B> = MBC.MB()
-        override fun MM(): Monad<Kind<T, M>> = MTC.monad(MBC.MM())
+        override fun MM(): Monad<Kind<T, M>> = MTC.liftMonad(MBC.MM())
         override fun <A> liftBaseWith(f: (RunInBase<Kind<T, M>, B>) -> Kind<B, A>): Kind<Kind<T, M>, A> = MTC.liftWith(MBC.MM()) { runT ->
           MBC.liftBaseWith { runMB ->
             f(object : RunInBase<Kind<T, M>, B> {

@@ -39,7 +39,11 @@ import arrow.mtl.EitherT
 import arrow.mtl.ForOptionT
 import arrow.mtl.OptionT
 import arrow.mtl.OptionTPartialOf
+import arrow.mtl.eq.EqTrans
 import arrow.mtl.extensions.ComposedFunctorFilter
+import arrow.mtl.extensions.core.monadBaseControl
+import arrow.mtl.extensions.monadBaseControl
+import arrow.mtl.extensions.monadTransControl
 import arrow.mtl.extensions.nested
 import arrow.mtl.extensions.optiont.applicative.applicative
 import arrow.mtl.extensions.optiont.divisible.divisible
@@ -51,9 +55,11 @@ import arrow.mtl.extensions.optiont.monadTrans.monadTrans
 import arrow.mtl.extensions.optiont.monoidK.monoidK
 import arrow.mtl.extensions.optiont.semigroupK.semigroupK
 import arrow.mtl.extensions.optiont.traverseFilter.traverseFilter
+import arrow.mtl.generators.GenTrans
 import arrow.mtl.test.eq.eqK
 import arrow.mtl.test.generators.genK
 import arrow.mtl.test.generators.nested
+import arrow.typeclasses.EqK
 import arrow.typeclasses.Monad
 import io.kotlintest.properties.Gen
 import io.kotlintest.properties.forAll
@@ -117,10 +123,21 @@ class OptionTTest : UnitSpec() {
         OptionT.eqK(Const.eqK(Int.eq()))
       ),
 
-      MonadTransLaws.laws(
-        OptionT.monadTrans(),
-        Id.monad(),
-        OptionT.monad(Id.monad()),
+      MonadTransControlLaws.laws(
+        OptionT.monadTransControl(),
+        object : GenTrans<ForOptionT> {
+          override fun <F> liftGenK(MF: Monad<F>, genK: GenK<F>): GenK<Kind<ForOptionT, F>> =
+            OptionT.genK(genK)
+        },
+        object : EqTrans<ForOptionT> {
+          override fun <F> liftEqK(MF: Monad<F>, eqK: EqK<F>): EqK<Kind<ForOptionT, F>> =
+            OptionT.eqK(eqK)
+        }
+      ),
+
+      MonadBaseControlLaws.laws(
+        OptionT.monadBaseControl(Id.monadBaseControl()),
+        OptionT.genK(Id.genK()),
         Id.genK(),
         OptionT.eqK(Id.eqK())
       )

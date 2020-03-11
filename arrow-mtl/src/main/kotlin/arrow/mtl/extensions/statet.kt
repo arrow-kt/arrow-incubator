@@ -299,7 +299,7 @@ interface StateTMonadTrans<S> : MonadTrans<Kind<ForStateT, S>> {
   override fun <G, A> Kind<G, A>.liftT(MG: Monad<G>): Kind2<Kind<ForStateT, S>, G, A> =
     StateT.liftF(MG, this)
 
-  override fun <M> monad(MM: Monad<M>): Monad<Kind<Kind<ForStateT, S>, M>> = object : StateTMonad<S, M> {
+  override fun <M> liftMonad(MM: Monad<M>): Monad<Kind<Kind<ForStateT, S>, M>> = object : StateTMonad<S, M> {
     override fun MF(): Monad<M> = MM
   }
 }
@@ -319,7 +319,7 @@ interface StateTMonadTransControl<S> : MonadTransControl<Kind<ForStateT, S>> {
   override fun <M, A> Kind<M, StT<Kind<ForStateT, S>, A>>.restoreT(MM: Monad<M>): Kind<Kind<Kind<ForStateT, S>, M>, A> =
     MM.run { StateT { _: S -> map { (it.unsafeState as Tuple2<S, A>) } } }
 
-  override fun <M> monad(MM: Monad<M>): Monad<Kind<Kind<ForStateT, S>, M>> = object : StateTMonad<S, M> {
+  override fun <M> liftMonad(MM: Monad<M>): Monad<Kind<Kind<ForStateT, S>, M>> = object : StateTMonad<S, M> {
     override fun MF(): Monad<M> = MM
   }
 }

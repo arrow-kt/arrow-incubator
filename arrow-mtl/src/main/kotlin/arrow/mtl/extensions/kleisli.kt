@@ -230,7 +230,7 @@ interface KleisliMonadTrans<D> : MonadTrans<Kind<ForKleisli, D>> {
   override fun <G, A> Kind<G, A>.liftT(MG: Monad<G>): Kind2<Kind<ForKleisli, D>, G, A> =
     Kleisli.liftF(this)
 
-  override fun <M> monad(MM: Monad<M>): Monad<Kind<Kind<ForKleisli, D>, M>> = object : KleisliMonad<D, M> {
+  override fun <M> liftMonad(MM: Monad<M>): Monad<Kind<Kind<ForKleisli, D>, M>> = object : KleisliMonad<D, M> {
     override fun MF(): Monad<M> = MM
   }
 }
@@ -248,7 +248,7 @@ interface KleisliMonadTransControl<D> : MonadTransControl<Kind<ForKleisli, D>> {
   override fun <M, A> Kind<M, StT<Kind<ForKleisli, D>, A>>.restoreT(MM: Monad<M>): Kind<Kind<Kind<ForKleisli, D>, M>, A> =
     Kleisli { _: D -> MM.run { map { (it.unsafeState as A) } } }
 
-  override fun <M> monad(MM: Monad<M>): Monad<Kind<Kind<ForKleisli, D>, M>> = object : KleisliMonad<D, M> {
+  override fun <M> liftMonad(MM: Monad<M>): Monad<Kind<Kind<ForKleisli, D>, M>> = object : KleisliMonad<D, M> {
     override fun MF(): Monad<M> = MM
   }
 }
