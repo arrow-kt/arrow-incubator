@@ -16,10 +16,10 @@ import arrow.free.extensions.FreeApplicativeApplicative
 import arrow.free.extensions.FreeApplicativeEq
 import arrow.free.extensions.freeapplicative.applicative.applicative
 import arrow.free.extensions.freeapplicative.eq.eq
-import arrow.test.UnitSpec
-import arrow.test.generators.GenK
-import arrow.test.laws.ApplicativeLaws
-import arrow.test.laws.EqLaws
+import arrow.core.test.UnitSpec
+import arrow.core.test.generators.GenK
+import arrow.core.test.laws.ApplicativeLaws
+import arrow.core.test.laws.EqLaws
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
 import io.kotlintest.properties.Gen

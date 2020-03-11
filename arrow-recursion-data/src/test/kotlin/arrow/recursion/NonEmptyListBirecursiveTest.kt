@@ -11,8 +11,8 @@ import arrow.recursion.extensions.nonemptylist.birecursive.birecursive
 import arrow.recursion.extensions.nonemptylistf.traverse.traverse
 import arrow.recursion.pattern.NonEmptyListF
 import arrow.recursion.pattern.fix
-import arrow.test.UnitSpec
-import arrow.test.laws.BirecursiveLaws
+import arrow.core.test.UnitSpec
+import arrow.recursion.test.BirecursiveLaws
 import io.kotlintest.properties.Gen
 
 class NonEmptyListBirecursiveTest : UnitSpec() {
