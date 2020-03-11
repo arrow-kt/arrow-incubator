@@ -90,7 +90,7 @@ object MonadReaderLaws {
     }
   }
 
- private fun <F, D, A> MonadReader<F, D>.localChangesTheCorrectEnv(
+  private fun <F, D, A> MonadReader<F, D>.localChangesTheCorrectEnv(
     genFun: Gen<(D) -> D>,
     genFA: Gen<Kind<F, A>>,
     EQ: Eq<Kind<F, A>>

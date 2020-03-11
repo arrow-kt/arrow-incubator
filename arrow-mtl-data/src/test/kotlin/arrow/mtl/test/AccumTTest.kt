@@ -6,7 +6,6 @@ import arrow.core.EitherPartialOf
 import arrow.core.ForId
 import arrow.core.Id
 import arrow.core.Option
-import arrow.core.Tuple2
 import arrow.core.extensions.either.eqK.eqK
 import arrow.core.extensions.either.functor.functor
 import arrow.core.extensions.either.monad.monad
@@ -18,12 +17,9 @@ import arrow.core.extensions.monoid
 import arrow.core.extensions.option.alternative.alternative
 import arrow.core.extensions.option.eqK.eqK
 import arrow.core.extensions.option.monad.monad
-import arrow.core.extensions.tuple2.eq.eq
 import arrow.core.test.UnitSpec
-import arrow.core.test.generators.GenK
 import arrow.core.test.generators.genK
 import arrow.core.test.generators.throwable
-import arrow.core.test.generators.tuple2
 import arrow.core.test.laws.AlternativeLaws
 import arrow.core.test.laws.MonadErrorLaws
 import arrow.core.toT
@@ -35,7 +31,6 @@ import arrow.fx.test.laws.equalUnderTheLaw
 import arrow.mtl.AccumT
 import arrow.mtl.AccumTPartialOf
 import arrow.mtl.Kleisli
-import arrow.mtl.KleisliPartialOf
 import arrow.mtl.StateT
 import arrow.mtl.StateTPartialOf
 import arrow.mtl.WriterT
@@ -48,10 +43,8 @@ import arrow.mtl.extensions.accumt.monadState.monadState
 import arrow.mtl.extensions.accumt.monadTrans.monadTrans
 import arrow.mtl.extensions.accumt.monadWriter.monadWriter
 import arrow.mtl.extensions.kleisli.monadReader.monadReader
-import arrow.mtl.extensions.statet.monad.monad
 import arrow.mtl.extensions.statet.monadState.monadState
 import arrow.mtl.extensions.writert.eqK.eqK
-import arrow.mtl.extensions.writert.monad.monad
 import arrow.mtl.extensions.writert.monadWriter.monadWriter
 import arrow.mtl.fix
 import arrow.mtl.test.eq.eqK
