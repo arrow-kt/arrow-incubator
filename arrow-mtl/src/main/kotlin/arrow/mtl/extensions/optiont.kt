@@ -86,9 +86,7 @@ interface OptionTApplicative<F> : Applicative<OptionTPartialOf<F>>, OptionTFunct
     OptionT(
       MF().fx.monad {
         value().bind().fold({ None }, { a ->
-          ff.value().value().bind().fold({ 
-            None
-          }, { f -> f(a).some() })
+          ff.value().value().bind().fold({ None }, { f -> f(a).some() })
         })
       }
     ).let(::Now)
