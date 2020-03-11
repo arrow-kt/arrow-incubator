@@ -12,14 +12,14 @@ import arrow.core.fix
 import arrow.core.identity
 import arrow.core.none
 import arrow.core.some
-import arrow.core.value
 import arrow.free.Cofree
 import arrow.recursion.extensions.cofree.birecursive.birecursive
 import arrow.recursion.extensions.cofreef.traverse.traverse
 import arrow.recursion.pattern.CofreeF
 import arrow.recursion.pattern.fix
-import arrow.test.UnitSpec
-import arrow.test.laws.BirecursiveLaws
+import arrow.core.test.UnitSpec
+import arrow.core.value
+import arrow.recursion.test.BirecursiveLaws
 import arrow.typeclasses.Eq
 import io.kotlintest.properties.Gen
 

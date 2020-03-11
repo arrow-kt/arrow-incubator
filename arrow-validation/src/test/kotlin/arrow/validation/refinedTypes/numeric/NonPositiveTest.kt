@@ -1,9 +1,9 @@
 package arrow.validation.refinedTypes.numeric
 
 import arrow.core.extensions.order
-import arrow.test.UnitSpec
-import arrow.test.generators.greaterThan
-import arrow.test.generators.lessEqual
+import arrow.core.test.UnitSpec
+import arrow.validation.test.greaterThan
+import arrow.validation.test.lessEqual
 import arrow.validation.refinedTypes.numeric.validated.nonPositive.nonPositive
 import io.kotlintest.properties.Gen
 import io.kotlintest.properties.forAll

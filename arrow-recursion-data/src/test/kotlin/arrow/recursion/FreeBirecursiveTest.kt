@@ -10,16 +10,16 @@ import arrow.core.extensions.option.monad.monad
 import arrow.core.extensions.option.traverse.traverse
 import arrow.core.fix
 import arrow.core.some
-import arrow.core.value
 import arrow.free.Free
 import arrow.free.extensions.free.eq.eq
 import arrow.recursion.extensions.free.birecursive.birecursive
 import arrow.recursion.extensions.freef.traverse.traverse
 import arrow.recursion.pattern.FreeF
 import arrow.recursion.pattern.fix
-import arrow.test.UnitSpec
-import arrow.test.generators.intSmall
-import arrow.test.laws.BirecursiveLaws
+import arrow.core.test.UnitSpec
+import arrow.core.test.generators.intSmall
+import arrow.core.value
+import arrow.recursion.test.BirecursiveLaws
 import io.kotlintest.properties.Gen
 
 class FreeBirecursive : UnitSpec() {
