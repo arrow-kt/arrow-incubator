@@ -26,12 +26,23 @@ import arrow.fx.test.eq.eqK
 import arrow.mtl.ForKleisli
 import arrow.mtl.Kleisli
 import arrow.mtl.KleisliPartialOf
+import arrow.mtl.StateT
+import arrow.mtl.StateTPartialOf
+import arrow.mtl.WriterT
+import arrow.mtl.WriterTPartialOf
 import arrow.mtl.extensions.kleisli.alternative.alternative
 import arrow.mtl.extensions.kleisli.divisible.divisible
 import arrow.mtl.extensions.kleisli.monadReader.monadReader
+import arrow.mtl.extensions.kleisli.monadState.monadState
+import arrow.mtl.extensions.kleisli.monadWriter.monadWriter
+import arrow.mtl.extensions.statet.monadState.monadState
+import arrow.mtl.extensions.writert.eqK.eqK
+import arrow.mtl.extensions.writert.monadWriter.monadWriter
 import arrow.mtl.test.eq.eqK
 import arrow.mtl.test.generators.genK
 import arrow.mtl.test.laws.MonadReaderLaws
+import arrow.mtl.test.laws.MonadStateLaws
+import arrow.mtl.test.laws.MonadWriterLaws
 import arrow.typeclasses.EqK
 import io.kotlintest.properties.Gen
 import io.kotlintest.shouldBe
@@ -71,6 +82,17 @@ class KleisliTest : UnitSpec() {
         Gen.int(),
         Kleisli.eqK(Id.eqK(), 1),
         Int.eq()
+      ),
+      MonadWriterLaws.laws(
+        Kleisli.monadWriter<Int, WriterTPartialOf<String, ForId>, String>(WriterT.monadWriter(Id.monad(), String.monoid())),
+        String.monoid(), Gen.string(),
+        Kleisli.genK<Int, WriterTPartialOf<String, ForId>>(WriterT.genK(Id.genK(), Gen.string())),
+        Kleisli.eqK(WriterT.eqK(Id.eqK(), String.eq()), 1), String.eq()
+      ),
+      MonadStateLaws.laws(
+        Kleisli.monadState<Int, StateTPartialOf<Int, ForId>, Int>(StateT.monadState(Id.monad())),
+        Kleisli.genK<Int, StateTPartialOf<Int, ForId>>(StateT.genK(Id.genK(), Gen.int())),
+        Gen.int(), Kleisli.eqK(StateT.eqK(Id.eqK(), Int.eq(), Id.monad(), 0), 1), Int.eq()
       )
     )
 

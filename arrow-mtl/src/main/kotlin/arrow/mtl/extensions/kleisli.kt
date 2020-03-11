@@ -23,7 +23,9 @@ import arrow.mtl.extensions.kleisli.monad.monad
 import arrow.mtl.fix
 import arrow.mtl.run
 import arrow.mtl.typeclasses.MonadReader
+import arrow.mtl.typeclasses.MonadState
 import arrow.mtl.typeclasses.MonadTrans
+import arrow.mtl.typeclasses.MonadWriter
 import arrow.typeclasses.Alternative
 import arrow.typeclasses.Applicative
 import arrow.typeclasses.ApplicativeError
@@ -128,7 +130,6 @@ interface KleisliApplicative<D, F> : Applicative<KleisliPartialOf<D, F>>, Kleisl
 
 @extension
 interface KleisliMonad<D, F> : Monad<KleisliPartialOf<D, F>>, KleisliApplicative<D, F> {
-
   fun MF(): Monad<F>
 
   override fun AF(): Applicative<F> = MF()
@@ -199,12 +200,34 @@ interface KleisliAlternative<D, F> : Alternative<KleisliPartialOf<D, F>>, Kleisl
 
 @extension
 interface KleisliMonadReader<D, F> : MonadReader<KleisliPartialOf<D, F>, D>, KleisliMonad<D, F> {
-
   override fun MF(): Monad<F>
 
   override fun ask(): Kleisli<D, F, D> = Kleisli { MF().just(it) }
 
   override fun <A> Kind<KleisliPartialOf<D, F>, A>.local(f: (D) -> D): Kleisli<D, F, A> = fix().local(f)
+}
+
+@extension
+interface KleisliMonadWriter<D, F, W> : MonadWriter<KleisliPartialOf<D, F>, W>, KleisliMonad<D, F> {
+  fun MW(): MonadWriter<F, W>
+  override fun MF(): Monad<F> = MW()
+
+  override fun <A> Kind<KleisliPartialOf<D, F>, A>.listen(): Kind<KleisliPartialOf<D, F>, Tuple2<W, A>> =
+    Kleisli(AndThen(fix().run).andThen { MW().run { it.listen() } })
+
+  override fun <A> Kind<KleisliPartialOf<D, F>, Tuple2<(W) -> W, A>>.pass(): Kind<KleisliPartialOf<D, F>, A> =
+    Kleisli(AndThen(fix().run).andThen { MW().run { it.pass() } })
+
+  override fun <A> writer(aw: Tuple2<W, A>): Kind<KleisliPartialOf<D, F>, A> = Kleisli.liftF(MW().writer(aw))
+}
+
+@extension
+interface KleisliMonadState<D, F, S> : MonadState<KleisliPartialOf<D, F>, S>, KleisliMonad<D, F> {
+  fun MS(): MonadState<F, S>
+  override fun MF(): Monad<F> = MS()
+
+  override fun get(): Kind<KleisliPartialOf<D, F>, S> = Kleisli.liftF(MS().get())
+  override fun set(s: S): Kind<KleisliPartialOf<D, F>, Unit> = Kleisli.liftF(MS().set(s))
 }
 
 /**

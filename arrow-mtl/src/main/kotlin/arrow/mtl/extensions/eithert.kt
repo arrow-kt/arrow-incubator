@@ -5,6 +5,7 @@ import arrow.Kind2
 import arrow.core.Either
 import arrow.core.EitherPartialOf
 import arrow.core.Eval
+import arrow.core.Right
 import arrow.core.Tuple2
 import arrow.core.ap
 import arrow.core.extensions.either.eq.eq
@@ -23,7 +24,10 @@ import arrow.mtl.ForEitherT
 import arrow.mtl.extensions.eithert.monadThrow.monadThrow
 import arrow.mtl.fix
 import arrow.mtl.typeclasses.ComposedTraverse
+import arrow.mtl.typeclasses.MonadReader
+import arrow.mtl.typeclasses.MonadState
 import arrow.mtl.typeclasses.MonadTrans
+import arrow.mtl.typeclasses.MonadWriter
 import arrow.mtl.typeclasses.Nested
 import arrow.mtl.typeclasses.compose
 import arrow.mtl.typeclasses.unnest
@@ -317,4 +321,46 @@ interface EitherTEqK<L, F> : EqK<EitherTPartialOf<L, F>> {
 interface EitherTMonadTrans<L> : MonadTrans<Kind<ForEitherT, L>> {
   override fun <G, A> Kind<G, A>.liftT(MG: Monad<G>): Kind2<Kind<ForEitherT, L>, G, A> =
     EitherT.liftF(MG, this)
+}
+
+@extension
+interface EitherTMonadReader<L, F, D> : MonadReader<EitherTPartialOf<L, F>, D>, EitherTMonad<L, F> {
+  fun MR(): MonadReader<F, D>
+  override fun MF(): Monad<F> = MR()
+
+  override fun ask(): Kind<EitherTPartialOf<L, F>, D> = EitherT.liftF(MR(), MR().ask())
+
+  override fun <A> Kind<EitherTPartialOf<L, F>, A>.local(f: (D) -> D): Kind<EitherTPartialOf<L, F>, A> =
+    EitherT(MR().run { fix().value().local(f) })
+}
+
+@extension
+interface EitherTMonadWriter<L, F, W> : MonadWriter<EitherTPartialOf<L, F>, W>, EitherTMonad<L, F> {
+  fun MW(): MonadWriter<F, W>
+  override fun MF(): Monad<F> = MW()
+
+  override fun <A> Kind<EitherTPartialOf<L, F>, A>.listen(): Kind<EitherTPartialOf<L, F>, Tuple2<W, A>> =
+    EitherT(MW().run { fix().value().listen().map { (w, e) -> e.map { w toT it } } })
+
+  override fun <A> Kind<EitherTPartialOf<L, F>, Tuple2<(W) -> W, A>>.pass(): Kind<EitherTPartialOf<L, F>, A> =
+    EitherT(MW().run {
+      fix().value().map {
+        it.fold({
+          Tuple2({ w: W -> w }, it.left())
+        }, {
+          it.map(::Right)
+        })
+      }.pass()
+    })
+
+  override fun <A> writer(aw: Tuple2<W, A>): Kind<EitherTPartialOf<L, F>, A> = EitherT.liftF(MW(), MW().writer(aw))
+}
+
+@extension
+interface EitherTMonadState<L, F, S> : MonadState<EitherTPartialOf<L, F>, S>, EitherTMonad<L, F> {
+  fun MS(): MonadState<F, S>
+  override fun MF(): Monad<F> = MS()
+
+  override fun get(): Kind<EitherTPartialOf<L, F>, S> = EitherT.liftF(MS(), MS().get())
+  override fun set(s: S): Kind<EitherTPartialOf<L, F>, Unit> = EitherT.liftF(MS(), MS().set(s))
 }

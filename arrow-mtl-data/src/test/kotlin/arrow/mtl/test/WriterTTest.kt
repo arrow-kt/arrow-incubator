@@ -2,13 +2,17 @@ package arrow.mtl.test
 
 import arrow.core.Const
 import arrow.core.ConstPartialOf
+import arrow.core.ForId
 import arrow.core.ForListK
 import arrow.core.ForOption
+import arrow.core.Id
 import arrow.core.ListK
 import arrow.core.Option
 import arrow.core.extensions.const.divisible.divisible
 import arrow.core.extensions.const.eqK.eqK
 import arrow.core.extensions.eq
+import arrow.core.extensions.id.eqK.eqK
+import arrow.core.extensions.id.monad.monad
 import arrow.core.extensions.listk.eq.eq
 import arrow.core.extensions.listk.eqK.eqK
 import arrow.core.extensions.listk.monoid.monoid
@@ -30,8 +34,14 @@ import arrow.core.test.laws.MonoidKLaws
 import arrow.fx.ForIO
 import arrow.fx.IO
 import arrow.fx.test.eq.eqK
+import arrow.mtl.Kleisli
+import arrow.mtl.KleisliPartialOf
+import arrow.mtl.StateT
+import arrow.mtl.StateTPartialOf
 import arrow.mtl.WriterT
 import arrow.mtl.extensions.WriterTEqK
+import arrow.mtl.extensions.kleisli.monadReader.monadReader
+import arrow.mtl.extensions.statet.monadState.monadState
 import arrow.mtl.extensions.writert.alternative.alternative
 import arrow.mtl.extensions.writert.applicative.applicative
 import arrow.mtl.extensions.writert.divisible.divisible
@@ -39,10 +49,14 @@ import arrow.mtl.extensions.writert.eqK.eqK
 import arrow.mtl.extensions.writert.functor.functor
 import arrow.mtl.extensions.writert.monad.monad
 import arrow.mtl.extensions.writert.monadFilter.monadFilter
+import arrow.mtl.extensions.writert.monadReader.monadReader
+import arrow.mtl.extensions.writert.monadState.monadState
 import arrow.mtl.extensions.writert.monadTrans.monadTrans
 import arrow.mtl.extensions.writert.monadWriter.monadWriter
 import arrow.mtl.extensions.writert.monoidK.monoidK
+import arrow.mtl.test.eq.eqK
 import arrow.mtl.test.generators.genK
+import arrow.mtl.test.laws.MonadReaderLaws
 import arrow.mtl.test.laws.MonadStateLaws
 import arrow.mtl.test.laws.MonadTransLaws
 import arrow.mtl.test.laws.MonadWriterLaws
@@ -93,6 +107,15 @@ class WriterTTest : UnitSpec() {
         listEQK()
       ),
 
+      MonadFilterLaws.laws(
+        WriterT.monadFilter(Option.monadFilter(), ListK.monoid<Int>()),
+        WriterT.functor<ListK<Int>, ForOption>(Option.functor()),
+        WriterT.applicative(Option.applicative(), ListK.monoid<Int>()),
+        WriterT.monad(Option.monad(), ListK.monoid<Int>()),
+        WriterT.genK(Option.genK(), Gen.list(Gen.int()).map { it.k() }),
+        optionEQK()
+      ),
+
       MonadWriterLaws.laws(
         WriterT.monadWriter(Option.monad(), ListK.monoid<Int>()),
         ListK.monoid(),
@@ -102,13 +125,16 @@ class WriterTTest : UnitSpec() {
         ListK.eq(Int.eq())
       ),
 
-      MonadFilterLaws.laws(
-        WriterT.monadFilter(Option.monadFilter(), ListK.monoid<Int>()),
-        WriterT.functor<ListK<Int>, ForOption>(Option.functor()),
-        WriterT.applicative(Option.applicative(), ListK.monoid<Int>()),
-        WriterT.monad(Option.monad(), ListK.monoid<Int>()),
-        WriterT.genK(Option.genK(), Gen.list(Gen.int()).map { it.k() }),
-        optionEQK()
+      MonadReaderLaws.laws(
+        WriterT.monadReader<String, KleisliPartialOf<Int, ForId>, Int>(Kleisli.monadReader(Id.monad()), String.monoid()),
+        WriterT.genK(Kleisli.genK<Int, ForId>(Id.genK()), Gen.string()), Gen.int(),
+        WriterT.eqK(Kleisli.eqK(Id.eqK(), 1), String.eq()), Int.eq()
+      ),
+
+      MonadStateLaws.laws(
+        WriterT.monadState<String, StateTPartialOf<Int, ForId>, Int>(StateT.monadState(Id.monad()), String.monoid()),
+        WriterT.genK(StateT.genK(Id.genK(), Gen.int()), Gen.string()), Gen.int(),
+        WriterT.eqK(StateT.eqK(Id.eqK(), Int.eq(), Id.monad(), 1), String.eq()), Int.eq()
       )
     )
   }

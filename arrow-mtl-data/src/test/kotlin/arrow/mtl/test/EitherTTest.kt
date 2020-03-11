@@ -32,6 +32,12 @@ import arrow.fx.test.eq.throwableEq
 import arrow.mtl.EitherT
 import arrow.mtl.EitherTPartialOf
 import arrow.mtl.ForEitherT
+import arrow.mtl.Kleisli
+import arrow.mtl.KleisliPartialOf
+import arrow.mtl.StateT
+import arrow.mtl.StateTPartialOf
+import arrow.mtl.WriterT
+import arrow.mtl.WriterTPartialOf
 import arrow.mtl.extensions.eithert.alternative.alternative
 import arrow.mtl.extensions.eithert.apply.apply
 import arrow.mtl.extensions.eithert.divisible.divisible
@@ -39,8 +45,19 @@ import arrow.mtl.extensions.eithert.eqK.eqK
 import arrow.mtl.extensions.eithert.functor.functor
 import arrow.mtl.extensions.eithert.monad.monad
 import arrow.mtl.extensions.eithert.monadError.monadError
+import arrow.mtl.extensions.eithert.monadReader.monadReader
+import arrow.mtl.extensions.eithert.monadState.monadState
+import arrow.mtl.extensions.eithert.monadWriter.monadWriter
 import arrow.mtl.extensions.eithert.traverse.traverse
+import arrow.mtl.extensions.kleisli.monadReader.monadReader
+import arrow.mtl.extensions.statet.monadState.monadState
+import arrow.mtl.extensions.writert.eqK.eqK
+import arrow.mtl.extensions.writert.monadWriter.monadWriter
+import arrow.mtl.test.eq.eqK
 import arrow.mtl.test.generators.genK
+import arrow.mtl.test.laws.MonadReaderLaws
+import arrow.mtl.test.laws.MonadStateLaws
+import arrow.mtl.test.laws.MonadWriterLaws
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
 import io.kotlintest.properties.Gen
@@ -90,6 +107,24 @@ class EitherTTest : UnitSpec() {
         EitherT.monad(Id.monad()),
         EitherT.genK(Id.genK(), Gen.throwable()),
         EitherT.eqK(Id.eqK(), throwableEq())
+      ),
+
+      MonadReaderLaws.laws(
+        EitherT.monadReader<String, KleisliPartialOf<String, ForId>, String>(Kleisli.monadReader(Id.monad())),
+        EitherT.genK(Kleisli.genK<String, ForId>(Id.genK()), Gen.string()),
+        Gen.string(), EitherT.eqK(Kleisli.eqK(Id.eqK(), "H"), String.eq()), String.eq()
+      ),
+
+      MonadWriterLaws.laws(
+        EitherT.monadWriter<String, WriterTPartialOf<String, ForId>, String>(WriterT.monadWriter(Id.monad(), String.monoid())),
+        String.monoid(), Gen.string(), EitherT.genK(WriterT.genK(Id.genK(), Gen.string()), Gen.string()),
+        EitherT.eqK(WriterT.eqK(Id.eqK(), String.eq()), String.eq()), String.eq()
+      ),
+
+      MonadStateLaws.laws(
+        EitherT.monadState<String, StateTPartialOf<Int, ForId>, Int>(StateT.monadState(Id.monad())),
+        EitherT.genK(StateT.genK(Id.genK(), Gen.int()), Gen.string()), Gen.int(),
+        EitherT.eqK(StateT.eqK(Id.eqK(), Int.eq(), Id.monad(), 1), String.eq()), Int.eq()
       )
     )
 

@@ -22,35 +22,35 @@ object MonadReaderLaws {
     eqK: EqK<F>,
     eqD: Eq<D>
   ): List<Law> = listOf(
-    Law("MonadReader: ask().followedBy(m) == m") {
+    Law("MonadReader laws: ask().followedBy(m) == m") {
       MR.askHasNoSideEffects(genK.genK(Gen.int()), eqK.liftEq(Int.eq()))
     },
-    Law("MonadReader: ask().flatMap { s1 -> ask().flatMap { s2 -> k(s1, s2) } } == ask().flatMap { s -> k(s, s) }") {
+    Law("MonadReader laws: ask().flatMap { s1 -> ask().flatMap { s2 -> k(s1, s2) } } == ask().flatMap { s -> k(s, s) }") {
       MR.askProducesTheSameResult(
         genK.genK(Gen.int()).map { { _: D, _: D -> it } },
         eqK.liftEq(Int.eq())
       )
     },
-    Law("MonadReader: ask().local(f) == ask().map(f)") {
+    Law("MonadReader laws: ask().local(f) == ask().map(f)") {
       MR.localChangesTheEnvProducedByAsk(Gen.functionAToB(genD), eqK.liftEq(eqD))
     },
-    Law("MonadReader: local changes the correct env") {
+    Law("MonadReader laws: local changes the correct env") {
       MR.localChangesTheCorrectEnv(
         Gen.functionAToB(genD),
         genK.genK(Gen.int()),
         eqK.liftEq(Int.eq())
       )
     },
-    Law("MonadReader: local id x == x") {
+    Law("MonadReader laws: local id x == x") {
       MR.localWithIdNoChanges(genK.genK(Gen.int()), eqK.liftEq(Int.eq()))
     },
-    Law("MonadReader: x.local(f).local(g) == x.local { g(f(it)) }") {
+    Law("MonadReader laws: x.local(f).local(g) == x.local { g(f(it)) }") {
       MR.localIsAFunctionMorphism(Gen.functionAToB(genD), genK.genK(Gen.int()), eqK.liftEq(Int.eq()))
     },
-    Law("MonadReader: just(x).local(f) == just(x)") {
+    Law("MonadReader laws: just(x).local(f) == just(x)") {
       MR.localPerformsNoSideEffects(Gen.functionAToB(genD), Gen.int(), eqK.liftEq(Int.eq()))
     },
-    Law("MonadReader: local f distributes over flatMap") {
+    Law("MonadReader laws: local f distributes over flatMap") {
       MR.localDistributesOverFlatMap(
         Gen.functionAToB(genD),
         genK.genK(Gen.int()),
@@ -58,7 +58,7 @@ object MonadReaderLaws {
         eqK.liftEq(Int.eq())
       )
     },
-    Law("MonadReader: reader derived") {
+    Law("MonadReader laws: reader derived") {
       MR.readerDerived(Gen.functionAToB(Gen.int()), eqK.liftEq(Int.eq()))
     }
   )
