@@ -32,13 +32,6 @@ import arrow.core.test.laws.MonadFilterLaws
 import arrow.core.test.laws.MonoidKLaws
 import arrow.fx.ForIO
 import arrow.fx.IO
-import arrow.fx.extensions.io.applicative.applicative
-import arrow.fx.extensions.io.concurrent.concurrent
-import arrow.fx.extensions.io.functor.functor
-import arrow.fx.extensions.io.monad.monad
-import arrow.fx.mtl.concurrent
-import arrow.fx.mtl.timer
-import arrow.fx.test.laws.ConcurrentLaws
 import arrow.mtl.WriterT
 import arrow.mtl.WriterTPartialOf
 import arrow.mtl.extensions.WriterTEqK
@@ -53,7 +46,6 @@ import arrow.mtl.extensions.writert.monadTrans.monadTrans
 import arrow.mtl.extensions.writert.monadWriter.monadWriter
 import arrow.mtl.extensions.writert.monoidK.monoidK
 import arrow.mtl.test.eq.eqK
-import arrow.mtl.test.generators.genK
 import io.kotlintest.properties.Gen
 
 class WriterTTest : UnitSpec() {
