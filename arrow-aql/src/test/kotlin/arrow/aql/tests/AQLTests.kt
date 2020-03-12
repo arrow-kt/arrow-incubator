@@ -1,6 +1,11 @@
 package arrow.aql.tests
 
 import arrow.aql.Ord
+import arrow.aql.extensions.either.select.query
+import arrow.aql.extensions.either.select.select
+import arrow.aql.extensions.either.select.value
+import arrow.aql.extensions.either.whereOr.orRaise
+import arrow.aql.extensions.either.whereOr.where
 import arrow.aql.extensions.list.count.count
 import arrow.aql.extensions.list.from.join
 import arrow.aql.extensions.list.groupBy.groupBy
@@ -26,7 +31,9 @@ import arrow.core.Option
 import arrow.core.Some
 import arrow.core.None
 import arrow.core.extensions.order
-import arrow.core.test.UnitSpec
+import arrow.core.left
+import arrow.core.right
+import arrow.test.UnitSpec
 import io.kotlintest.shouldBe
 
 class AQLTests : UnitSpec() {
@@ -85,6 +92,20 @@ class AQLTests : UnitSpec() {
       listOf(john, jane, jack).query {
         selectAll() where { age > 30 } groupBy { age }
       }.value() shouldBe mapOf(32 to listOf(jane, jack))
+    }
+
+    "AQL is able to filter using `whereOr`" {
+      john.right().query {
+        select { name } where { this.name.startsWith("J") } orRaise { "InvalidName" }
+      }.value() shouldBe john.name.right()
+    }
+
+    "AQL is unable to filter using `whereOr`" {
+      val error = "InvalidName"
+
+      john.right().query {
+        select { name } where { this.name.startsWith("a") } orRaise { error }
+      }.value() shouldBe error.left()
     }
 
     "AQL is able to `sum`" {
