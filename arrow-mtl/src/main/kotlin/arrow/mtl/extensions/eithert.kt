@@ -1,13 +1,13 @@
 package arrow.mtl.extensions
 
-import arrow.Kind
+  import arrow.Kind
 import arrow.Kind2
 import arrow.core.Either
 import arrow.core.EitherPartialOf
 import arrow.core.Eval
+import arrow.core.Eval.Now
 import arrow.core.Right
 import arrow.core.Tuple2
-import arrow.core.ap
 import arrow.core.extensions.either.eq.eq
 import arrow.core.extensions.either.foldable.foldable
 import arrow.core.extensions.either.traverse.traverse
@@ -67,43 +67,39 @@ interface EitherTFunctor<L, F> : Functor<EitherTPartialOf<L, F>> {
 @undocumented
 interface EitherTApply<L, F> : Apply<EitherTPartialOf<L, F>>, EitherTFunctor<L, F> {
 
-  fun AF(): Applicative<F>
+  fun MF(): Monad<F>
 
-  override fun FF(): Functor<F> = AF()
+  override fun FF(): Functor<F> = MF()
 
   override fun <A, B> EitherTOf<L, F, A>.map(f: (A) -> B): EitherT<L, F, B> =
-    fix().map(AF(), f)
+    fix().map(MF(), f)
 
   override fun <A, B> EitherTOf<L, F, A>.ap(ff: EitherTOf<L, F, (A) -> B>): EitherT<L, F, B> =
-    fix().ap(AF(), ff)
+    fix().ap(MF(), ff)
 
   override fun <A, B> Kind<EitherTPartialOf<L, F>, A>.apEval(ff: Eval<Kind<EitherTPartialOf<L, F>, (A) -> B>>): Eval<Kind<EitherTPartialOf<L, F>, B>> =
-    AF().run { value().apEval(ff.map { it.value().map { eitherF -> { eitherA: Either<L, A> -> eitherA.ap(eitherF) } } }) }
-      .map(::EitherT)
+    fix().flatMap(MF()) { a -> ff.value().map { f -> f(a) } }.let(::Now)
 }
 
 @extension
 @undocumented
 interface EitherTApplicative<L, F> : Applicative<EitherTPartialOf<L, F>>, EitherTApply<L, F> {
 
-  override fun AF(): Applicative<F>
-
-  override fun FF(): Functor<F> = AF()
+  override fun MF(): Monad<F>
+  override fun FF(): Functor<F> = MF()
 
   override fun <A> just(a: A): EitherT<L, F, A> =
-    EitherT.just(AF(), a)
+    EitherT.just(MF(), a)
 
   override fun <A, B> EitherTOf<L, F, A>.map(f: (A) -> B): EitherT<L, F, B> =
-    fix().map(AF(), f)
+    fix().map(MF(), f)
 }
 
 @extension
 @undocumented
 interface EitherTMonad<L, F> : Monad<EitherTPartialOf<L, F>>, EitherTApplicative<L, F> {
 
-  fun MF(): Monad<F>
-
-  override fun AF(): Applicative<F> = MF()
+  override fun MF(): Monad<F>
 
   override fun <A, B> EitherTOf<L, F, A>.map(f: (A) -> B): EitherT<L, F, B> =
     fix().map(MF(), f)
@@ -122,15 +118,14 @@ interface EitherTMonad<L, F> : Monad<EitherTPartialOf<L, F>>, EitherTApplicative
 @undocumented
 interface EitherTApplicativeError<L, F> : ApplicativeError<EitherTPartialOf<L, F>, L>, EitherTApplicative<L, F> {
 
-  fun MF(): Monad<F>
-  override fun AF(): Applicative<F> = MF()
+  override fun MF(): Monad<F>
 
-  override fun <A> raiseError(e: L): Kind<EitherTPartialOf<L, F>, A> = EitherT.left(AF(), e)
+  override fun <A> raiseError(e: L): Kind<EitherTPartialOf<L, F>, A> = EitherT.left(MF(), e)
 
   override fun <A> Kind<EitherTPartialOf<L, F>, A>.handleErrorWith(f: (L) -> Kind<EitherTPartialOf<L, F>, A>): Kind<EitherTPartialOf<L, F>, A> =
     MF().run {
       value().flatMap {
-        it.fold({ f(it).value() }, { AF().just(it.right()) })
+        it.fold({ f(it).value() }, { MF().just(it.right()) })
       }.let(::EitherT)
     }
 }
@@ -139,7 +134,6 @@ interface EitherTApplicativeError<L, F> : ApplicativeError<EitherTPartialOf<L, F
 @undocumented
 interface EitherTMonadError<L, F> : MonadError<EitherTPartialOf<L, F>, L>, EitherTApplicativeError<L, F>, EitherTMonad<L, F> {
   override fun MF(): Monad<F>
-  override fun AF(): Applicative<F> = MF()
 }
 
 @extension
@@ -260,8 +254,7 @@ interface EitherTDecidableInstance<L, F> : Decidable<EitherTPartialOf<L, F>>, Ei
 
 @extension
 interface EitherTAlternative<L, F> : Alternative<EitherTPartialOf<L, F>>, EitherTApplicative<L, F> {
-  override fun AF(): Applicative<F> = MF()
-  fun MF(): Monad<F>
+  override fun MF(): Monad<F>
   fun ME(): Monoid<L>
 
   override fun <A> empty(): Kind<EitherTPartialOf<L, F>, A> = EitherT(MF().just(ME().empty().left()))

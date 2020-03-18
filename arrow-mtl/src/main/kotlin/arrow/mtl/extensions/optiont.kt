@@ -83,13 +83,7 @@ interface OptionTApplicative<F> : Applicative<OptionTPartialOf<F>>, OptionTFunct
 
   // This is not stacksafe for unstacksafe F, but this is better than nothing.
   override fun <A, B> Kind<OptionTPartialOf<F>, A>.apEval(ff: Eval<Kind<OptionTPartialOf<F>, (A) -> B>>): Eval<Kind<OptionTPartialOf<F>, B>> =
-    OptionT(
-      MF().fx.monad {
-        value().bind().fold({ None }, { a ->
-          ff.value().value().bind().fold({ None }, { f -> f(a).some() })
-        })
-      }
-    ).let(::Now)
+    fix().flatMap(MF()) { a -> ff.value().fix().map(MF()) { f -> f(a) } }.let(::Now)
 }
 
 @extension
