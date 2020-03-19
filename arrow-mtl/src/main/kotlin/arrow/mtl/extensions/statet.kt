@@ -8,6 +8,7 @@ import arrow.core.Eval
 import arrow.core.Eval.Now
 import arrow.core.ForId
 import arrow.core.Id
+import arrow.core.Option
 import arrow.core.Tuple2
 import arrow.core.extensions.id.monad.monad
 import arrow.core.left
@@ -40,6 +41,8 @@ import arrow.typeclasses.Functor
 import arrow.typeclasses.Monad
 import arrow.typeclasses.MonadCombine
 import arrow.typeclasses.MonadError
+import arrow.typeclasses.MonadLogic
+import arrow.typeclasses.MonadPlus
 import arrow.typeclasses.MonadSyntax
 import arrow.typeclasses.MonadThrow
 import arrow.typeclasses.MonoidK
@@ -293,4 +296,91 @@ interface StateTAlternative<S, F> : Alternative<StateTPartialOf<S, F>>, StateTMo
 interface StateTMonadTrans<S> : MonadTrans<Kind<ForStateT, S>> {
   override fun <G, A> Kind<G, A>.liftT(MG: Monad<G>): Kind2<Kind<ForStateT, S>, G, A> =
     StateT.liftF(MG, this)
+}
+
+@extension
+interface StateTMonadPlus<S, F> : MonadPlus<StateTPartialOf<S, F>>, StateTMonad<S, F>, StateTAlternative<S, F> {
+  override fun MF(): Monad<F>
+  override fun AF(): Alternative<F>
+}
+
+@extension
+interface StateTMonadLogic<S, F> : MonadLogic<StateTPartialOf<S, F>>, StateTMonadPlus<S, F> {
+  fun ML(): MonadLogic<F>
+  override fun MF(): Monad<F> = ML()
+  override fun AF(): Alternative<F> = ML()
+
+  override fun <A> Kind<StateTPartialOf<S, F>, A>.splitM(): Kind<StateTPartialOf<S, F>, Option<Tuple2<Kind<StateTPartialOf<S, F>, A>, A>>> =
+    this.fix().let { fa ->
+      StateT(
+        ML().run {
+          AndThen.id<S>().flatMap { s ->
+            AndThen(fa.runF).andThen {
+              it.splitM().map { option ->
+                option.fold({ s toT Option.empty<Tuple2<Kind<StateTPartialOf<S, F>, A>, A>>() }, { (fa, tupleSA) ->
+                  val (s1, a) = tupleSA
+                  s1 toT Option.just(StateT { _: S -> fa } toT a)
+                })
+              }
+            }
+          }
+        }
+      )
+    }
+
+  override fun <A> Kind<StateTPartialOf<S, F>, A>.interleave(other: Kind<StateTPartialOf<S, F>, A>): Kind<StateTPartialOf<S, F>, A> =
+    (this.fix() to other.fix()).let { (left, right) ->
+      StateT(
+        ML().run {
+          AndThen.id<S>().flatMap { s ->
+            AndThen(left.runF).flatMap { fa ->
+              AndThen(right.runF).andThen {
+                fa.interleave(it)
+              }
+            }
+          }
+        }
+      )
+    }
+
+  override fun <A, B> Kind<StateTPartialOf<S, F>, A>.unweave(ffa: (A) -> Kind<StateTPartialOf<S, F>, B>): Kind<StateTPartialOf<S, F>, B> =
+    this.fix().let { fa ->
+      StateT(
+        ML().run {
+          AndThen(fa.runF).andThen {
+            it.unweave { (s1, a) ->
+              ffa(a).run(s1)
+            }
+          }
+        }
+      )
+    }
+
+  override fun <A, B> Kind<StateTPartialOf<S, F>, A>.ifThen(fb: Kind<StateTPartialOf<S, F>, B>, ffa: (A) -> Kind<StateTPartialOf<S, F>, B>): Kind<StateTPartialOf<S, F>, B> =
+    (this.fix() to fb.fix()).let { (left, right) ->
+      StateT(
+        ML().run {
+          AndThen.id<S>().flatMap { s ->
+            AndThen(left.runF).flatMap { fa ->
+              AndThen(right.runF).andThen {
+                fa.ifThen(it) { (s1, a) ->
+                  ffa(a).run(s1)
+                }
+              }
+            }
+          }
+        }
+      )
+    }
+
+  override fun <A> Kind<StateTPartialOf<S, F>, A>.once(): Kind<StateTPartialOf<S, F>, A> =
+    this.fix().let { fa ->
+      StateT(
+        ML().run {
+          AndThen(fa.runF).andThen {
+            it.once()
+          }
+        }
+      )
+    }
 }
