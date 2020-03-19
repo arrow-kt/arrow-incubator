@@ -31,6 +31,8 @@ import arrow.typeclasses.Monad
  * - As with [MonadBaseControl] this approach of "unlifting" fails in the presence of non-polymorphic higher order actions: `fun g(f: IO<Unit>): IO<Unit>` cannot be lifted without discarding the state for example.
  *
  * @see [MonadBaseControl] For a more powerful version that can lift/unlift entire monad stacks with different base monads.
+ *
+ * ank_macro_hierarchy(arrow.mtl.typeclasses.MonadTransControl)
  */
 interface MonadTransControl<T> : MonadTrans<T> {
 

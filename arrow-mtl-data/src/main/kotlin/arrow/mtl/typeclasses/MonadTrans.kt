@@ -6,6 +6,8 @@ import arrow.typeclasses.Monad
 
 /**
  * [MonadTrans] is a typeclass which abstracts lifting arbitrary monadic computations to a higher context.
+ *
+ * ank_macro_hierarchy(arrow.mtl.typeclasses.MonadTrans)
  */
 interface MonadTrans<F> {
 

@@ -10,6 +10,8 @@ import arrow.typeclasses.Monad
  *
  * For example:
  * - `MonadIO<M>` == `MonadBase<ForIO, M>`
+ *
+ * ank_macro_hierarchy(arrow.mtl.typeclasses.MonadBase)
  */
 interface MonadBase<B, M> {
   fun MM(): Monad<M>

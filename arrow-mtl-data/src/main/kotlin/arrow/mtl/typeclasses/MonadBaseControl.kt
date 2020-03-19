@@ -30,11 +30,13 @@ import arrow.typeclasses.Monad
  *   MBC.control { runInBase -> withFile { file -> runInBase(f(file)) } }
  * ```
  *
- * This apprach has limitations, mainly that it fails in a non-polymorphic setting.
+ * This approach has limitations, mainly that it fails in a non-polymorphic setting.
  * For example it is easy to lift `fun <A> g(a: IO<A>): IO<A>` because it is polymorphic. It is however impossible to lift `fun h(a: IO<Any>): IO<Any>` without discarding the monadic state of the action.
  * [MonadBaseControl] relies on polymorphism to retrieve the monadic state from the action, if the action is not polymorphic that state has to be discarded.
  * Even if the action is polymorphic not everything may be recovered, functions like `fun <A, B> g(a: IO<A>, b: IO<B>): IO<A>` also have to discard state when lifted.
  * However even with these problems it is a useful and working method of integrating functions that take concrete monadic actions as arguments into arbitrary monad stacks.
+ *
+ * ank_macro_hierarchy(arrow.mtl.typeclasses.MonadBaseControl)
  */
 interface MonadBaseControl<B, M> : MonadBase<B, M> {
 
