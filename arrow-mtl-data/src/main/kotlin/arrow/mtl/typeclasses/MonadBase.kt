@@ -5,6 +5,11 @@ import arrow.typeclasses.Monad
 
 /**
  * Lift a computation from `Kind<B, A>` to `Kind<M, A>`
+ *
+ * Useful if you want to specify an exact base monad for a polymorphic monad stack.
+ *
+ * For example:
+ * - `MonadIO<M>` == `MonadBase<ForIO, M>`
  */
 interface MonadBase<B, M> {
   fun MM(): Monad<M>

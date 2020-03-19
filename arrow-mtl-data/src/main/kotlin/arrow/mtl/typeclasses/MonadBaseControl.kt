@@ -3,16 +3,61 @@ package arrow.mtl.typeclasses
 import arrow.Kind
 import arrow.typeclasses.Monad
 
+/**
+ * [MonadBaseControl] provides means of removing and restoring the monadic state with a specified base monad
+ *
+ * This basically allows for the same function as [MonadTransControl] but allows specifying a fixed base monad:
+ * ```kotlin
+ * fun withFile(f: File -> IO<A>): IO<A> = TODO()
+ * ```
+ * Similar to the [MonadTransControl] example we want to lift this as well:
+ * ```kotlin
+ * fun withFileM(f: (File) -> Kind<M, A>): Kind<M, A> = ???
+ * ```
+ * The difference to the MonadTransControl code is that here we do not need to leave the specific base monad in the type
+ * This provides the same benefit that MonadIO does for "unlifting", it leaves the monad stack abstract, while keeping evidence of IO as the base.
+ *
+ * An implementation might look like this:
+ * ```kotlin
+ * fun <M> withFileM(MBC: MonadBaseControl<ForIO, M>, f: (File) -> Kind<M, A>): Kind<M, A> =
+ *   MBC.MM().run { // get the monad instance for M in scope
+ *     MBC.liftBaseWith { runInBase -> withFile { file -> runInBase(f(file)) } }
+ *       .flatMap { ctx -> MBC.run { ctx.restoreM() } }
+ *   }
+ *
+ * // Because using liftBaseWith and flatMap { it.restoreM } together is a very common method there is a utility function called control:
+ * fun <M> withFileM(MBC: MonadBaseControl<ForIO, M>, f: (File) -> Kind<M, A>): Kind<M, A> =
+ *   MBC.control { runInBase -> withFile { file -> runInBase(f(file)) } }
+ * ```
+ *
+ * This apprach has limitations, mainly that it fails in a non-polymorphic setting.
+ * For example it is easy to lift `fun <A> g(a: IO<A>): IO<A>` because it is polymorphic. It is however impossible to lift `fun h(a: IO<Any>): IO<Any>` without discarding the monadic state of the action.
+ * [MonadBaseControl] relies on polymorphism to retrieve the monadic state from the action, if the action is not polymorphic that state has to be discarded.
+ * Even if the action is polymorphic not everything may be recovered, functions like `fun <A, B> g(a: IO<A>, b: IO<B>): IO<A>` also have to discard state when lifted.
+ * However even with these problems it is a useful and working method of integrating functions that take concrete monadic actions as arguments into arbitrary monad stacks.
+ */
 interface MonadBaseControl<B, M> : MonadBase<B, M> {
 
+  /**
+   * Provide a function with can remove all monadic state from any action [M], can be used in combination with [restoreM] to remove and restore monadic context over certain boundaries.
+   *
+   * This returns `Kind<M, A>` because to unlift actions of type [M] it usually needs access to some monadic state.
+   * For example unlifting [Kleisli] first needs to retrieve the stored context.
+   */
   fun <A> liftBaseWith(f: (RunInBase<M, B>) -> Kind<B, A>): Kind<M, A>
 
+  /**
+   * Restores the monadic context from the concrete saved monadic state inside [StM].
+   */
   fun <A> StM<M, A>.restoreM(): Kind<M, A>
 
-  override fun <A> Kind<B, A>.liftBase(): Kind<M, A> = liftBaseWith { this@liftBase }
-
+  /**
+   * Shorthand for `MBC.liftBaseWith {}.flatMap { it.restoreM() }`
+   */
   fun <A> control(f: (RunInBase<M, B>) -> Kind<B, StM<M, A>>): Kind<M, A> =
     MM().run { liftBaseWith(f).flatMap { it.restoreM() } }
+
+  override fun <A> Kind<B, A>.liftBase(): Kind<M, A> = liftBaseWith { this@liftBase }
 
   companion object {
     fun <M> id(MM: Monad<M>): MonadBaseControl<M, M> = object : MonadBaseControl<M, M> {

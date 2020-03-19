@@ -13,17 +13,24 @@ import arrow.typeclasses.Monad
  * ```
  * If we now want to define:
  * ```kotlin
- * fun withFile(f: File -> Kind<T, Kind<ForIO, A>>): Kind<T, Kind<ForIO, A>> = ???
+ * fun withFileT(f: File -> Kind<T, Kind<ForIO, A>>): Kind<T, Kind<ForIO, A>> = ???
  *
  * // concrete example with WriterT
- * fun withFile(f: File -> WriterT<Log, ForIO, A>): WriterT<Log, ForIO, A> = ???
+ * fun withFileWriterT(f: File -> WriterT<Log, ForIO, A>): WriterT<Log, ForIO, A> = ???
  * ```
  * This is a bit troublesome because we cannot use only `MonadTrans` with `liftT` to implement this. This is where `MonadTransControl` comes in:
  * ```kotlin
- * fun withFile(f: File -> Kind<T, Kind<ForIO, A>>): Kind<T, Kind<ForIO, A>> =
+ * fun withFileT(f: File -> Kind<T, Kind<ForIO, A>>): Kind<T, Kind<ForIO, A>> =
  *   liftWith { runT -> withFile { file -> runT(f(file)) } }.flatMap { just(it).restoreT() }
  * ```
  * In the above example the `runT` function strips off the monadic state from the result of `f`. This state is later used with `restoreT` to restore the lost state.
+ *
+ * However this has limitations:
+ * - Usually monad transformer stacks are made up of multiple transformers and while it is possible to unlift them one by one, composing them is not as easy as it should be.
+ * - It is also very useful to know the base monad when working with polymorphic monad stacks. For example lifting bracket from [IO] usually works by defining `fun <F> liftBracket(MBC: MonadBaseControl<F, ForIO>)`. This is not possible with just [MonadTransControl].
+ * - As with [MonadBaseControl] this approach of "unlifting" fails in the presence of non-polymorphic higher order actions: `fun g(f: IO<Unit>): IO<Unit>` cannot be lifted without discarding the state for example.
+ *
+ * @see [MonadBaseControl] For a more powerful version that can lift/unlift entire monad stacks with different base monads.
  */
 interface MonadTransControl<T> : MonadTrans<T> {
 
@@ -38,5 +45,4 @@ interface RunT<T> {
   operator fun <M, A> invoke(MM: Monad<M>, fa: Kind<Kind<T, M>, A>): Kind<M, StT<T, A>>
 }
 
-// TODO Can this be replaced to work entirely at the typelevel with arrow-meta?
 class StT<T, A>(val unsafeState: Any?)
