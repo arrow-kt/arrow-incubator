@@ -38,8 +38,6 @@ import arrow.mtl.WriterTPartialOf
 import arrow.mtl.extensions.kleisli.alternative.alternative
 import arrow.mtl.extensions.kleisli.divisible.divisible
 import arrow.mtl.extensions.kleisli.monadLogic.monadLogic
-import arrow.mtl.fix
-import arrow.typeclasses.Eq
 import arrow.mtl.extensions.kleisli.monadReader.monadReader
 import arrow.mtl.extensions.kleisli.monadState.monadState
 import arrow.mtl.extensions.kleisli.monadWriter.monadWriter
@@ -86,7 +84,7 @@ class KleisliTest : UnitSpec() {
       ),
       MonadLogicLaws.laws(
         Kleisli.monadLogic<Int, ForListK>(ListK.monadLogic()),
-        genK<Int, ForListK>(ListK.genK()),
+        Kleisli.genK<Int, ForListK>(ListK.genK()),
         Kleisli.eqK(ListK.eqK(), 0)
       ),
       MonadReaderLaws.laws<KleisliPartialOf<Int, ForId>, Int>(
@@ -105,7 +103,7 @@ class KleisliTest : UnitSpec() {
       MonadStateLaws.laws(
         Kleisli.monadState<Int, StateTPartialOf<Int, ForId>, Int>(StateT.monadState(Id.monad())),
         Kleisli.genK<Int, StateTPartialOf<Int, ForId>>(StateT.genK(Id.genK(), Gen.int())),
-        Gen.int(), Kleisli.eqK(StateT.eqK(Id.eqK(), Int.eq(), Id.monad(), 0), 1), Int.eq()
+        Gen.int(), Kleisli.eqK(StateT.eqK(Id.eqK(), Int.eq(), 0), 1), Int.eq()
       )
     )
 

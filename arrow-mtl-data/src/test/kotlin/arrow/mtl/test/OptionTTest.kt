@@ -156,7 +156,7 @@ class OptionTTest : UnitSpec() {
       MonadStateLaws.laws(
         OptionT.monadState<StateTPartialOf<Int, ForId>, Int>(StateT.monadState(Id.monad())),
         OptionT.genK(StateT.genK(Id.genK(), Gen.int())), Gen.int(),
-        OptionT.eqK(StateT.eqK(Id.eqK(), Int.eq(), Id.monad(), 1)), Int.eq()
+        OptionT.eqK(StateT.eqK(Id.eqK(), Int.eq(), 1)), Int.eq()
       )
     )
 

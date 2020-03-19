@@ -124,7 +124,7 @@ class EitherTTest : UnitSpec() {
       MonadStateLaws.laws(
         EitherT.monadState<String, StateTPartialOf<Int, ForId>, Int>(StateT.monadState(Id.monad())),
         EitherT.genK(StateT.genK(Id.genK(), Gen.int()), Gen.string()), Gen.int(),
-        EitherT.eqK(StateT.eqK(Id.eqK(), Int.eq(), Id.monad(), 1), String.eq()), Int.eq()
+        EitherT.eqK(StateT.eqK(Id.eqK(), Int.eq(), 1), String.eq()), Int.eq()
       )
     )
 
