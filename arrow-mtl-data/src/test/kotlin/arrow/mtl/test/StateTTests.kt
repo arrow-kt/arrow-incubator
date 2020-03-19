@@ -1,10 +1,16 @@
 package arrow.mtl.test
 
+import arrow.Kind
+import arrow.core.ForListK
 import arrow.core.ForId
 import arrow.core.ForOption
+import arrow.core.ListK
 import arrow.core.Id
 import arrow.core.Option
 import arrow.core.extensions.eq
+import arrow.core.extensions.listk.eqK.eqK
+import arrow.core.extensions.listk.monad.monad
+import arrow.core.extensions.listk.monadLogic.monadLogic
 import arrow.core.extensions.id.eqK.eqK
 import arrow.core.extensions.id.monad.monad
 import arrow.core.extensions.monoid
@@ -16,6 +22,7 @@ import arrow.core.extensions.option.semigroupK.semigroupK
 import arrow.core.test.UnitSpec
 import arrow.core.test.generators.genK
 import arrow.core.test.laws.MonadCombineLaws
+import arrow.core.test.laws.MonadLogicLaws
 import arrow.core.test.laws.SemigroupKLaws
 import arrow.fx.ForIO
 import arrow.fx.IO
@@ -38,6 +45,7 @@ import arrow.mtl.extensions.statet.applicative.applicative
 import arrow.mtl.extensions.statet.functor.functor
 import arrow.mtl.extensions.statet.monad.monad
 import arrow.mtl.extensions.statet.monadCombine.monadCombine
+import arrow.mtl.extensions.statet.monadLogic.monadLogic
 import arrow.mtl.extensions.statet.monadReader.monadReader
 import arrow.mtl.extensions.statet.monadState.monadState
 import arrow.mtl.extensions.statet.monadWriter.monadWriter
@@ -78,6 +86,12 @@ class StateTTests : UnitSpec() {
         StateT.monad(Option.monad()),
         StateT.genK(Option.genK(), Gen.int()),
         StateT.eqK(Option.eqK(), Int.eq(), Option.monad(), 0)
+      ),
+
+      MonadLogicLaws.laws(
+        StateT.monadLogic<Int, ForListK>(ListK.monadLogic()),
+        StateT.genK(ListK.genK(withMaxSize = 20), Gen.int()),
+        StateT.eqK(ListK.eqK(), Int.eq(), ListK.monad(), 1), 50
       ),
 
       MonadStateLaws.laws<StateTPartialOf<Int, ForIO>, Int>(

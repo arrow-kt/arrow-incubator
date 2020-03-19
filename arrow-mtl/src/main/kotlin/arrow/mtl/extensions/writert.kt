@@ -34,6 +34,7 @@ import arrow.typeclasses.Functor
 import arrow.typeclasses.Monad
 import arrow.typeclasses.MonadError
 import arrow.typeclasses.MonadFilter
+import arrow.typeclasses.MonadPlus
 import arrow.typeclasses.MonadSyntax
 import arrow.typeclasses.MonadThrow
 import arrow.typeclasses.Monoid
@@ -151,11 +152,11 @@ interface WriterTSemigroupK<W, F> : SemigroupK<WriterTPartialOf<W, F>> {
 @undocumented
 interface WriterTMonoidK<W, F> : MonoidK<WriterTPartialOf<W, F>>, WriterTSemigroupK<W, F> {
 
-  fun MF(): MonoidK<F>
+  fun MK(): MonoidK<F>
 
-  override fun SS(): SemigroupK<F> = MF()
+  override fun SS(): SemigroupK<F> = MK()
 
-  override fun <A> empty(): WriterT<W, F, A> = WriterT(MF().empty())
+  override fun <A> empty(): WriterT<W, F, A> = WriterT(MK().empty())
 }
 
 @extension
@@ -231,7 +232,7 @@ interface WriterTMonadFilter<W, F> : MonadFilter<WriterTPartialOf<W, F>>, Writer
 @extension
 interface WriterTAlternative<W, F> : Alternative<WriterTPartialOf<W, F>>, WriterTApplicative<W, F>, WriterTMonoidK<W, F> {
   override fun AF(): Applicative<F> = AL()
-  override fun MF(): MonoidK<F> = AL()
+  override fun MK(): MonoidK<F> = AL()
   override fun MM(): Monoid<W>
   fun AL(): Alternative<F>
 
@@ -272,6 +273,14 @@ interface WriterTEqK<W, F> : EqK<WriterTPartialOf<W, F>> {
 interface WriterTMonadTrans<W> : MonadTrans<Kind<ForWriterT, W>> {
   fun MW(): Monoid<W>
   override fun <G, A> Kind<G, A>.liftT(MF: Monad<G>): Kind2<Kind<ForWriterT, W>, G, A> = WriterT(MF.run { map { MW().empty() toT it } })
+}
+
+@extension
+interface WriterTMonadPlus<W, F> : MonadPlus<WriterTPartialOf<W, F>>, WriterTMonad<W, F>, WriterTAlternative<W, F> {
+  override fun MF(): Monad<F>
+  override fun MM(): Monoid<W>
+  override fun AL(): Alternative<F>
+  override fun AF(): Applicative<F> = AL()
 }
 
 @extension

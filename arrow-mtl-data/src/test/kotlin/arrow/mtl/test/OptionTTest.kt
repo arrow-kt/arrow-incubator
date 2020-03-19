@@ -24,6 +24,7 @@ import arrow.core.test.UnitSpec
 import arrow.core.test.generators.genK
 import arrow.core.test.laws.DivisibleLaws
 import arrow.core.test.laws.FunctorFilterLaws
+import arrow.core.test.laws.MonadPlusLaws
 import arrow.core.test.laws.MonoidKLaws
 import arrow.core.test.laws.SemigroupKLaws
 import arrow.core.test.laws.TraverseFilterLaws
@@ -45,6 +46,7 @@ import arrow.mtl.extensions.optiont.divisible.divisible
 import arrow.mtl.extensions.optiont.eqK.eqK
 import arrow.mtl.extensions.optiont.functorFilter.functorFilter
 import arrow.mtl.extensions.optiont.monad.monad
+import arrow.mtl.extensions.optiont.monadPlus.monadPlus
 import arrow.mtl.extensions.optiont.monadReader.monadReader
 import arrow.mtl.extensions.optiont.monadState.monadState
 import arrow.mtl.extensions.optiont.monadTrans.monadTrans
@@ -130,6 +132,12 @@ class OptionTTest : UnitSpec() {
         Id.monad(),
         OptionT.monad(Id.monad()),
         Id.genK(),
+        OptionT.eqK(Id.eqK())
+      ),
+
+      MonadPlusLaws.laws(
+        OptionT.monadPlus(Id.monad()),
+        OptionT.genK(Id.genK()),
         OptionT.eqK(Id.eqK())
       ),
 

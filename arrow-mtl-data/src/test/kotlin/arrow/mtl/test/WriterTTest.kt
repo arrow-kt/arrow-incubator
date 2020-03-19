@@ -11,10 +11,12 @@ import arrow.core.Option
 import arrow.core.extensions.const.divisible.divisible
 import arrow.core.extensions.const.eqK.eqK
 import arrow.core.extensions.eq
+import arrow.core.extensions.listk.alternative.alternative
 import arrow.core.extensions.id.eqK.eqK
 import arrow.core.extensions.id.monad.monad
 import arrow.core.extensions.listk.eq.eq
 import arrow.core.extensions.listk.eqK.eqK
+import arrow.core.extensions.listk.monad.monad
 import arrow.core.extensions.listk.monoid.monoid
 import arrow.core.extensions.listk.monoidK.monoidK
 import arrow.core.extensions.monoid
@@ -30,6 +32,7 @@ import arrow.core.test.generators.genK
 import arrow.core.test.laws.AlternativeLaws
 import arrow.core.test.laws.DivisibleLaws
 import arrow.core.test.laws.MonadFilterLaws
+import arrow.core.test.laws.MonadPlusLaws
 import arrow.core.test.laws.MonoidKLaws
 import arrow.fx.ForIO
 import arrow.fx.IO
@@ -49,6 +52,7 @@ import arrow.mtl.extensions.writert.eqK.eqK
 import arrow.mtl.extensions.writert.functor.functor
 import arrow.mtl.extensions.writert.monad.monad
 import arrow.mtl.extensions.writert.monadFilter.monadFilter
+import arrow.mtl.extensions.writert.monadPlus.monadPlus
 import arrow.mtl.extensions.writert.monadReader.monadReader
 import arrow.mtl.extensions.writert.monadState.monadState
 import arrow.mtl.extensions.writert.monadTrans.monadTrans
@@ -125,6 +129,19 @@ class WriterTTest : UnitSpec() {
         ListK.eq(Int.eq())
       ),
 
+      MonadFilterLaws.laws(
+        WriterT.monadFilter(Option.monadFilter(), ListK.monoid<Int>()),
+        WriterT.functor<ListK<Int>, ForOption>(Option.functor()),
+        WriterT.applicative(Option.applicative(), ListK.monoid<Int>()),
+        WriterT.monad(Option.monad(), ListK.monoid<Int>()),
+        WriterT.genK(Option.genK(), Gen.list(Gen.int()).map { it.k() }),
+        optionEQK()
+      ),
+      MonadPlusLaws.laws(
+        WriterT.monadPlus(ListK.monad(), String.monoid(), ListK.alternative()),
+        WriterT.genK(ListK.genK(), Gen.string()),
+        WriterT.eqK(ListK.eqK(), String.eq())
+      ),
       MonadReaderLaws.laws(
         WriterT.monadReader<String, KleisliPartialOf<Int, ForId>, Int>(Kleisli.monadReader(Id.monad()), String.monoid()),
         WriterT.genK(Kleisli.genK<Int, ForId>(Id.genK()), Gen.string()), Gen.int(),
