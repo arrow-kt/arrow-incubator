@@ -2,6 +2,7 @@ package arrow.mtl.test
 
 import arrow.Kind
 import arrow.core.Const
+import arrow.core.ForId
 import arrow.core.ForNonEmptyList
 import arrow.core.Id
 import arrow.core.NonEmptyList
@@ -20,9 +21,7 @@ import arrow.core.extensions.option.eqK.eqK
 import arrow.core.extensions.option.monad.monad
 import arrow.core.extensions.option.traverseFilter.traverseFilter
 import arrow.core.test.UnitSpec
-import arrow.core.test.generators.GenK
 import arrow.core.test.generators.genK
-import arrow.core.test.generators.option
 import arrow.core.test.laws.DivisibleLaws
 import arrow.core.test.laws.FunctorFilterLaws
 import arrow.core.test.laws.MonadPlusLaws
@@ -30,11 +29,17 @@ import arrow.core.test.laws.MonoidKLaws
 import arrow.core.test.laws.SemigroupKLaws
 import arrow.core.test.laws.TraverseFilterLaws
 import arrow.fx.IO
+import arrow.fx.test.eq.eqK
 import arrow.mtl.EitherT
-import arrow.mtl.ForOptionT
+import arrow.mtl.Kleisli
+import arrow.mtl.KleisliPartialOf
 import arrow.mtl.OptionT
 import arrow.mtl.OptionTPartialOf
+import arrow.mtl.StateT
+import arrow.mtl.StateTPartialOf
+import arrow.mtl.WriterT
 import arrow.mtl.extensions.ComposedFunctorFilter
+import arrow.mtl.extensions.kleisli.monadReader.monadReader
 import arrow.mtl.extensions.nested
 import arrow.mtl.extensions.optiont.applicative.applicative
 import arrow.mtl.extensions.optiont.divisible.divisible
@@ -42,12 +47,23 @@ import arrow.mtl.extensions.optiont.eqK.eqK
 import arrow.mtl.extensions.optiont.functorFilter.functorFilter
 import arrow.mtl.extensions.optiont.monad.monad
 import arrow.mtl.extensions.optiont.monadPlus.monadPlus
+import arrow.mtl.extensions.optiont.monadReader.monadReader
+import arrow.mtl.extensions.optiont.monadState.monadState
 import arrow.mtl.extensions.optiont.monadTrans.monadTrans
+import arrow.mtl.extensions.optiont.monadWriter.monadWriter
 import arrow.mtl.extensions.optiont.monoidK.monoidK
 import arrow.mtl.extensions.optiont.semigroupK.semigroupK
 import arrow.mtl.extensions.optiont.traverseFilter.traverseFilter
+import arrow.mtl.extensions.statet.monadState.monadState
+import arrow.mtl.extensions.writert.eqK.eqK
+import arrow.mtl.extensions.writert.monadWriter.monadWriter
 import arrow.mtl.test.eq.eqK
+import arrow.mtl.test.generators.genK
 import arrow.mtl.test.generators.nested
+import arrow.mtl.test.laws.MonadReaderLaws
+import arrow.mtl.test.laws.MonadStateLaws
+import arrow.mtl.test.laws.MonadTransLaws
+import arrow.mtl.test.laws.MonadWriterLaws
 import arrow.typeclasses.Monad
 import io.kotlintest.properties.Gen
 import io.kotlintest.properties.forAll
@@ -123,6 +139,24 @@ class OptionTTest : UnitSpec() {
         OptionT.monadPlus(Id.monad()),
         OptionT.genK(Id.genK()),
         OptionT.eqK(Id.eqK())
+      ),
+
+      MonadReaderLaws.laws(
+        OptionT.monadReader<KleisliPartialOf<Int, ForId>, Int>(Kleisli.monadReader(Id.monad())),
+        OptionT.genK(Kleisli.genK<Int, ForId>(Id.genK())), Gen.int(),
+        OptionT.eqK(Kleisli.eqK(Id.eqK(), 1)), Int.eq()
+      ),
+
+      MonadWriterLaws.laws(
+        OptionT.monadWriter(WriterT.monadWriter(Id.monad(), String.monoid())), String.monoid(), Gen.string(),
+        OptionT.genK(WriterT.genK(Id.genK(), Gen.string())),
+        OptionT.eqK(WriterT.eqK(Id.eqK(), String.eq())), String.eq()
+      ),
+
+      MonadStateLaws.laws(
+        OptionT.monadState<StateTPartialOf<Int, ForId>, Int>(StateT.monadState(Id.monad())),
+        OptionT.genK(StateT.genK(Id.genK(), Gen.int())), Gen.int(),
+        OptionT.eqK(StateT.eqK(Id.eqK(), Int.eq(), 1)), Int.eq()
       )
     )
 
@@ -151,11 +185,5 @@ class OptionTTest : UnitSpec() {
         OptionT.fromOption<ForNonEmptyList, String>(NELM, None).toRight(NELM) { a } == EitherT.left<Int, ForNonEmptyList, String>(NELM, a)
       }
     }
-  }
-}
-
-fun <F> OptionT.Companion.genK(genkF: GenK<F>) = object : GenK<Kind<ForOptionT, F>> {
-  override fun <A> genK(gen: Gen<A>): Gen<Kind<Kind<ForOptionT, F>, A>> = genkF.genK(Gen.option(gen)).map {
-    OptionT(it)
   }
 }

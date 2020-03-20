@@ -1,4 +1,4 @@
-package arrow.mtl.test
+package arrow.mtl.test.laws
 
 import arrow.Kind
 import arrow.Kind2
