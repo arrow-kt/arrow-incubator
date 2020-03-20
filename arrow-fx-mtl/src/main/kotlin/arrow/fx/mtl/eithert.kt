@@ -122,8 +122,8 @@ interface EitherTConcurrent<L, F> : Concurrent<EitherTPartialOf<L, F>>, EitherTA
   override fun dispatchers(): Dispatchers<EitherTPartialOf<L, F>> =
     CF().dispatchers() as Dispatchers<EitherTPartialOf<L, F>>
 
-  override fun <A> cancelable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<EitherTPartialOf<L, F>>): EitherT<L, F, A> = CF().run {
-    EitherT.liftF(this, cancelable(k.andThen { it.value().void() }))
+  override fun <A> cancellable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<EitherTPartialOf<L, F>>): EitherT<L, F, A> = CF().run {
+    EitherT.liftF(this, cancellable(k.andThen { it.value().void() }))
   }
 
   override fun <A> EitherTOf<L, F, A>.fork(ctx: CoroutineContext): EitherT<L, F, Fiber<EitherTPartialOf<L, F>, A>> = CF().run {

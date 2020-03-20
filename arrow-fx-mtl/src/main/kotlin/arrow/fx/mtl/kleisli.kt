@@ -122,8 +122,8 @@ interface KleisliConcurrent<D, F> : Concurrent<KleisliPartialOf<D, F>>, KleisliA
   override fun dispatchers(): Dispatchers<KleisliPartialOf<D, F>> =
     CF().dispatchers() as Dispatchers<KleisliPartialOf<D, F>>
 
-  override fun <A> cancelable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<KleisliPartialOf<D, F>>): Kleisli<D, F, A> = CF().run {
-    Kleisli { d -> cancelable(k.andThen { it.run(d).void() }) }
+  override fun <A> cancellable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<KleisliPartialOf<D, F>>): Kleisli<D, F, A> = CF().run {
+    Kleisli { d -> cancellable(k.andThen { it.run(d).void() }) }
   }
 
   override fun <A> KleisliOf<D, F, A>.fork(ctx: CoroutineContext): Kleisli<D, F, Fiber<KleisliPartialOf<D, F>, A>> = CF().run {

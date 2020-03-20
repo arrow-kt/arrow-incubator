@@ -112,8 +112,8 @@ interface OptionTConcurrent<F> : Concurrent<OptionTPartialOf<F>>, OptionTAsync<F
   override fun dispatchers(): Dispatchers<OptionTPartialOf<F>> =
     CF().dispatchers() as Dispatchers<OptionTPartialOf<F>>
 
-  override fun <A> cancelable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<OptionTPartialOf<F>>): OptionT<F, A> = CF().run {
-    OptionT.liftF(this, cancelable(k.andThen { it.value().void() }))
+  override fun <A> cancellable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<OptionTPartialOf<F>>): OptionT<F, A> = CF().run {
+    OptionT.liftF(this, cancellable(k.andThen { it.value().void() }))
   }
 
   override fun <A> OptionTOf<F, A>.fork(ctx: CoroutineContext): OptionT<F, Fiber<OptionTPartialOf<F>, A>> = CF().run {
