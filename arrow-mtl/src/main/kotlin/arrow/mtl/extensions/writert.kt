@@ -16,6 +16,8 @@ import arrow.mtl.WriterTOf
 import arrow.mtl.WriterTPartialOf
 import arrow.mtl.extensions.writert.monad.monad
 import arrow.mtl.fix
+import arrow.mtl.typeclasses.MonadReader
+import arrow.mtl.typeclasses.MonadState
 import arrow.mtl.typeclasses.MonadTrans
 import arrow.mtl.typeclasses.MonadWriter
 import arrow.mtl.value
@@ -32,6 +34,7 @@ import arrow.typeclasses.Functor
 import arrow.typeclasses.Monad
 import arrow.typeclasses.MonadError
 import arrow.typeclasses.MonadFilter
+import arrow.typeclasses.MonadPlus
 import arrow.typeclasses.MonadSyntax
 import arrow.typeclasses.MonadThrow
 import arrow.typeclasses.Monoid
@@ -149,11 +152,11 @@ interface WriterTSemigroupK<W, F> : SemigroupK<WriterTPartialOf<W, F>> {
 @undocumented
 interface WriterTMonoidK<W, F> : MonoidK<WriterTPartialOf<W, F>>, WriterTSemigroupK<W, F> {
 
-  fun MF(): MonoidK<F>
+  fun MK(): MonoidK<F>
 
-  override fun SS(): SemigroupK<F> = MF()
+  override fun SS(): SemigroupK<F> = MK()
 
-  override fun <A> empty(): WriterT<W, F, A> = WriterT(MF().empty())
+  override fun <A> empty(): WriterT<W, F, A> = WriterT(MK().empty())
 }
 
 @extension
@@ -227,29 +230,9 @@ interface WriterTMonadFilter<W, F> : MonadFilter<WriterTPartialOf<W, F>>, Writer
 }
 
 @extension
-interface WriterTMonadWriter<W, F> : MonadWriter<WriterTPartialOf<W, F>, W>, WriterTMonad<W, F> {
-
-  override fun MF(): Monad<F>
-
-  override fun MM(): Monoid<W>
-
-  override fun <A> Kind<WriterTPartialOf<W, F>, A>.listen(): Kind<WriterTPartialOf<W, F>, Tuple2<W, A>> = MF().run {
-    WriterT(fix().content(this).flatMap { a -> fix().write(this).map { l -> Tuple2(l, Tuple2(l, a)) } })
-  }
-
-  override fun <A> Kind<WriterTPartialOf<W, F>, Tuple2<(W) -> W, A>>.pass(): WriterT<W, F, A> = MF().run {
-    WriterT(fix().content(this).flatMap { tuple2FA -> fix().write(this).map { l -> Tuple2(tuple2FA.a(l), tuple2FA.b) } })
-  }
-
-  override fun <A> writer(aw: Tuple2<W, A>): WriterT<W, F, A> = WriterT.put2(MF(), aw.b, aw.a)
-
-  override fun tell(w: W): Kind<WriterTPartialOf<W, F>, Unit> = WriterT.tell2(MF(), w)
-}
-
-@extension
 interface WriterTAlternative<W, F> : Alternative<WriterTPartialOf<W, F>>, WriterTApplicative<W, F>, WriterTMonoidK<W, F> {
   override fun AF(): Applicative<F> = AL()
-  override fun MF(): MonoidK<F> = AL()
+  override fun MK(): MonoidK<F> = AL()
   override fun MM(): Monoid<W>
   fun AL(): Alternative<F>
 
@@ -290,4 +273,53 @@ interface WriterTEqK<W, F> : EqK<WriterTPartialOf<W, F>> {
 interface WriterTMonadTrans<W> : MonadTrans<Kind<ForWriterT, W>> {
   fun MW(): Monoid<W>
   override fun <G, A> Kind<G, A>.liftT(MF: Monad<G>): Kind2<Kind<ForWriterT, W>, G, A> = WriterT(MF.run { map { MW().empty() toT it } })
+}
+
+@extension
+interface WriterTMonadPlus<W, F> : MonadPlus<WriterTPartialOf<W, F>>, WriterTMonad<W, F>, WriterTAlternative<W, F> {
+  override fun MF(): Monad<F>
+  override fun MM(): Monoid<W>
+  override fun AL(): Alternative<F>
+  override fun AF(): Applicative<F> = AL()
+}
+
+@extension
+interface WriterTMonadWriter<W, F> : MonadWriter<WriterTPartialOf<W, F>, W>, WriterTMonad<W, F> {
+
+  override fun MF(): Monad<F>
+
+  override fun MM(): Monoid<W>
+
+  override fun <A> Kind<WriterTPartialOf<W, F>, A>.listen(): Kind<WriterTPartialOf<W, F>, Tuple2<W, A>> = MF().run {
+    WriterT(fix().content(this).flatMap { a -> fix().write(this).map { l -> Tuple2(l, Tuple2(l, a)) } })
+  }
+
+  override fun <A> Kind<WriterTPartialOf<W, F>, Tuple2<(W) -> W, A>>.pass(): WriterT<W, F, A> = MF().run {
+    WriterT(fix().content(this).flatMap { tuple2FA -> fix().write(this).map { l -> Tuple2(tuple2FA.a(l), tuple2FA.b) } })
+  }
+
+  override fun <A> writer(aw: Tuple2<W, A>): WriterT<W, F, A> = WriterT.put2(MF(), aw.b, aw.a)
+
+  override fun tell(w: W): Kind<WriterTPartialOf<W, F>, Unit> = WriterT.tell2(MF(), w)
+}
+
+@extension
+interface WriterTMonadReader<W, F, D> : MonadReader<WriterTPartialOf<W, F>, D>, WriterTMonad<W, F> {
+  fun MR(): MonadReader<F, D>
+  override fun MF(): Monad<F> = MR()
+  override fun MM(): Monoid<W>
+
+  override fun ask(): Kind<WriterTPartialOf<W, F>, D> = WriterT.liftF(MR().ask(), MM(), MR())
+  override fun <A> Kind<WriterTPartialOf<W, F>, A>.local(f: (D) -> D): Kind<WriterTPartialOf<W, F>, A> =
+    WriterT(MR().run { value().local(f) })
+}
+
+@extension
+interface WriterTMonadState<W, F, S> : MonadState<WriterTPartialOf<W, F>, S>, WriterTMonad<W, F> {
+  fun MS(): MonadState<F, S>
+  override fun MF(): Monad<F> = MS()
+  override fun MM(): Monoid<W>
+
+  override fun get(): Kind<WriterTPartialOf<W, F>, S> = WriterT.liftF(MS().get(), MM(), MS())
+  override fun set(s: S): Kind<WriterTPartialOf<W, F>, Unit> = WriterT.liftF(MS().set(s), MM(), MS())
 }

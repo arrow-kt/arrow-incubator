@@ -117,10 +117,6 @@ data class EitherT<A, F, B>(private val value: Kind<F, Either<A, B>>) : EitherTO
     })
   }
 
-  fun <C> ap(AF: Applicative<F>, ff: EitherTOf<A, F, (B) -> C>): EitherT<A, F, C> =
-    EitherT(AF.mapN(ff.value(), value) { (a, b) ->
-      b.flatMap { bb ->
-        a.map { f -> f(bb) }
-      }
-    })
+  fun <C> ap(MF: Monad<F>, ff: EitherTOf<A, F, (B) -> C>): EitherT<A, F, C> =
+    fix().flatMap(MF) { a -> ff.fix().map(MF) { f -> f(a) } }
 }
