@@ -5,6 +5,7 @@ import arrow.core.AndThen
 import arrow.core.Either
 import arrow.core.Tuple2
 import arrow.core.Tuple3
+import arrow.core.andThen
 import arrow.extension
 import arrow.fx.IO
 import arrow.fx.RacePair
@@ -122,7 +123,7 @@ interface KleisliConcurrent<D, F> : Concurrent<KleisliPartialOf<D, F>>, KleisliA
     CF().dispatchers() as Dispatchers<KleisliPartialOf<D, F>>
 
   override fun <A> cancelable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<KleisliPartialOf<D, F>>): Kleisli<D, F, A> = CF().run {
-    Kleisli { d -> cancelable { cb -> k(cb).run(d).map { Unit } } }
+    Kleisli { d -> cancelable(k.andThen { it.run(d).void() } }
   }
 
   override fun <A> KleisliOf<D, F, A>.fork(ctx: CoroutineContext): Kleisli<D, F, Fiber<KleisliPartialOf<D, F>, A>> = CF().run {
