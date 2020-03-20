@@ -112,7 +112,7 @@ interface WriterTConcurrent<W, F> : Concurrent<WriterTPartialOf<W, F>>, WriterTA
     CF().dispatchers() as Dispatchers<WriterTPartialOf<W, F>>
 
   override fun <A> cancelable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<WriterTPartialOf<W, F>>): WriterT<W, F, A> = CF().run {
-    WriterT.liftF(cancelable(k.andThen { it.value().void() })), MM(), this)
+    WriterT.liftF(cancelable(k.andThen { it.value().void() }), MM(), this)
   }
 
   override fun <A> WriterTOf<W, F, A>.fork(ctx: CoroutineContext): WriterT<W, F, Fiber<WriterTPartialOf<W, F>, A>> = CF().run {
