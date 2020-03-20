@@ -9,6 +9,7 @@ import arrow.core.Right
 import arrow.core.Some
 import arrow.core.Tuple2
 import arrow.core.Tuple3
+import arrow.core.andThen
 import arrow.core.flatMap
 import arrow.extension
 import arrow.fx.IO
@@ -121,8 +122,8 @@ interface EitherTConcurrent<L, F> : Concurrent<EitherTPartialOf<L, F>>, EitherTA
   override fun dispatchers(): Dispatchers<EitherTPartialOf<L, F>> =
     CF().dispatchers() as Dispatchers<EitherTPartialOf<L, F>>
 
-  override fun <A> cancelable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<EitherTPartialOf<L, F>>): EitherT<L, F, A> = CF().run {
-    EitherT.liftF(this, cancelable { cb -> k(cb).value().map { Unit } })
+  override fun <A> cancellable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<EitherTPartialOf<L, F>>): EitherT<L, F, A> = CF().run {
+    EitherT.liftF(this, cancellable(k.andThen { it.value().void() }))
   }
 
   override fun <A> EitherTOf<L, F, A>.fork(ctx: CoroutineContext): EitherT<L, F, Fiber<EitherTPartialOf<L, F>, A>> = CF().run {
