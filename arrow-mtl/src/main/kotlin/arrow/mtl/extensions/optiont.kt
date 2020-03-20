@@ -4,6 +4,7 @@ import arrow.Kind
 import arrow.Kind2
 import arrow.core.Either
 import arrow.core.Eval
+import arrow.core.Eval.Now
 import arrow.core.ForOption
 import arrow.core.None
 import arrow.core.Option
@@ -28,9 +29,12 @@ import arrow.mtl.OptionTPartialOf
 import arrow.mtl.extensions.optiont.monad.monad
 import arrow.mtl.fix
 import arrow.mtl.typeclasses.ComposedTraverse
+import arrow.mtl.typeclasses.MonadReader
+import arrow.mtl.typeclasses.MonadState
 import arrow.mtl.typeclasses.MonadBase
 import arrow.mtl.typeclasses.MonadBaseControl
 import arrow.mtl.typeclasses.MonadTrans
+import arrow.mtl.typeclasses.MonadWriter
 import arrow.mtl.typeclasses.MonadTransControl
 import arrow.mtl.typeclasses.Nested
 import arrow.mtl.typeclasses.RunT
@@ -52,6 +56,7 @@ import arrow.typeclasses.Functor
 import arrow.typeclasses.FunctorFilter
 import arrow.typeclasses.Monad
 import arrow.typeclasses.MonadError
+import arrow.typeclasses.MonadPlus
 import arrow.typeclasses.MonadSyntax
 import arrow.typeclasses.MonadThrow
 import arrow.typeclasses.MonoidK
@@ -82,9 +87,9 @@ interface OptionTApplicative<F> : Applicative<OptionTPartialOf<F>>, OptionTFunct
   override fun <A, B> OptionTOf<F, A>.ap(ff: OptionTOf<F, (A) -> B>): OptionT<F, B> =
     fix().ap(MF(), ff)
 
+  // This is not stacksafe for unstacksafe F, but this is better than nothing.
   override fun <A, B> Kind<OptionTPartialOf<F>, A>.apEval(ff: Eval<Kind<OptionTPartialOf<F>, (A) -> B>>): Eval<Kind<OptionTPartialOf<F>, B>> =
-    MF().run { value().apEval(ff.map { it.value().map { optF -> { optA: Option<A> -> optA.ap(optF) } } }) }
-      .map(::OptionT)
+    fix().flatMap(MF()) { a -> ff.value().fix().map(MF()) { f -> f(a) } }.let(::Now)
 }
 
 @extension
@@ -317,6 +322,52 @@ interface OptionTMonadTrans : MonadTrans<ForOptionT> {
   override fun <M> liftMonad(MM: Monad<M>): Monad<Kind<ForOptionT, M>> = object : OptionTMonad<M> {
     override fun MF(): Monad<M> = MM
   }
+}
+
+@extension
+interface OptionTMonadPlus<F> : MonadPlus<OptionTPartialOf<F>>, OptionTMonad<F>, OptionTAlternative<F> {
+  override fun MF(): Monad<F>
+}
+
+@extension
+interface OptionTMonadReader<F, D> : MonadReader<OptionTPartialOf<F>, D>, OptionTMonad<F> {
+  fun MR(): MonadReader<F, D>
+  override fun MF(): Monad<F> = MR()
+
+  override fun ask(): Kind<OptionTPartialOf<F>, D> = OptionT.liftF(MR(), MR().ask())
+  override fun <A> Kind<OptionTPartialOf<F>, A>.local(f: (D) -> D): Kind<OptionTPartialOf<F>, A> =
+    OptionT(MR().run { value().local(f) })
+}
+
+@extension
+interface OptionTMonadWriter<F, W> : MonadWriter<OptionTPartialOf<F>, W>, OptionTMonad<F> {
+  fun MW(): MonadWriter<F, W>
+  override fun MF(): Monad<F> = MW()
+
+  override fun <A> Kind<OptionTPartialOf<F>, A>.listen(): Kind<OptionTPartialOf<F>, Tuple2<W, A>> =
+    OptionT(MW().run { value().listen().map { (w, opt) -> opt.map { w toT it } } })
+
+  override fun <A> Kind<OptionTPartialOf<F>, Tuple2<(W) -> W, A>>.pass(): Kind<OptionTPartialOf<F>, A> =
+    OptionT(MW().run {
+      value().map {
+        it.fold({
+          { w: W -> w } toT None
+        }, { a ->
+          a.map(::Some)
+        })
+      }.pass()
+    })
+
+  override fun <A> writer(aw: Tuple2<W, A>): Kind<OptionTPartialOf<F>, A> = OptionT.liftF(MW(), MW().writer(aw))
+}
+
+@extension
+interface OptionTMonadState<F, S> : MonadState<OptionTPartialOf<F>, S>, OptionTMonad<F> {
+  fun MS(): MonadState<F, S>
+  override fun MF(): Monad<F> = MS()
+
+  override fun get(): Kind<OptionTPartialOf<F>, S> = OptionT.liftF(MS(), MS().get())
+  override fun set(s: S): Kind<OptionTPartialOf<F>, Unit> = OptionT.liftF(MS(), MS().set(s))
 }
 
 private val runT = object : RunT<ForOptionT> {

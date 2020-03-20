@@ -12,6 +12,7 @@ import arrow.core.test.laws.Law
 import arrow.core.test.laws.equalUnderTheLaw
 import arrow.mtl.eq.EqTrans
 import arrow.mtl.generators.GenTrans
+import arrow.mtl.test.laws.MonadTransLaws
 import arrow.mtl.typeclasses.MonadTransControl
 import arrow.typeclasses.Eq
 import arrow.typeclasses.Monad

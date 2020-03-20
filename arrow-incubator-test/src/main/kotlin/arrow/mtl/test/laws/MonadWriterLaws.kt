@@ -1,4 +1,4 @@
-package arrow.mtl.test
+package arrow.mtl.test.laws
 
 import arrow.Kind
 import arrow.core.Tuple2
@@ -13,7 +13,6 @@ import arrow.typeclasses.Apply
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
 import arrow.typeclasses.Functor
-import arrow.typeclasses.Monad
 import arrow.typeclasses.Monoid
 import arrow.typeclasses.Selective
 import io.kotlintest.properties.Gen
@@ -40,7 +39,6 @@ object MonadWriterLaws {
   }
 
   fun <F, W> laws(
-    MF: Monad<F>,
     MW: MonadWriter<F, W>,
     MOW: Monoid<W>,
     genW: Gen<W>,
@@ -48,11 +46,10 @@ object MonadWriterLaws {
     EQK: EqK<F>,
     EQW: Eq<W>
   ): List<Law> =
-    MonadLaws.laws(MF, GENK, EQK) +
+    MonadLaws.laws(MW, GENK, EQK) +
       monadWriterLaws(MW, MOW, genW, EQK, EQW)
 
   fun <F, W> laws(
-    MF: Monad<F>,
     MW: MonadWriter<F, W>,
     MOW: Monoid<W>,
     FF: Functor<F>,
@@ -63,7 +60,7 @@ object MonadWriterLaws {
     EQK: EqK<F>,
     EQW: Eq<W>
   ): List<Law> =
-    MonadLaws.laws(MF, FF, AP, SL, GENK, EQK) + monadWriterLaws(MW, MOW, genW, EQK, EQW)
+    MonadLaws.laws(MW, FF, AP, SL, GENK, EQK) + monadWriterLaws(MW, MOW, genW, EQK, EQW)
 
   fun <F, W> MonadWriter<F, W>.monadWriterWriterJust(
     MOW: Monoid<W>,

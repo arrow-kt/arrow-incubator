@@ -32,7 +32,7 @@ object MonadBaseControlLaws {
     Law("MonadBaseControl: liftBaseDerived") {
       MBC.liftBaseDerived(genB.genK(Gen.int()), EQM.liftEq(Int.eq()))
     },
-    Law("MonadBaseControl: liftBaseWith (\r -> r m) >>= restoreM == m") {
+    Law("MonadBaseControl: liftBaseWith (\\r -> r m) >>= restoreM == m") {
       MBC.restoreMAfterLiftBaseWith(genM.genK(Gen.int()), EQM.liftEq(Int.eq()))
     }
   )
