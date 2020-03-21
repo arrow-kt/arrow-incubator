@@ -5,7 +5,6 @@ import arrow.core.Either
 import arrow.core.Tuple2
 import arrow.core.Tuple3
 import arrow.core.andThen
-import arrow.core.internal.AtomicRefW
 import arrow.extension
 import arrow.fx.IO
 import arrow.fx.RacePair
