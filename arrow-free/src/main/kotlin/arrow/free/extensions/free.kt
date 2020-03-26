@@ -104,7 +104,7 @@ interface FreeFoldable<F> : Foldable<FreePartialOf<F>> {
 
   override fun <A, B> Kind<FreePartialOf<F>, A>.foldRight(lb: Eval<B>, f: (A, Eval<B>) -> Eval<B>): Eval<B> =
     fix().foldStep(
-      onPure = { a -> f(a, lb) },
+      onPure = { a -> Eval.defer { f(a, lb) } },
       onSuspend = { fa: Kind<F, A> -> FF().run { fa.foldRight(lb, f) } },
       onFlatMapped = { fa: Kind<F, A>, g: (A) -> Free<F, A> -> FF().run { fa.foldRight(lb) { a: A, lbb: Eval<B> -> g(a).foldRight(lbb, f) } } }
     )

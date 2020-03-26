@@ -7,6 +7,7 @@ import arrow.core.Option
 import arrow.core.Some
 import arrow.core.Tuple2
 import arrow.core.Tuple3
+import arrow.core.andThen
 import arrow.extension
 import arrow.fx.IO
 import arrow.fx.RacePair
@@ -112,7 +113,7 @@ interface OptionTConcurrent<F> : Concurrent<OptionTPartialOf<F>>, OptionTAsync<F
     CF().dispatchers() as Dispatchers<OptionTPartialOf<F>>
 
   override fun <A> cancellable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<OptionTPartialOf<F>>): OptionT<F, A> = CF().run {
-    OptionT.liftF(this, cancellable { cb -> k(cb).value().map { Unit } })
+    OptionT.liftF(this, cancellable(k.andThen { it.value().void() }))
   }
 
   override fun <A> OptionTOf<F, A>.fork(ctx: CoroutineContext): OptionT<F, Fiber<OptionTPartialOf<F>, A>> = CF().run {

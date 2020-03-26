@@ -4,6 +4,7 @@ import arrow.Kind
 import arrow.core.Either
 import arrow.core.Tuple2
 import arrow.core.Tuple3
+import arrow.core.andThen
 import arrow.core.internal.AtomicRefW
 import arrow.extension
 import arrow.fx.IO
@@ -111,7 +112,7 @@ interface WriterTConcurrent<W, F> : Concurrent<WriterTPartialOf<W, F>>, WriterTA
     CF().dispatchers() as Dispatchers<WriterTPartialOf<W, F>>
 
   override fun <A> cancellable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<WriterTPartialOf<W, F>>): WriterT<W, F, A> = CF().run {
-    WriterT.liftF(cancellable { cb -> k(cb).value().unit() }, MM(), this)
+    WriterT.liftF(cancellable(k.andThen { it.value().void() }), MM(), this)
   }
 
   override fun <A> WriterTOf<W, F, A>.fork(ctx: CoroutineContext): WriterT<W, F, Fiber<WriterTPartialOf<W, F>, A>> = CF().run {
