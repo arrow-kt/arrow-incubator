@@ -121,7 +121,7 @@ import arrow.fx.extensions.io.applicative.applicative
 val asyncBalance: IO<Nothing, Int> = IO { 1000 }
 val asyncAvailable: IO<Nothing, Int> = IO { 900 }
 
-IO.applicative<Kind<ForIO, Nothing>>().run {  
+IO.applicative<IOPartialOf<Nothing>>().run {  
   mapToAccount(asyncBalance, asyncAvailable)
 }
 ```
