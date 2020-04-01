@@ -25,8 +25,8 @@ import arrow.core.test.generators.genK
 import arrow.core.test.laws.AlternativeLaws
 import arrow.core.test.laws.DivisibleLaws
 import arrow.core.test.laws.MonadLogicLaws
-import arrow.fx.ForIO
 import arrow.fx.IO
+import arrow.fx.IOPartialOf
 import arrow.fx.test.eq.eqK
 import arrow.fx.extensions.io.applicative.applicative
 import arrow.fx.extensions.io.concurrent.concurrent
@@ -69,7 +69,7 @@ class KleisliTest : UnitSpec() {
   init {
     val optionEQK = Kleisli.eqK(Option.eqK(), 0)
 
-    val ioEQK: EqK<Kind<Kind<ForKleisli, Int>, ForIO>> = Kleisli.eqK(IO.eqK(), 1)
+    val ioEQK: EqK<Kind<Kind<ForKleisli, Int>, IOPartialOf<Nothing>>> = Kleisli.eqK(IO.eqK(), 1)
 
     val constEQK: EqK<Kind<Kind<ForKleisli, Int>, Kind<ForConst, Int>>> = Kleisli.eqK(Const.eqK(Int.eq()), 1)
 
@@ -79,7 +79,7 @@ class KleisliTest : UnitSpec() {
         Kleisli.genK<Int, ForOption>(Option.genK()),
         optionEQK
       ),
-      ConcurrentLaws.laws<KleisliPartialOf<Int, ForIO>>(
+      ConcurrentLaws.laws<KleisliPartialOf<Int, IOPartialOf<Nothing>>>(
         Kleisli.concurrent(IO.concurrent()),
         Kleisli.timer(IO.concurrent()),
         Kleisli.functor(IO.functor()),

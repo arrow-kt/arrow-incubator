@@ -29,6 +29,8 @@ import arrow.core.test.laws.MonoidKLaws
 import arrow.core.test.laws.SemigroupKLaws
 import arrow.core.test.laws.TraverseFilterLaws
 import arrow.fx.IO
+import arrow.fx.IOPartialOf
+import arrow.fx.extensions.io.applicative.applicative
 import arrow.fx.test.eq.eqK
 import arrow.fx.extensions.io.concurrent.concurrent
 import arrow.fx.extensions.io.functor.functor
@@ -82,14 +84,14 @@ class OptionTTest : UnitSpec() {
 
   val NELM: Monad<ForNonEmptyList> = NonEmptyList.monad()
 
-  val ioEQK = OptionT.eqK(IO.eqK())
+  val ioEQK = OptionT.eqK<IOPartialOf<Nothing>>(IO.eqK<Nothing>())
 
   init {
 
     val nestedEQK = OptionT.eqK(Id.eqK()).nested(OptionT.eqK(NonEmptyList.eqK()))
 
     testLaws(
-      ConcurrentLaws.laws(
+      ConcurrentLaws.laws<OptionTPartialOf<IOPartialOf<Nothing>>>(
         OptionT.concurrent(IO.concurrent()),
         OptionT.timer(IO.concurrent()),
         OptionT.functor(IO.functor()),

@@ -204,11 +204,10 @@ fun <L, F> EitherT.Companion.concurrent(CF: Concurrent<F>): Concurrent<EitherTPa
 fun <L, F> EitherT.Companion.timer(CF: Concurrent<F>): Timer<EitherTPartialOf<L, F>> =
   Timer(concurrent<L, F>(CF))
 
-@extension
 interface EitherTMonadIO<L, F> : MonadIO<EitherTPartialOf<L, F>>, EitherTMonad<L, F> {
   fun FIO(): MonadIO<F>
   override fun MF(): Monad<F> = FIO()
-  override fun <A> IO<A>.liftIO(): Kind<EitherTPartialOf<L, F>, A> = FIO().run {
+  override fun <A> IO<Nothing, A>.liftIO(): Kind<EitherTPartialOf<L, F>, A> = FIO().run {
     EitherT.liftF(this, liftIO())
   }
 }

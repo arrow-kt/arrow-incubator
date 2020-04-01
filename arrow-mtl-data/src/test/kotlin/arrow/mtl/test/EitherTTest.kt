@@ -18,6 +18,8 @@ import arrow.core.extensions.id.monad.monad
 import arrow.core.extensions.id.traverse.traverse
 import arrow.core.extensions.monoid
 import arrow.core.extensions.option.functor.functor
+import arrow.fx.IO
+import arrow.fx.IOPartialOf
 import arrow.core.test.UnitSpec
 import arrow.core.test.generators.genK
 import arrow.core.test.generators.throwable
@@ -25,8 +27,6 @@ import arrow.core.test.laws.AlternativeLaws
 import arrow.core.test.laws.DivisibleLaws
 import arrow.core.test.laws.MonadErrorLaws
 import arrow.core.test.laws.TraverseLaws
-import arrow.fx.ForIO
-import arrow.fx.IO
 import arrow.fx.test.eq.eqK
 import arrow.fx.extensions.io.applicative.applicative
 import arrow.fx.extensions.io.concurrent.concurrent
@@ -77,7 +77,7 @@ class EitherTTest : UnitSpec() {
   init {
     val idEQK: EqK<Kind<Kind<ForEitherT, Int>, ForId>> = EitherT.eqK(Id.eqK(), Int.eq())
 
-    val ioEQK: EqK<Kind<Kind<ForEitherT, String>, ForIO>> = EitherT.eqK(IO.eqK(), Eq.any())
+    val ioEQK: EqK<EitherTPartialOf<String, IOPartialOf<Nothing>>> = EitherT.eqK(IO.eqK(), Eq.any())
 
     val constEQK: EqK<Kind<Kind<ForEitherT, Int>, Kind<ForConst, Int>>> = EitherT.eqK(Const.eqK(Int.eq()), Int.eq())
 
@@ -94,7 +94,7 @@ class EitherTTest : UnitSpec() {
         idEQK
       ),
 
-      ConcurrentLaws.laws<EitherTPartialOf<String, ForIO>>(
+      ConcurrentLaws.laws<EitherTPartialOf<String, IOPartialOf<Nothing>>>(
         EitherT.concurrent(IO.concurrent()),
         EitherT.timer(IO.concurrent()),
         EitherT.functor(IO.functor()),

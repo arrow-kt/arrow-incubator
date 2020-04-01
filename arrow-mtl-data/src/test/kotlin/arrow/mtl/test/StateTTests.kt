@@ -22,8 +22,8 @@ import arrow.core.test.generators.genK
 import arrow.core.test.laws.MonadCombineLaws
 import arrow.core.test.laws.MonadLogicLaws
 import arrow.core.test.laws.SemigroupKLaws
-import arrow.fx.ForIO
 import arrow.fx.IO
+import arrow.fx.IOPartialOf
 import arrow.fx.extensions.io.async.async
 import arrow.fx.extensions.io.functor.functor
 import arrow.fx.extensions.io.monad.monad
@@ -60,7 +60,7 @@ class StateTTests : UnitSpec() {
 
   init {
     testLaws(
-      AsyncLaws.laws<StateTPartialOf<Int, ForIO>>(
+      AsyncLaws.laws<StateTPartialOf<Int, IOPartialOf<Nothing>>>(
         StateT.async(IO.async()),
         StateT.functor(IO.functor()),
         StateT.applicative(IO.monad()),
@@ -90,7 +90,7 @@ class StateTTests : UnitSpec() {
         StateT.eqK(ListK.eqK(), Int.eq(), 1), 50
       ),
 
-      MonadStateLaws.laws<StateTPartialOf<Int, ForIO>, Int>(
+      MonadStateLaws.laws<StateTPartialOf<Int, IOPartialOf<Nothing>>, Int>(
         StateT.monadState(IO.monad()),
         StateT.genK(IO.genK(), Gen.int()),
         Gen.int(),
