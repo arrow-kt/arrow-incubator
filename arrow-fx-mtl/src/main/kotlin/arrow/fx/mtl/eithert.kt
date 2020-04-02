@@ -9,6 +9,7 @@ import arrow.core.Right
 import arrow.core.Some
 import arrow.core.Tuple2
 import arrow.core.Tuple3
+import arrow.core.andThen
 import arrow.core.flatMap
 import arrow.extension
 import arrow.fx.IO
@@ -121,8 +122,8 @@ interface EitherTConcurrent<L, F> : Concurrent<EitherTPartialOf<L, F>>, EitherTA
   override fun dispatchers(): Dispatchers<EitherTPartialOf<L, F>> =
     CF().dispatchers() as Dispatchers<EitherTPartialOf<L, F>>
 
-  override fun <A> cancelable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<EitherTPartialOf<L, F>>): EitherT<L, F, A> = CF().run {
-    EitherT.liftF(this, cancelable { cb -> k(cb).value().map { Unit } })
+  override fun <A> cancellable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<EitherTPartialOf<L, F>>): EitherT<L, F, A> = CF().run {
+    EitherT.liftF(this, cancellable(k.andThen { it.value().void() }))
   }
 
   override fun <A> EitherTOf<L, F, A>.fork(ctx: CoroutineContext): EitherT<L, F, Fiber<EitherTPartialOf<L, F>, A>> = CF().run {
@@ -203,11 +204,10 @@ fun <L, F> EitherT.Companion.concurrent(CF: Concurrent<F>): Concurrent<EitherTPa
 fun <L, F> EitherT.Companion.timer(CF: Concurrent<F>): Timer<EitherTPartialOf<L, F>> =
   Timer(concurrent<L, F>(CF))
 
-@extension
 interface EitherTMonadIO<L, F> : MonadIO<EitherTPartialOf<L, F>>, EitherTMonad<L, F> {
   fun FIO(): MonadIO<F>
   override fun MF(): Monad<F> = FIO()
-  override fun <A> IO<A>.liftIO(): Kind<EitherTPartialOf<L, F>, A> = FIO().run {
+  override fun <A> IO<Nothing, A>.liftIO(): Kind<EitherTPartialOf<L, F>, A> = FIO().run {
     EitherT.liftF(this, liftIO())
   }
 }

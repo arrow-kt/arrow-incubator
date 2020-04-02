@@ -29,11 +29,11 @@ import arrow.mtl.OptionTOf
 import arrow.mtl.OptionTPartialOf
 import arrow.mtl.extensions.optiont.monad.monad
 import arrow.mtl.value
-import arrow.test.UnitSpec
-import arrow.test.concurrency.SideEffect
-import arrow.test.generators.GenK
-import arrow.test.generators.nonEmptyList
-import arrow.test.laws.ComonadLaws
+import arrow.core.test.UnitSpec
+import arrow.core.test.concurrency.SideEffect
+import arrow.core.test.generators.GenK
+import arrow.core.test.generators.nonEmptyList
+import arrow.core.test.laws.ComonadLaws
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
 import io.kotlintest.properties.Gen

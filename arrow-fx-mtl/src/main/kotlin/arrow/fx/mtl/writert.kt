@@ -4,6 +4,7 @@ import arrow.Kind
 import arrow.core.Either
 import arrow.core.Tuple2
 import arrow.core.Tuple3
+import arrow.core.andThen
 import arrow.core.internal.AtomicRefW
 import arrow.extension
 import arrow.fx.IO
@@ -110,8 +111,8 @@ interface WriterTConcurrent<W, F> : Concurrent<WriterTPartialOf<W, F>>, WriterTA
   override fun dispatchers(): Dispatchers<WriterTPartialOf<W, F>> =
     CF().dispatchers() as Dispatchers<WriterTPartialOf<W, F>>
 
-  override fun <A> cancelable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<WriterTPartialOf<W, F>>): WriterT<W, F, A> = CF().run {
-    WriterT.liftF(cancelable { cb -> k(cb).value().unit() }, MM(), this)
+  override fun <A> cancellable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<WriterTPartialOf<W, F>>): WriterT<W, F, A> = CF().run {
+    WriterT.liftF(cancellable(k.andThen { it.value().void() }), MM(), this)
   }
 
   override fun <A> WriterTOf<W, F, A>.fork(ctx: CoroutineContext): WriterT<W, F, Fiber<WriterTPartialOf<W, F>, A>> = CF().run {
@@ -172,12 +173,11 @@ fun <W, F> WriterT.Companion.concurrent(CF: Concurrent<F>, MM: Monoid<W>): Concu
 fun <W, F> WriterT.Companion.timer(CF: Concurrent<F>, MM: Monoid<W>): Timer<WriterTPartialOf<W, F>> =
   Timer(concurrent(CF, MM))
 
-@extension
 interface WriterTMonadIO<W, F> : MonadIO<WriterTPartialOf<W, F>>, WriterTMonad<W, F> {
   fun FIO(): MonadIO<F>
   override fun MF(): Monad<F> = FIO()
   override fun MM(): Monoid<W>
-  override fun <A> IO<A>.liftIO(): Kind<WriterTPartialOf<W, F>, A> = FIO().run {
+  override fun <A> IO<Nothing, A>.liftIO(): Kind<WriterTPartialOf<W, F>, A> = FIO().run {
     WriterT.liftF(liftIO(), MM(), this)
   }
 }
