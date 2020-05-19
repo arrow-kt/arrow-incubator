@@ -2,6 +2,7 @@ package arrow.aql.extensions
 
 import arrow.aql.Select
 import arrow.aql.From
+import arrow.aql.WhereOr
 import arrow.aql.GroupBy
 import arrow.aql.Count
 import arrow.aql.Sum
@@ -14,10 +15,12 @@ import arrow.core.EitherPartialOf
 import arrow.core.extensions.either.applicative.applicative
 import arrow.core.extensions.either.foldable.foldable
 import arrow.core.extensions.either.functor.functor
+import arrow.core.extensions.either.monadError.monadError
 import arrow.extension
 import arrow.typeclasses.Applicative
 import arrow.typeclasses.Foldable
 import arrow.typeclasses.Functor
+import arrow.typeclasses.MonadError
 
 @extension interface EitherSelect<L> : Select<EitherPartialOf<L>> {
   override fun functor(): Functor<EitherPartialOf<L>> = Either.functor()
@@ -26,6 +29,11 @@ import arrow.typeclasses.Functor
 @extension
 interface EitherFrom<L> : From<EitherPartialOf<L>> {
   override fun applicative(): Applicative<EitherPartialOf<L>> = Either.applicative()
+}
+
+@extension
+interface EitherWhereOr<L> : WhereOr<EitherPartialOf<L>, L> {
+  override fun monadError(): MonadError<EitherPartialOf<L>, L> = Either.monadError()
 }
 
 @extension
