@@ -31,7 +31,6 @@ import arrow.typeclasses.Monad
 import arrow.typeclasses.MonadError
 import arrow.typeclasses.Monoid
 import arrow.undocumented
-import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.CoroutineContext
 
 @extension
@@ -49,17 +48,18 @@ interface WriterTBracket<W, F> : Bracket<WriterTPartialOf<W, F>, Throwable>, Wri
     use: (A) -> WriterTOf<W, F, B>
   ): WriterT<W, F, B> = MM().run {
     MD().run {
-      val atomic: AtomicReference<W> = AtomicReference(empty())
-      WriterT(value().bracketCase(use = { wa ->
-        WriterT(wa.just()).flatMap(use).value()
-      }, release = { wa, exitCase ->
-        val r = release(wa.b, exitCase).value()
-        when (exitCase) {
-          is ExitCase.Completed -> r.flatMap { (l, _) -> later { atomic.set(l) } }
-          else -> r.unit()
+      WriterT(Ref(empty()).flatMap { ref ->
+        value().bracketCase(use = { wa ->
+          WriterT(wa.just()).flatMap(use).value()
+        }, release = { wa, exitCase ->
+          val r = release(wa.b, exitCase).value()
+          when (exitCase) {
+            is ExitCase.Completed -> r.flatMap { (l, _) -> ref.set(l) }
+            else -> r.unit()
+          }
+        }).flatMap { (w, b) ->
+          ref.get().map { ww -> Tuple2(w.combine(ww), b) }
         }
-      }).map { (w, b) ->
-        Tuple2(w.combine(atomic.get()), b)
       })
     }
   }
