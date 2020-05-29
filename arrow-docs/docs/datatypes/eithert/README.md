@@ -69,11 +69,10 @@ We can further simplify this case by using Arrow `fx` facilities
 that enable monad comprehensions for all datatypes for which a monad instance is available.
 
 ```kotlin:ank
-import arrow.core.extensions.fx
 import arrow.core.fix
 
 fun getCountryCode(maybePerson : Either<BizError, Person>): Either<BizError, String> =
-  Either.fx<BizError, String> {
+  Either.fx2<BizError, String> {
     val (person) = maybePerson
     val (address) = person.address.toEither { AddressNotFound(person.id) }
     val (country) = address.country.toEither { CountryNotFound(address.id)}
