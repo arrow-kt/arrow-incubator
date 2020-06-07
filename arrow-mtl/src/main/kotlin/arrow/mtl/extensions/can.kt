@@ -41,7 +41,6 @@ import arrow.typeclasses.Monoid
 import arrow.typeclasses.Semigroup
 import arrow.typeclasses.Show
 import arrow.typeclasses.Traverse
-import arrow.mtl.extensions.traverse as canTraverse
 
 fun <L, R> Can<L, R>.combine(
   SGL: Semigroup<L>,
@@ -131,8 +130,7 @@ interface CanApply<L> : Apply<CanPartialOf<L>>, CanFunctor<L> {
     )
 
   @Suppress("OverridingDeprecatedMember")
-  override fun <A, B> CanOf<L, A>.ap(ff: CanOf<L, (A) -> B>): Can<L, B> =
-    fix().ap(SL(), ff)
+  override fun <A, B> CanOf<L, A>.ap(ff: CanOf<L, (A) -> B>): Can<L, B> = ap(SL(), ff)
 }
 
 @extension
@@ -146,7 +144,7 @@ interface CanApplicative<L> : Applicative<CanPartialOf<L>>, CanApply<L> {
 
   @Suppress("OverridingDeprecatedMember")
   override fun <A, B> Kind<CanPartialOf<L>, A>.ap(ff: Kind<CanPartialOf<L>, (A) -> B>): Can<L, B> =
-    fix().ap(SL(), ff)
+    ap(SL(), ff)
 }
 
 @extension
@@ -157,11 +155,9 @@ interface CanMonad<L> : Monad<CanPartialOf<L>>, CanApplicative<L> {
   override fun <A, B> CanOf<L, A>.map(f: (A) -> B): Can<L, B> = fix().map(f)
 
   @Suppress("OverridingDeprecatedMember")
-  override fun <A, B> CanOf<L, A>.ap(ff: CanOf<L, (A) -> B>): Can<L, B> =
-    fix().ap(SL(), ff)
+  override fun <A, B> CanOf<L, A>.ap(ff: CanOf<L, (A) -> B>): Can<L, B> = ap(SL(), ff)
 
-  override fun <A, B> CanOf<L, A>.flatMap(f: (A) -> CanOf<L, B>): Can<L, B> =
-    fix().flatMap(SL()) { f(it).fix() }
+  override fun <A, B> CanOf<L, A>.flatMap(f: (A) -> CanOf<L, B>): Can<L, B> = flatMap(SL(), f)
 
   override fun <A, B> tailRecM(a: A, f: (A) -> Kind<CanPartialOf<L>, Either<A, B>>): Kind<CanPartialOf<L>, B> =
     Can.tailRecM(a, f, SL())
@@ -193,7 +189,7 @@ fun <G, A, B, C> CanOf<A, B>.traverse(GA: Applicative<G>, f: (B) -> Kind<G, C>):
 interface CanTraverse<L> : Traverse<CanPartialOf<L>>, CanFoldable<L> {
 
   override fun <G, A, B> CanOf<L, A>.traverse(AP: Applicative<G>, f: (A) -> Kind<G, B>): Kind<G, CanOf<L, B>> =
-    fix().canTraverse(AP, f)
+    AP.run { fix().fold({ just(Neither) }, { just(Left(it)) }, { b -> f(b).map(::Right) }, { _, b -> f(b).map(::Right) }) }
 }
 
 @extension
@@ -270,7 +266,7 @@ interface CanHash<L, R> : Hash<Can<L, R>>, CanEq<L, R> {
 }
 
 fun <L, R> Can.Companion.fx(SL: Semigroup<L>, c: suspend MonadSyntax<CanPartialOf<L>>.() -> R): Can<L, R> =
-  Can.monad<L>(SL).fx.monad(c).fix()
+  Can.monad(SL).fx.monad(c).fix()
 
 @extension
 interface CanBicrosswalk : Bicrosswalk<ForCan>, CanBifunctor, CanBifoldable {
