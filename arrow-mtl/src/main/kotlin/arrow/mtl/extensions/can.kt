@@ -1,28 +1,27 @@
 @file:Suppress("UnusedImports")
 
-package arrow.smash.extensions
+package arrow.mtl.extensions
 
 import arrow.Kind
 import arrow.Kind2
-import arrow.smash.Can
-import arrow.smash.Can.Both
-import arrow.smash.Can.Left
-import arrow.smash.Can.Neither
-import arrow.smash.Can.Right
 import arrow.core.Either
 import arrow.core.Eval
-import arrow.smash.ap
-import arrow.smash.extensions.can.eq.eq
-import arrow.smash.extensions.can.monad.monad
-import arrow.smash.fix
-import arrow.smash.flatMap
-import arrow.smash.toLeftCan
-import arrow.smash.toCan
 import arrow.extension
-import arrow.smash.CanOf
-import arrow.smash.CanPartialOf
-import arrow.smash.ForCan
-import arrow.smash.fix
+import arrow.mtl.Can
+import arrow.mtl.Can.Both
+import arrow.mtl.Can.Left
+import arrow.mtl.Can.Neither
+import arrow.mtl.Can.Right
+import arrow.mtl.CanOf
+import arrow.mtl.CanPartialOf
+import arrow.mtl.ForCan
+import arrow.mtl.ap
+import arrow.mtl.extensions.can.eq.eq
+import arrow.mtl.extensions.can.monad.monad
+import arrow.mtl.fix
+import arrow.mtl.flatMap
+import arrow.mtl.toCan
+import arrow.mtl.toLeftCan
 import arrow.typeclasses.Align
 import arrow.typeclasses.Applicative
 import arrow.typeclasses.Apply
@@ -42,7 +41,7 @@ import arrow.typeclasses.Monoid
 import arrow.typeclasses.Semigroup
 import arrow.typeclasses.Show
 import arrow.typeclasses.Traverse
-import arrow.smash.extensions.traverse as canTraverse
+import arrow.mtl.extensions.traverse as canTraverse
 
 fun <L, R> Can<L, R>.combine(
   SGL: Semigroup<L>,
@@ -113,6 +112,7 @@ interface CanApply<L> : Apply<CanPartialOf<L>>, CanFunctor<L> {
 
   override fun <A, B> CanOf<L, A>.map(f: (A) -> B): Can<L, B> = fix().map(f)
 
+  @Suppress("OverridingDeprecatedMember")
   override fun <A, B> Kind<CanPartialOf<L>, A>.apEval(ff: Eval<Kind<CanPartialOf<L>, (A) -> B>>): Eval<Kind<CanPartialOf<L>, B>> =
     fix().fold(
       ifNeither = { Eval.now(Neither) },
@@ -130,6 +130,7 @@ interface CanApply<L> : Apply<CanPartialOf<L>>, CanFunctor<L> {
       }
     )
 
+  @Suppress("OverridingDeprecatedMember")
   override fun <A, B> CanOf<L, A>.ap(ff: CanOf<L, (A) -> B>): Can<L, B> =
     fix().ap(SL(), ff)
 }
@@ -143,6 +144,7 @@ interface CanApplicative<L> : Applicative<CanPartialOf<L>>, CanApply<L> {
 
   override fun <A, B> CanOf<L, A>.map(f: (A) -> B): Can<L, B> = fix().map(f)
 
+  @Suppress("OverridingDeprecatedMember")
   override fun <A, B> Kind<CanPartialOf<L>, A>.ap(ff: Kind<CanPartialOf<L>, (A) -> B>): Can<L, B> =
     fix().ap(SL(), ff)
 }
@@ -154,6 +156,7 @@ interface CanMonad<L> : Monad<CanPartialOf<L>>, CanApplicative<L> {
 
   override fun <A, B> CanOf<L, A>.map(f: (A) -> B): Can<L, B> = fix().map(f)
 
+  @Suppress("OverridingDeprecatedMember")
   override fun <A, B> CanOf<L, A>.ap(ff: CanOf<L, (A) -> B>): Can<L, B> =
     fix().ap(SL(), ff)
 

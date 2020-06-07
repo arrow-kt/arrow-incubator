@@ -1,4 +1,4 @@
-package arrow.smash.generators
+package arrow.mtl.test.generators
 
 import arrow.core.Option
 import arrow.core.SequenceK
@@ -6,7 +6,7 @@ import arrow.core.extensions.sequencek.apply.apply
 import arrow.core.extensions.sequencek.monad.map
 import arrow.core.k
 import arrow.core.test.generators.option
-import arrow.smash.Can
+import arrow.mtl.Can
 import io.kotlintest.properties.Gen
 
 
