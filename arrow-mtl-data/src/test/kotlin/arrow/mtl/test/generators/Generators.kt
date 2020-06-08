@@ -9,7 +9,6 @@ import arrow.core.test.generators.option
 import arrow.mtl.Can
 import io.kotlintest.properties.Gen
 
-
 fun <A, B> Gen.Companion.can(genA: Gen<A>, genB: Gen<B>): Gen<Can<A, B>> =
   object : Gen<Can<A, B>> {
     override fun constants(): Iterable<Can<A, B>> =

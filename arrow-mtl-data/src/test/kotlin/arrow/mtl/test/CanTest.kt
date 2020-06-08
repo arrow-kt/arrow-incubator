@@ -24,7 +24,6 @@ import arrow.core.test.laws.ShowLaws
 import arrow.core.test.laws.TraverseLaws
 import arrow.core.toT
 import arrow.mtl.Can
-import arrow.mtl.CanOf
 import arrow.mtl.CanPartialOf
 import arrow.mtl.component1
 import arrow.mtl.component2
