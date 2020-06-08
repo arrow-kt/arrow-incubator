@@ -145,7 +145,7 @@ import arrow.typeclasses.Show
  *
  * ### Extension functions
  *
- * There are a few extra factory extension functions that can be used to create instances of [Can]:
+ * There are a few factory extension functions that can be used to create instances of [Can]:
  *
  * - [Pair]<[A], [B]>.toCan(): [Can.Both]<[A], [B]>
  * ``` kotlin:ank
@@ -203,19 +203,19 @@ import arrow.typeclasses.Show
  *
  * - [Can]<[A], [B]>.left(): [Option]<[A]>
  * ```kotlin:ank
- * import arrow.core.left
+ * import arrow.mtl.leftOption
  *
  * //sampleStart
- * check(Can.both("Over", 9000).left() == Some("Over"))
- * check(Can.right("not this").left() == None)
+ * check(Can.both("Over", 9000).leftOption() == Some("Over"))
+ * check(Can.right("not this").leftOption() == None)
  * ```
  * - [Can]<[A], [B]>.right(): [Option]<[A]>
  * ```kotlin:ank
- * import arrow.core.right
+ * import arrow.mtl.rightOption
  *
  * //sampleStart
- * check(Can.both("Over", 9000).right() == Some(9000))
- * check(Can.left(42).right() == None)
+ * check(Can.both("Over", 9000).rightOption() == Some(9000))
+ * check(Can.left(42).rightOption() == None)
  * ```
  * - [Can]<[A], [B]>.leftOrNull(): [A]?
  * ```kotlin:ank
@@ -301,10 +301,10 @@ sealed class Can<out A, out B>(
    *
    * Example:
    * ```
-   * Can.Neither.isEmpty                   // Result: true
-   * Can.Left("tulip").isEmpty             // Result: false
-   * Can.Right("venus fly-trap").isEmpty   // Result: false
-   * Can.Both("venus", "fly-trap").isEmpty // Result: false
+   * Can.Neither.isNeither                   // Result: true
+   * Can.Left("tulip").isNeither             // Result: false
+   * Can.Right("venus fly-trap").isNeither   // Result: false
+   * Can.Both("venus", "fly-trap").isNeither // Result: false
    * ```
    */
   val isNeither: Boolean = false,
@@ -314,10 +314,10 @@ sealed class Can<out A, out B>(
    *
    * Example:
    * ```
-   * Can.Neither.isRight                   // Result: false
-   * Can.Left("tulip").isRight             // Result: false
-   * Can.Right("venus fly-trap").isRight   // Result: true
-   * Can.Both("venus", "fly-trap").isRight // Result: false
+   * Can.Neither.isLeft                   // Result: false
+   * Can.Left("tulip").isLeft             // Result: false
+   * Can.Right("venus fly-trap").isLeft   // Result: true
+   * Can.Both("venus", "fly-trap").isLeft // Result: false
    * ```
    */
   val isLeft: Boolean = false,
@@ -327,10 +327,10 @@ sealed class Can<out A, out B>(
    *
    * Example:
    * ```
-   * Can.Neither.isLeft                   // Result: false
-   * Can.Left("tulip").isLeft             // Result: true
-   * Can.Right("venus fly-trap").isLeft   // Result: false
-   * Can.Both("venus", "fly-trap").isLeft // Result: false
+   * Can.Neither.isRight                   // Result: false
+   * Can.Left("tulip").isRight             // Result: true
+   * Can.Right("venus fly-trap").isRight   // Result: false
+   * Can.Both("venus", "fly-trap").isRight // Result: false
    * ```
    */
   val isRight: Boolean = false,
