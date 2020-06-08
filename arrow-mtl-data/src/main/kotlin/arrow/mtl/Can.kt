@@ -28,7 +28,40 @@ import arrow.typeclasses.Show
  * It's rare, but you may have come across a situation when you need to represent whether you have one of two values or both at the same time.
  * If that's the case, then [Ior] is the ADT for you.
  *
- * However, sometimes you may also want to represent those cases as well as none of them. This is where [Can] comes in handy.
+ * However, sometimes you may also want to represent such cases as well as none of them. This is where [Can] comes in handy.
+ *
+ * ## Mathematical explanation:
+ *
+ * [Can] Represents a right-biased disjunction of either [A], [B], both [A] and [B] or none of them.
+ *
+ * This can be represented mathematically as the product of two components that are optional (see: [Option]):
+ *
+ * ```
+ * (1 + a) * (1 + b)   // (1 + a) is the union of an empty case (None) and a base case (Some)
+ * ~ 1 + a + b + a*b   // This is expressed as the union of: Neither (1), Left (a), Right (b), or Both (a*b)
+ * ~ Option (Ior a b)  // Ior (or There in Haskell) can be defined as `a + b + a*b`, therefore joining it, with Option, adds the empty case
+ * ~ Can a b           // And that's how we get to Can of <A, B>
+ * ```
+ * It can be easier to visualize in a picture:
+ * ```
+ * Can:
+ *             A (Left)
+ *             |
+ * Neither +---+---+ A and B (Both)
+ *             |
+ *             B (Right)
+ * ```
+ *
+ * An instance of [Can]<[A], [B]> can be one of:
+ *  - [Can.Neither]
+ *  - [Can.Left] <[A]>
+ *  - [Can.Right] <[B]>
+ *  - [Can.Both]<[A], [B]>
+ *
+ * Similarly to [Ior], [Can] differs from [Either] in that it can contain both [A] and [B]. On top of that it can contain neither of them.
+ * This means that it's isomorphic to using [Option]<[Ior]<[A], [B]>>.
+ *
+ * Operations available are biased towards [B]
  *
  * ### The coffee maker use case
  *
@@ -254,39 +287,6 @@ import arrow.typeclasses.Show
  * check(Can.Left("this").getLeftOrElse { "not this" } == "this")
  * check(Can.Right("not this").getLeftOrElse { "this" } == "this")
  * ```
- *
- * ## Mathematical explanation:
- *
- * [Can] Represents a right-biased disjunction of either [A], [B], both [A] and [B] or none of them.
- *
- * This can be represented mathematically as the product of two components that are optional (see: [Option]):
- *
- * ```
- * (1 + a) * (1 + b)   // (1 + a) is the union of an empty case (None) and a base case (Some)
- * ~ 1 + a + b + a*b   // This is expressed as the union of: Neither (1), Left (a), Right (b), or Both (a*b)
- * ~ Option (Ior a b)  // Ior (or There in Haskell) can be defined as `a + b + a*b`, therefore joining it, with Option, adds the empty case
- * ~ Can a b           // And that's how we get to Can of <A, B>
- * ```
- * It can be easier to visualize in a picture:
- * ```
- * Can:
- *             A (Left)
- *             |
- * Neither +---+---+ A and B (Both)
- *             |
- *             B (Right)
- * ```
- *
- * An instance of [Can]<[A], [B]> can be one of:
- *  - [Can.Neither]
- *  - [Can.Left] <[A]>
- *  - [Can.Right] <[B]>
- *  - [Can.Both]<[A], [B]>
- *
- * Similarly to [Ior], [Can] differs from [Either] in that it can contain both [A] and [B]. On top of that it can contain neither of them.
- * This means that it's isomorphic to using [Option]<[Ior]<[A], [B]>>.
- *
- * Operations available are biased towards [B]
  *
  * Implementation Notes:
  *  - The names of [Can.Left] and [Can.Right] were used instead of the original `One` and `Eno` to match other data classes like [Either] or [Ior]
