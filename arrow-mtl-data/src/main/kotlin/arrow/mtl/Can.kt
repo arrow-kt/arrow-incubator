@@ -17,6 +17,7 @@ import arrow.core.fix
 import arrow.core.getOrElse
 import arrow.core.toOption
 import arrow.higherkind
+import arrow.typeclasses.Hash
 import arrow.typeclasses.Semigroup
 import arrow.typeclasses.Show
 
@@ -658,6 +659,16 @@ sealed class Can<out A, out B>(
     { "Left(${SL.run { it.show() }})" },
     { "Right(${SR.run { it.show() }})" },
     { a, b -> "Both(left=${SL.run { a.show() }}, right=${SR.run { b.show() }})" }
+  )
+
+  /**
+   * Generates a hash value with the provided [Hash] for either [A] or [B]
+   */
+  fun hash(HL: Hash<A>, HR: Hash<B>): Int = fold(
+    { 0 },
+    { HL.run { it.hash() } },
+    { HR.run { it.hash() } },
+    { a, b -> 31 * HL.run { a.hash() } + HR.run { b.hash() } }
   )
 
   override fun toString(): String = show(Show.any(), Show.any())

@@ -256,13 +256,7 @@ interface CanHash<L, R> : Hash<Can<L, R>>, CanEq<L, R> {
 
   override fun EQR(): Eq<R> = HR()
 
-  override fun Can<L, R>.hash(): Int =
-    fold(
-      ifNeither = { 0 },
-      ifLeft = { HL().run { it.hash() } },
-      ifRight = { HR().run { it.hash() } },
-      ifBoth = { a, b -> 31 * HL().run { a.hash() } + HR().run { b.hash() } }
-    )
+  override fun Can<L, R>.hash(): Int = hash(HL(), HR())
 }
 
 fun <L, R> Can.Companion.fx(SL: Semigroup<L>, c: suspend MonadSyntax<CanPartialOf<L>>.() -> R): Can<L, R> =
