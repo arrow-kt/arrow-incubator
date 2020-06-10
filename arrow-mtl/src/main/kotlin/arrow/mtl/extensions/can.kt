@@ -20,6 +20,7 @@ import arrow.mtl.extensions.can.eq.eq
 import arrow.mtl.extensions.can.monad.monad
 import arrow.mtl.fix
 import arrow.mtl.flatMap
+import arrow.mtl.fold
 import arrow.mtl.toCan
 import arrow.mtl.toLeftCan
 import arrow.typeclasses.Align
@@ -113,13 +114,13 @@ interface CanApply<L> : Apply<CanPartialOf<L>>, CanFunctor<L> {
 
   @Suppress("OverridingDeprecatedMember")
   override fun <A, B> CanOf<L, A>.apEval(ff: Eval<CanOf<L, (A) -> B>>): Eval<Can<L, B>> =
-    fix().fold(
+    fold(
       ifNeither = { Eval.now(Neither) },
       ifLeft = { l -> Eval.now(Left(l)) },
       ifRight = { r -> ff.map { it.fix().map { f -> f(r) } } },
       ifBoth = { l, r ->
         ff.map { partial ->
-          partial.fix().fold(
+          partial.fold(
             ifNeither = Can.Companion::neither,
             ifLeft = { ll -> SL().run { l + ll }.toLeftCan() },
             ifRight = { f -> Both(l, f(r)) },
@@ -182,14 +183,14 @@ interface CanBifoldable : Bifoldable<ForCan> {
 }
 
 fun <G, A, B, C> CanOf<A, B>.traverse(GA: Applicative<G>, f: (B) -> Kind<G, C>): Kind<G, Can<A, C>> = GA.run {
-  fix().fold({ just(Neither) }, { just(Left(it)) }, { b -> f(b).map(::Right) }, { _, b -> f(b).map(::Right) })
+  fold({ just(Neither) }, { just(Left(it)) }, { b -> f(b).map(::Right) }, { _, b -> f(b).map(::Right) })
 }
 
 @extension
 interface CanTraverse<L> : Traverse<CanPartialOf<L>>, CanFoldable<L> {
 
   override fun <G, A, B> CanOf<L, A>.traverse(AP: Applicative<G>, f: (A) -> Kind<G, B>): Kind<G, CanOf<L, B>> =
-    AP.run { fix().fold({ just(Neither) }, { just(Left(it)) }, { b -> f(b).map(::Right) }, { _, b -> f(b).map(::Right) }) }
+    AP.run { fold({ just(Neither) }, { just(Left(it)) }, { b -> f(b).map(::Right) }, { _, b -> f(b).map(::Right) }) }
 }
 
 @extension
@@ -199,7 +200,7 @@ interface CanBitraverse : Bitraverse<ForCan>, CanBifoldable {
     f: (A) -> Kind<G, C>,
     g: (B) -> Kind<G, D>
   ): Kind<G, CanOf<C, D>> = AP.run {
-    fix().fold(
+    fold(
       ifNeither = { just(Neither) },
       ifLeft = { f(it).map(::Left) },
       ifRight = { g(it).map(::Right) },
@@ -268,10 +269,10 @@ interface CanBicrosswalk : Bicrosswalk<ForCan>, CanBifunctor, CanBifoldable {
     fa: (A) -> Kind<F, C>,
     fb: (B) -> Kind<F, D>
   ): Kind<F, Kind2<ForCan, C, D>> =
-    when (val can = tab.fix()) {
-      is Neither -> ALIGN.empty()
-      is Left -> ALIGN.run { fa(can.a).map(::Left) }
-      is Right -> ALIGN.run { fb(can.b).map(::Right) }
-      is Both -> ALIGN.alignWith(fa(can.a), fb(can.b)) { it.toCan() }
-    }
+    tab.fold(
+      ifNeither = { ALIGN.empty() },
+      ifLeft = { ALIGN.run { fa(it).map(::Left) } },
+      ifRight = { ALIGN.run { fb(it).map(::Right) } },
+      ifBoth = { a, b -> ALIGN.alignWith(fa(a), fb(b)) { it.toCan() } }
+    )
 }

@@ -445,21 +445,6 @@ sealed class Can<out A, out B>(
     fold({ Neither }, { Left(fa(it)) }, { Right(fb(it)) }, { l, r -> Both(fa(l), fb(r)) })
 
   /**
-   * Transforms this into an instance of [C] depending on the case.
-   *
-   * @param ifNeither produces a value for [C] on [Neither]
-   * @param ifLeft transforms from left [A] to [C]
-   * @param ifRight transforms from right [B] to [C]
-   * @param ifBoth transforms both [A] and [B] to [C]
-   */
-  inline fun <C> fold(ifNeither: () -> C, ifLeft: (A) -> C, ifRight: (B) -> C, ifBoth: (A, B) -> C): C = when (this) {
-    is Neither -> ifNeither()
-    is Left -> ifLeft(a)
-    is Right -> ifRight(b)
-    is Both -> ifBoth(a, b)
-  }
-
-  /**
    * Similar to [map] but removes the right value if the result of [f] is null.
    * This destruction means that, when [f] results in a `null` value then [Can.Right]
    * becomes [Can.Neither] and [Can.Both] becomes [Can.Left], the rest remain the same.
@@ -680,6 +665,21 @@ sealed class Can<out A, out B>(
 }
 
 /**
+ * Transforms a [CanOf] (as well as [Can]) into an instance of [C] depending on the case.
+ *
+ * @param ifNeither produces a value for [C] on [Can.Neither]
+ * @param ifLeft transforms from left [A] to [C]
+ * @param ifRight transforms from right [B] to [C]
+ * @param ifBoth transforms both [A] and [B] to [C]
+ */
+inline fun <A, B, C> CanOf<A, B>.fold(ifNeither: () -> C, ifLeft: (A) -> C, ifRight: (B) -> C, ifBoth: (A, B) -> C): C = when (this) {
+  is Can.Left -> ifLeft(a)
+  is Can.Right -> ifRight(b)
+  is Can.Both -> ifBoth(a, b)
+  else -> ifNeither()
+}
+
+/**
  * Returns a [Validated.Valid] containing the [Can.Right] value or [B] if this is [Can.Right] or [Can.Both]
  * and [Validated.Invalid] if this is a [Can.Left].
  *
@@ -693,7 +693,7 @@ sealed class Can<out A, out B>(
  * @param ifNeither used to source an intance of [Validated]
  */
 fun <A, B> CanOf<A, B>.toValidated(ifNeither: () -> Validated<A, B>): Validated<A, B> =
-  fix().fold(ifNeither, ::Invalid, ::Valid, { _, b -> Valid(b) })
+  fold(ifNeither, ::Invalid, ::Valid, { _, b -> Valid(b) })
 
 /**
  * Returns a [Validated.Valid] containing the [Can.Left] value or [A] if this is [Can.Left] or [Can.Both]
@@ -709,7 +709,7 @@ fun <A, B> CanOf<A, B>.toValidated(ifNeither: () -> Validated<A, B>): Validated<
  * @param ifNeither used to source an intance of [Validated]
  */
 fun <A, B> CanOf<A, B>.toValidatedLeft(ifNeither: () -> Validated<B, A>): Validated<B, A> =
-  fix().fold(ifNeither, ::Valid, ::Invalid, { a, _ -> Valid(a) })
+  fold(ifNeither, ::Valid, ::Invalid, { a, _ -> Valid(a) })
 
 /**
  * Similar to [toValidated] but returning [None] if there is nothing to validate.
@@ -724,7 +724,7 @@ fun <A, B> CanOf<A, B>.toValidatedLeft(ifNeither: () -> Validated<B, A>): Valida
  * @return [None] if the [Can] is [Can.Neither], otherwise the result from [toValidated] inside [Some]
  */
 fun <A, B> CanOf<A, B>.toValidated(): Option<Validated<A, B>> =
-  fix().fold({ None }, { Some(Invalid(it)) }, { Some(Valid(it)) }) { _: A, b: B -> Some(Valid(b)) }
+  fold({ None }, { Some(Invalid(it)) }, { Some(Valid(it)) }) { _: A, b: B -> Some(Valid(b)) }
 
 /**
  * Similar to [toValidatedLeft] but returning [None] if there is nothing to validate.
@@ -739,7 +739,7 @@ fun <A, B> CanOf<A, B>.toValidated(): Option<Validated<A, B>> =
  * @return [None] if the [Can] is [Can.Neither], otherwise the result from [toValidatedLeft] inside [Some]
  */
 fun <A, B> CanOf<A, B>.toValidatedLeft(): Option<Validated<B, A>> =
-  fix().fold({ None }, { Some(Valid(it)) }, { Some(Invalid(it)) }) { a: A, _: B -> Some(Valid(a)) }
+  fold({ None }, { Some(Valid(it)) }, { Some(Invalid(it)) }) { a: A, _: B -> Some(Valid(a)) }
 
 /**
  * Similar to [Can.unwrap] with a fallback alternative in case of working with an instance of [Can.Neither]
@@ -753,13 +753,13 @@ fun <A, B> CanOf<A, B>.toIor(ifNone: () -> IorOf<A, B>): Ior<A, B> =
  * @param f The function to bind across [Can.Right] or [Can.Both].
  */
 fun <A, B, C> CanOf<A, B>.flatMap(SG: Semigroup<A>, f: (B) -> CanOf<A, C>): Can<A, C> =
-  fix().fold({ Can.Neither }, { Can.Left(it) }, { f(it).fix() }, { a, b -> SG.flatMapCombine(a, b, f) })
+  fold({ Can.Neither }, { Can.Left(it) }, { f(it).fix() }, { a, b -> SG.flatMapCombine(a, b, f) })
 
 /**
  * Used internally by [flatMap] for the [Can.Both] case.
  */
 private fun <A, B, C> Semigroup<A>.flatMapCombine(a: A, b: B, f: (B) -> CanOf<A, C>) =
-  f(b).fix().fold({ Can.Neither }, { Can.Left(a.combine(it)) }, { Can.Both(a, it) }, { ll, rr -> Can.Both(a.combine(ll), rr) })
+  f(b).fold({ Can.Neither }, { Can.Left(a.combine(it)) }, { Can.Both(a, it) }, { ll, rr -> Can.Both(a.combine(ll), rr) })
 
 /**
  * Safe unwrapping of the right side.
@@ -861,12 +861,11 @@ fun <A, B> CanOf<A, B>.leftOption(): Option<A> = leftOrNull().toOption()
  * - [Can.Right]   -> `null`
  * - [Can.Both]    -> [A]
  */
-fun <A, B> CanOf<A, B>.leftOrNull(): A? =
-  when (val can = fix()) {
-    is Can.Left -> can.a
-    is Can.Both -> can.a
-    else -> null
-  }
+fun <A, B> CanOf<A, B>.leftOrNull(): A? = when (this) {
+  is Can.Left -> a
+  is Can.Both -> a
+  else -> null
+}
 
 /**
  * Deconstruction of the left side of this [Can]
@@ -902,9 +901,9 @@ fun <A, B> CanOf<A, B>.rightOption(): Option<B> = rightOrNull().toOption()
  * - [Can.Right]   -> `null`
  * - [Can.Both]    -> [B]
  */
-fun <A, B> CanOf<A, B>.rightOrNull(): B? = when (val can = fix()) {
-  is Can.Right -> can.b
-  is Can.Both -> can.b
+fun <A, B> CanOf<A, B>.rightOrNull(): B? = when (this) {
+  is Can.Right -> b
+  is Can.Both -> b
   else -> null
 }
 
