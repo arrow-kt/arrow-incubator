@@ -112,7 +112,7 @@ interface CanApply<L> : Apply<CanPartialOf<L>>, CanFunctor<L> {
   override fun <A, B> CanOf<L, A>.map(f: (A) -> B): Can<L, B> = fix().map(f)
 
   @Suppress("OverridingDeprecatedMember")
-  override fun <A, B> Kind<CanPartialOf<L>, A>.apEval(ff: Eval<Kind<CanPartialOf<L>, (A) -> B>>): Eval<Kind<CanPartialOf<L>, B>> =
+  override fun <A, B> CanOf<L, A>.apEval(ff: Eval<CanOf<L, (A) -> B>>): Eval<Can<L, B>> =
     fix().fold(
       ifNeither = { Eval.now(Neither) },
       ifLeft = { l -> Eval.now(Left(l)) },
@@ -143,7 +143,7 @@ interface CanApplicative<L> : Applicative<CanPartialOf<L>>, CanApply<L> {
   override fun <A, B> CanOf<L, A>.map(f: (A) -> B): Can<L, B> = fix().map(f)
 
   @Suppress("OverridingDeprecatedMember")
-  override fun <A, B> Kind<CanPartialOf<L>, A>.ap(ff: Kind<CanPartialOf<L>, (A) -> B>): Can<L, B> =
+  override fun <A, B> CanOf<L, A>.ap(ff: CanOf<L, (A) -> B>): Can<L, B> =
     ap(SL(), ff)
 }
 
@@ -159,7 +159,7 @@ interface CanMonad<L> : Monad<CanPartialOf<L>>, CanApplicative<L> {
 
   override fun <A, B> CanOf<L, A>.flatMap(f: (A) -> CanOf<L, B>): Can<L, B> = flatMap(SL(), f)
 
-  override fun <A, B> tailRecM(a: A, f: (A) -> Kind<CanPartialOf<L>, Either<A, B>>): Kind<CanPartialOf<L>, B> =
+  override fun <A, B> tailRecM(a: A, f: (A) -> CanOf<L, Either<A, B>>): Can<L, B> =
     Can.tailRecM(a, f, SL())
 }
 
@@ -227,16 +227,14 @@ interface CanEq<in L, in R> : Eq<Can<L, R>> {
 interface CanEqK<L> : EqK<CanPartialOf<L>> {
   fun EQL(): Eq<L>
 
-  override fun <R> Kind<CanPartialOf<L>, R>.eqK(other: Kind<CanPartialOf<L>, R>, EQ: Eq<R>): Boolean =
+  override fun <R> CanOf<L, R>.eqK(other: CanOf<L, R>, EQ: Eq<R>): Boolean =
     Can.eq(EQL(), EQ).run { this@eqK.fix().eqv(other.fix()) }
 }
 
 @extension
 interface CanEqK2 : EqK2<ForCan> {
   override fun <A, B> Kind2<ForCan, A, B>.eqK(other: Kind2<ForCan, A, B>, EQA: Eq<A>, EQB: Eq<B>): Boolean =
-    (this.fix() to other.fix()).let { (a, b) ->
-      Can.eq(EQA, EQB).run { a.eqv(b) }
-    }
+    (this.fix() to other.fix()).let { (a, b) -> Can.eq(EQA, EQB).run { a.eqv(b) } }
 }
 
 @extension
