@@ -451,7 +451,7 @@ sealed class Can<out A, out B>(
    * @param ifRight transforms from right [B] to [C]
    * @param ifBoth transforms both [A] and [B] to [C]
    */
-  fun <C> fold(ifNeither: () -> C, ifLeft: (A) -> C, ifRight: (B) -> C, ifBoth: (A, B) -> C): C = when (this) {
+  inline fun <C> fold(ifNeither: () -> C, ifLeft: (A) -> C, ifRight: (B) -> C, ifBoth: (A, B) -> C): C = when (this) {
     is Neither -> ifNeither()
     is Left -> ifLeft(a)
     is Right -> ifRight(b)
