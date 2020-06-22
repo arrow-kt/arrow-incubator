@@ -70,9 +70,10 @@ that enable monad comprehensions for all datatypes for which a monad instance is
 
 ```kotlin:ank
 import arrow.core.fix
+import arrow.core.either
 
 fun getCountryCode(maybePerson : Either<BizError, Person>): Either<BizError, String> =
-  Either.fx2<BizError, String> {
+  either<BizError, String> {
     val (person) = maybePerson
     val (address) = person.address.toEither { AddressNotFound(person.id) }
     val (country) = address.country.toEither { CountryNotFound(address.id)}
