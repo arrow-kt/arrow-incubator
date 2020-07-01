@@ -2,9 +2,7 @@ package arrow.generic
 
 import arrow.core.None
 import arrow.core.Option
-import arrow.core.Try
 import arrow.core.Tuple3
-import arrow.core.extensions.`try`.applicative.applicative
 import arrow.core.extensions.option.applicative.applicative
 import arrow.core.extensions.option.monoid.monoid
 import arrow.core.some
@@ -79,7 +77,6 @@ class ProductTest : UnitSpec() {
 
     "Applicative Syntax" {
       Option.applicative().testPersonApplicative()
-      Try.applicative().testPersonApplicative()
     }
 
     "Show instance defaults to .toString()" {

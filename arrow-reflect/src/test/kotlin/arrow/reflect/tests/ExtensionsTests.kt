@@ -1,8 +1,8 @@
 package arrow.reflect.tests
 
+import arrow.core.Either
 import arrow.core.Option
-import arrow.core.Try
-import arrow.core.extensions.TryMonadError
+import arrow.core.extensions.EitherMonadError
 import arrow.reflect.DataType
 import arrow.reflect.Extension
 import arrow.reflect.TypeClass
@@ -57,10 +57,10 @@ class ReflectionTests : UnitSpec() {
     }
 
     "A known instance is found in the data type extensions list" {
-      DataType(Try::class).extensions().contains(TypeClassExtension(
-        DataType(Try::class),
+      DataType(Either::class).extensions().contains(TypeClassExtension(
+        DataType(Either::class),
         TypeClass(MonadError::class),
-        Extension(TryMonadError::class)
+        Extension(EitherMonadError::class)
       )) shouldBe true
     }
 
