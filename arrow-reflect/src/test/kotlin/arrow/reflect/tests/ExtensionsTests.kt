@@ -1,8 +1,12 @@
 package arrow.reflect.tests
 
+import arrow.core.Either
 import arrow.core.Option
+import arrow.core.extensions.EitherMonadError
 import arrow.reflect.DataType
+import arrow.reflect.Extension
 import arrow.reflect.TypeClass
+import arrow.reflect.TypeClassExtension
 import arrow.reflect.extends
 import arrow.reflect.extensions
 import arrow.reflect.hierarchy
@@ -11,6 +15,7 @@ import arrow.reflect.supportedTypeClasses
 import arrow.core.test.UnitSpec
 import arrow.typeclasses.Functor
 import arrow.typeclasses.Invariant
+import arrow.typeclasses.MonadError
 import io.kotlintest.shouldBe
 
 object Bogus
@@ -49,6 +54,14 @@ class ReflectionTests : UnitSpec() {
 
     "The list of data types for a bogus type class is empty" {
       TypeClass(Bogus::class).supportedDataTypes().isEmpty() shouldBe true
+    }
+
+    "A known instance is found in the data type extensions list" {
+      DataType(Either::class).extensions().contains(TypeClassExtension(
+        DataType(Either::class),
+        TypeClass(MonadError::class),
+        Extension(EitherMonadError::class)
+      )) shouldBe true
     }
 
     "We can determine a known type class hierarchy" {
