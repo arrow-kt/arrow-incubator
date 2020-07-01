@@ -1,8 +1,6 @@
 package arrow.reflect.tests
 
 import arrow.core.Option
-import arrow.core.Try
-import arrow.core.extensions.TryMonadError
 import arrow.reflect.DataType
 import arrow.reflect.Extension
 import arrow.reflect.TypeClass
@@ -54,14 +52,6 @@ class ReflectionTests : UnitSpec() {
 
     "The list of data types for a bogus type class is empty" {
       TypeClass(Bogus::class).supportedDataTypes().isEmpty() shouldBe true
-    }
-
-    "A known instance is found in the data type extensions list" {
-      DataType(Try::class).extensions().contains(TypeClassExtension(
-        DataType(Try::class),
-        TypeClass(MonadError::class),
-        Extension(TryMonadError::class)
-      )) shouldBe true
     }
 
     "We can determine a known type class hierarchy" {
