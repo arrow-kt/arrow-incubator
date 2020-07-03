@@ -25,9 +25,9 @@ import arrow.core.test.laws.MonadErrorLaws
 import arrow.core.test.laws.MonadPlusLaws
 import arrow.core.toT
 import arrow.fx.IO
-import arrow.fx.extensions.monadIO
+import arrow.fx.extensions.io.monadIO.liftIO
+import arrow.fx.extensions.io.monadIO.monadIO
 import arrow.fx.mtl.monadIO
-import arrow.fx.unsafeRunSync
 import arrow.fx.fix
 import arrow.fx.test.laws.equalUnderTheLaw
 import arrow.mtl.AccumT
