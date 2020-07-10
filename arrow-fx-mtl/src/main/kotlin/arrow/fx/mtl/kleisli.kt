@@ -48,8 +48,8 @@ interface KleisliBracket<D, F, E> : Bracket<KleisliPartialOf<D, F>, E>, KleisliM
   override fun <A, B> Kind<KleisliPartialOf<D, F>, A>.bracketCase(release: (A, ExitCase<E>) -> Kind<KleisliPartialOf<D, F>, Unit>, use: (A) -> Kind<KleisliPartialOf<D, F>, B>): Kind<KleisliPartialOf<D, F>, B> =
     defaultBracket(BF(), Kleisli.monadBaseControl<D, F, F>(MonadBaseControl.id(BF())), release, use)
 
-  override fun <A> KleisliOf<D, F, A>.uncancelable(): Kleisli<D, F, A> = BF().run {
-    Kleisli { r -> this@uncancelable.run(r).uncancelable() }
+  override fun <A> KleisliOf<D, F, A>.uncancellable(): Kleisli<D, F, A> = BF().run {
+    Kleisli { r -> this@uncancellable.run(r).uncancellable() }
   }
 }
 
@@ -73,8 +73,8 @@ interface KleisliMonadDefer<D, F> : MonadDefer<KleisliPartialOf<D, F>>, KleisliB
     Kleisli { d -> defer { run(d).flatMap { a -> f(a).run(d) } } }
   }
 
-  override fun <A> KleisliOf<D, F, A>.uncancelable(): Kleisli<D, F, A> = MDF().run {
-    Kleisli { d -> defer { run(d).uncancelable() } }
+  override fun <A> KleisliOf<D, F, A>.uncancellable(): Kleisli<D, F, A> = MDF().run {
+    Kleisli { d -> defer { run(d).uncancellable() } }
   }
 }
 
@@ -178,7 +178,6 @@ fun <D, F> Kleisli.Companion.concurrent(CF: Concurrent<F>): Concurrent<KleisliPa
 fun <D, F> Kleisli.Companion.timer(CF: Concurrent<F>): Timer<KleisliPartialOf<D, F>> =
   Timer(concurrent<D, F>(CF))
 
-@extension
 interface KleisliMonadIO<D, F> : MonadIO<KleisliPartialOf<D, F>>, KleisliMonad<D, F> {
   fun FIO(): MonadIO<F>
   override fun MF(): Monad<F> = FIO()

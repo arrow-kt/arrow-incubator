@@ -75,7 +75,6 @@ interface StateTAsyncInstane<S, F> : Async<StateTPartialOf<S, F>>, StateTMonadDe
   }
 }
 
-@extension
 interface StateTMonadIO<S, F> : MonadIO<StateTPartialOf<S, F>>, StateTMonad<S, F> {
   fun FIO(): MonadIO<F>
   override fun MF(): Monad<F> = FIO()

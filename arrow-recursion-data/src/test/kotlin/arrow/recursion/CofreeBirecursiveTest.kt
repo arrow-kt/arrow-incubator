@@ -4,6 +4,7 @@ import arrow.core.Eval
 import arrow.core.ForOption
 import arrow.core.Nel
 import arrow.core.NonEmptyList
+import arrow.core.None
 import arrow.core.Option
 import arrow.core.extensions.eval.monad.monad
 import arrow.core.extensions.option.functor.functor
@@ -66,7 +67,7 @@ class CofreeBirecursive : UnitSpec() {
 fun <A> NonEmptyList<A>.toCofree(): Cofree<ForOption, A> = Cofree.birecursive<ForOption, A>(Option.functor()).run {
   this@toCofree.anaM(CofreeF.traverse(Option.traverse()), Eval.monad()) {
     Eval.later {
-      if (it.size == 1) CofreeF(Option.functor(), it.head, none())
+      if (it.size == 1) CofreeF(Option.functor(), it.head, None)
       else CofreeF(Option.functor(), it.head, Nel.fromListUnsafe(it.tail).some())
     }
   }.value()

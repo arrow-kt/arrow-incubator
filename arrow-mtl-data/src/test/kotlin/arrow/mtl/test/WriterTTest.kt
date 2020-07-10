@@ -81,6 +81,7 @@ import arrow.mtl.test.laws.MonadWriterLaws
 import arrow.typeclasses.EqK
 import arrow.typeclasses.Monad
 import io.kotlintest.properties.Gen
+import arrow.mtl.WriterTPartialOf
 
 class WriterTTest : UnitSpec() {
 
@@ -122,12 +123,12 @@ class WriterTTest : UnitSpec() {
         WriterT.genK(Const.genK(Gen.int()), Gen.list(Gen.int()).map { it.k() }),
         constEQK()
       ),
-      ConcurrentLaws.laws(
-        WriterT.concurrent(IO.concurrent(), ListK.monoid<Int>()),
-        WriterT.timer(IO.concurrent(), ListK.monoid<Int>()),
-        WriterT.functor<ListK<Int>, ForIO>(IO.functor()),
-        WriterT.applicative(IO.applicative(), ListK.monoid<Int>()),
-        WriterT.monad(IO.monad(), ListK.monoid<Int>()),
+      ConcurrentLaws.laws<WriterTPartialOf<ListK<Int>, ForIO>>(
+        WriterT.concurrent(IO.concurrent(), ListK.monoid()),
+        WriterT.timer(IO.concurrent(), ListK.monoid()),
+        WriterT.functor(IO.functor()),
+        WriterT.applicative(IO.applicative(), ListK.monoid()),
+        WriterT.monad(IO.monad(), ListK.monoid()),
         WriterT.genK(IO.genK(), Gen.list(Gen.int()).map { it.k() }),
         ioEQK()
       ),
