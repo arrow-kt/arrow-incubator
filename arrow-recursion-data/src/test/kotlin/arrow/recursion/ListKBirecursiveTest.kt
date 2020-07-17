@@ -12,7 +12,9 @@ import arrow.recursion.pattern.fix
 import arrow.core.test.UnitSpec
 import arrow.core.test.generators.listK
 import arrow.recursion.test.BirecursiveLaws
-import io.kotlintest.properties.Gen
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.constant
+import io.kotest.property.arbitrary.int
 
 class ListKBirecursiveTest : UnitSpec() {
   init {
@@ -20,8 +22,8 @@ class ListKBirecursiveTest : UnitSpec() {
       BirecursiveLaws.laws(
         ListF.traverse(),
         ListK.birecursive(),
-        Gen.listK(Gen.int()),
-        Gen.constant((0..5000).toList().k()),
+        Arb.listK(Arb.int()),
+        Arb.constant((0..5000).toList().k()),
         ListK.eq(Int.eq()),
         {
           when (val fa = it.fix()) {

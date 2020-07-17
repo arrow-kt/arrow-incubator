@@ -13,7 +13,12 @@ import arrow.recursion.pattern.NonEmptyListF
 import arrow.recursion.pattern.fix
 import arrow.core.test.UnitSpec
 import arrow.recursion.test.BirecursiveLaws
-import io.kotlintest.properties.Gen
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.constant
+import io.kotest.property.arbitrary.filter
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.list
+import io.kotest.property.arbitrary.map
 
 class NonEmptyListBirecursiveTest : UnitSpec() {
   init {
@@ -21,8 +26,8 @@ class NonEmptyListBirecursiveTest : UnitSpec() {
       BirecursiveLaws.laws(
         NonEmptyListF.traverse(),
         NonEmptyList.birecursive(),
-        Gen.list(Gen.int()).filter { it.isNotEmpty() }.map { Nel.fromListUnsafe(it) },
-        Gen.constant(Nel.fromListUnsafe((0..5000).toList())),
+        Arb.list(Arb.int()).filter { it.isNotEmpty() }.map { Nel.fromListUnsafe(it) },
+        Arb.constant(Nel.fromListUnsafe((0..5000).toList())),
         Nel.eq(Int.eq()),
         {
           it.fix().tail.fold({ 0 }, { it + 1 })

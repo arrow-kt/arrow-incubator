@@ -15,21 +15,23 @@ import arrow.typeclasses.EqK
 import arrow.typeclasses.Functor
 import arrow.typeclasses.Monoid
 import arrow.typeclasses.Selective
-import io.kotlintest.properties.Gen
-import io.kotlintest.properties.forAll
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.int
+import io.kotest.property.forAll
 
 object MonadWriterLaws {
 
   private fun <F, W> monadWriterLaws(
     MW: MonadWriter<F, W>,
     MOW: Monoid<W>,
-    genW: Gen<W>,
+    genW: Arb<W>,
     EQK: EqK<F>,
     EQW: Eq<W>
   ): List<Law> {
     val EQ_INT = EQK.liftEq(Int.eq())
     val EQ_TUPLE = EQK.liftEq(Tuple2.eq(EQW, Int.eq()))
-    val GEN_TUPLE = Gen.bind(genW, Gen.int(), ::Tuple2)
+    val GEN_TUPLE = Arb.bind(genW, Arb.int(), ::Tuple2)
 
     return listOf(
       Law("Monad Writer Laws: writer just") { MW.monadWriterWriterJust(MOW, EQ_INT) },
@@ -41,7 +43,7 @@ object MonadWriterLaws {
   fun <F, W> laws(
     MW: MonadWriter<F, W>,
     MOW: Monoid<W>,
-    genW: Gen<W>,
+    genW: Arb<W>,
     GENK: GenK<F>,
     EQK: EqK<F>,
     EQW: Eq<W>
@@ -55,24 +57,24 @@ object MonadWriterLaws {
     FF: Functor<F>,
     AP: Apply<F>,
     SL: Selective<F>,
-    genW: Gen<W>,
+    genW: Arb<W>,
     GENK: GenK<F>,
     EQK: EqK<F>,
     EQW: Eq<W>
   ): List<Law> =
     MonadLaws.laws(MW, FF, AP, SL, GENK, EQK) + monadWriterLaws(MW, MOW, genW, EQK, EQW)
 
-  fun <F, W> MonadWriter<F, W>.monadWriterWriterJust(
+  private suspend fun <F, W> MonadWriter<F, W>.monadWriterWriterJust(
     MOW: Monoid<W>,
     EQ: Eq<Kind<F, Int>>
   ) {
-    forAll(Gen.int()) { a: Int ->
+    forAll(Arb.int()) { a: Int ->
       writer(Tuple2(MOW.empty(), a)).equalUnderTheLaw(just(a), EQ)
     }
   }
 
-  fun <F, W> MonadWriter<F, W>.monadWriterTellFusion(
-    genW: Gen<W>,
+  private suspend fun <F, W> MonadWriter<F, W>.monadWriterTellFusion(
+    genW: Arb<W>,
     MOW: Monoid<W>,
     EQ: Eq<Kind<F, Unit>>
   ) {
@@ -84,17 +86,17 @@ object MonadWriterLaws {
     }
   }
 
-  fun <F, W> MonadWriter<F, W>.monadWriterListenJust(
+  private suspend fun <F, W> MonadWriter<F, W>.monadWriterListenJust(
     MOW: Monoid<W>,
     EqTupleWA: Eq<Kind<F, Tuple2<W, Int>>>
   ) {
-    forAll(Gen.int()) { a: Int ->
+    forAll(Arb.int()) { a: Int ->
       just(a).listen().equalUnderTheLaw(just(Tuple2(MOW.empty(), a)), EqTupleWA)
     }
   }
 
-  fun <F, W> MonadWriter<F, W>.monadWriterListenWriter(
-    genTupleWA: Gen<Tuple2<W, Int>>,
+  private suspend fun <F, W> MonadWriter<F, W>.monadWriterListenWriter(
+    genTupleWA: Arb<Tuple2<W, Int>>,
     EqTupleWA: Eq<Kind<F, Tuple2<W, Int>>>
   ) {
     forAll(genTupleWA) { tupleWA: Tuple2<W, Int> ->

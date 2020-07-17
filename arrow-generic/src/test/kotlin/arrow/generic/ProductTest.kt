@@ -15,30 +15,34 @@ import arrow.core.test.generators.tuple3
 import arrow.core.test.laws.EqLaws
 import arrow.core.test.laws.MonoidLaws
 import arrow.typeclasses.Applicative
-import io.kotlintest.properties.Gen
-import io.kotlintest.properties.forAll
-import io.kotlintest.shouldBe
+import io.kotest.property.Arb
+import io.kotest.property.forAll
+import io.kotest.matchers.shouldBe
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.string
+import io.kotest.property.arbitrary.map
+import io.kotest.property.arbitrary.bind
 
 @product
 data class Person(val name: String, val age: Int, val related: Option<Person>) {
   companion object
 }
 
-fun genPerson(): Gen<Person> {
+fun genPerson(): Arb<Person> {
   val genRelated =
-    Gen.bind(Gen.string(), Gen.int()) { name: String, age: Int -> Person(name, age, None) }
-  return Gen.bind(
-    Gen.string(),
-    Gen.int(),
-    Gen.option(genRelated)
+    Arb.bind(Arb.string(), Arb.int()) { name: String, age: Int -> Person(name, age, None) }
+  return Arb.bind(
+    Arb.string(),
+    Arb.int(),
+    Arb.option(genRelated)
   ) { name: String, age: Int, related: Option<Person> -> Person(name, age, related) }
 }
 
-fun tuple3PersonGen(): Gen<Tuple3<String, Int, Option<Person>>> =
-  Gen.tuple3(Gen.string(), Gen.int(), Gen.option(genPerson()))
+fun tuple3PersonGen(): Arb<Tuple3<String, Int, Option<Person>>> =
+  Arb.tuple3(Arb.string(), Arb.int(), Arb.option(genPerson()))
 
-inline fun <reified F> Applicative<F>.testPersonApplicative() {
-  forAll(Gen.string(), Gen.int(), genPerson()) { a, b, c ->
+suspend inline fun <reified F> Applicative<F>.testPersonApplicative() {
+  forAll(Arb.string(), Arb.int(), genPerson()) { a, b, c ->
     mapToPerson(just(a), just(b), just(c.some())) == just(Person(a, b, c.some()))
   }
 }
@@ -70,7 +74,7 @@ class ProductTest : UnitSpec() {
     }
 
     "List<@product>.combineAll()" {
-      forAll(Gen.nonEmptyList(genPerson()).map { it.all }) {
+      forAll(Arb.nonEmptyList(genPerson()).map { it.all }) {
         it.combineAll() == it.reduce { a, b -> a + b }
       }
     }

@@ -4,14 +4,14 @@ import arrow.core.extensions.eq
 import arrow.core.test.UnitSpec
 import arrow.core.test.generators.nonZeroInt
 import arrow.validation.refinedTypes.numeric.validated.nonZero.nonZero
-import io.kotlintest.properties.Gen
-import io.kotlintest.properties.forAll
+import io.kotest.property.Arb
+import io.kotest.property.forAll
 
 class NonZeroTest : UnitSpec() {
   init {
 
     "Can create NonZero from any number except 0" {
-      forAll(Gen.nonZeroInt()) { x: Int ->
+      forAll(Arb.nonZeroInt()) { x: Int ->
         x.nonZero(Int.eq()).isValid
       }
     }

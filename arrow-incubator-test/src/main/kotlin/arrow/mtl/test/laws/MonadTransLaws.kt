@@ -11,8 +11,9 @@ import arrow.core.test.laws.equalUnderTheLaw
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
 import arrow.typeclasses.Monad
-import io.kotlintest.properties.Gen
-import io.kotlintest.properties.forAll
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.int
+import io.kotest.property.forAll
 
 object MonadTransLaws {
   fun <T, F> laws(
@@ -22,13 +23,13 @@ object MonadTransLaws {
     genkF: GenK<F>,
     eqkTF: EqK<Kind<T, F>>
   ): List<Law> {
-    val genFA = genkF.genK(Gen.int())
-    val genFunAtoFB = Gen.functionAToB<Int, Kind<F, Int>>(genFA)
+    val genFA = genkF.genK(Arb.int())
+    val genFunAtoFB = Arb.functionAToB<Int, Kind<F, Int>>(genFA)
     val eq = eqkTF.liftEq(Int.eq())
 
     return listOf(
       Law("MonadTrans Laws: Identity") {
-        monadTrans.identity(Gen.int(), monadF, monadTF, eq)
+        monadTrans.identity(Arb.int(), monadF, monadTF, eq)
       },
       Law("MonadTrans Laws: associativity") {
         monadTrans.associativity(genFA, genFunAtoFB, monadF, monadTF, eq)
@@ -36,8 +37,8 @@ object MonadTransLaws {
     )
   }
 
-  private fun <T, F, A> MonadTrans<T>.identity(
-    genA: Gen<A>,
+  private suspend fun <T, F, A> MonadTrans<T>.identity(
+    genA: Arb<A>,
     MM: Monad<F>,
     MF: Monad<Kind<T, F>>,
     EQ: Eq<Kind2<T, F, A>>
@@ -50,9 +51,9 @@ object MonadTransLaws {
     }
   }
 
-  private fun <T, F, A, B> MonadTrans<T>.associativity(
-    genFA: Gen<Kind<F, A>>,
-    genFunAtoFB: Gen<(A) -> Kind<F, B>>,
+  private suspend fun <T, F, A, B> MonadTrans<T>.associativity(
+    genFA: Arb<Kind<F, A>>,
+    genFunAtoFB: Arb<(A) -> Kind<F, B>>,
     monadF: Monad<F>,
     monadTF: Monad<Kind<T, F>>,
     EQ: Eq<Kind2<T, F, B>>

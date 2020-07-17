@@ -10,61 +10,63 @@ import arrow.core.test.laws.equalUnderTheLaw
 import arrow.mtl.typeclasses.MonadReader
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
-import io.kotlintest.properties.Gen
-import io.kotlintest.properties.forAll
+import io.kotest.property.Arb
+import io.kotest.property.forAll
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.map
 
 // Laws mostly from https://mail.haskell.org/pipermail/libraries/2019-October/030038.html
 object MonadReaderLaws {
   fun <F, D> laws(
     MR: MonadReader<F, D>,
     genK: GenK<F>,
-    genD: Gen<D>,
+    genD: Arb<D>,
     eqK: EqK<F>,
     eqD: Eq<D>
   ): List<Law> = listOf(
     Law("MonadReader laws: ask().followedBy(m) == m") {
-      MR.askHasNoSideEffects(genK.genK(Gen.int()), eqK.liftEq(Int.eq()))
+      MR.askHasNoSideEffects(genK.genK(Arb.int()), eqK.liftEq(Int.eq()))
     },
     Law("MonadReader laws: ask().flatMap { s1 -> ask().flatMap { s2 -> k(s1, s2) } } == ask().flatMap { s -> k(s, s) }") {
       MR.askProducesTheSameResult(
-        genK.genK(Gen.int()).map { { _: D, _: D -> it } },
+        genK.genK(Arb.int()).map { { _: D, _: D -> it } },
         eqK.liftEq(Int.eq())
       )
     },
     Law("MonadReader laws: ask().local(f) == ask().map(f)") {
-      MR.localChangesTheEnvProducedByAsk(Gen.functionAToB(genD), eqK.liftEq(eqD))
+      MR.localChangesTheEnvProducedByAsk(Arb.functionAToB(genD), eqK.liftEq(eqD))
     },
     Law("MonadReader laws: local changes the correct env") {
       MR.localChangesTheCorrectEnv(
-        Gen.functionAToB(genD),
-        genK.genK(Gen.int()),
+        Arb.functionAToB(genD),
+        genK.genK(Arb.int()),
         eqK.liftEq(Int.eq())
       )
     },
     Law("MonadReader laws: local id x == x") {
-      MR.localWithIdNoChanges(genK.genK(Gen.int()), eqK.liftEq(Int.eq()))
+      MR.localWithIdNoChanges(genK.genK(Arb.int()), eqK.liftEq(Int.eq()))
     },
     Law("MonadReader laws: x.local(f).local(g) == x.local { g(f(it)) }") {
-      MR.localIsAFunctionMorphism(Gen.functionAToB(genD), genK.genK(Gen.int()), eqK.liftEq(Int.eq()))
+      MR.localIsAFunctionMorphism(Arb.functionAToB(genD), genK.genK(Arb.int()), eqK.liftEq(Int.eq()))
     },
     Law("MonadReader laws: just(x).local(f) == just(x)") {
-      MR.localPerformsNoSideEffects(Gen.functionAToB(genD), Gen.int(), eqK.liftEq(Int.eq()))
+      MR.localPerformsNoSideEffects(Arb.functionAToB(genD), Arb.int(), eqK.liftEq(Int.eq()))
     },
     Law("MonadReader laws: local f distributes over flatMap") {
       MR.localDistributesOverFlatMap(
-        Gen.functionAToB(genD),
-        genK.genK(Gen.int()),
-        Gen.functionAToB(genK.genK(Gen.int())),
+        Arb.functionAToB(genD),
+        genK.genK(Arb.int()),
+        Arb.functionAToB(genK.genK(Arb.int())),
         eqK.liftEq(Int.eq())
       )
     },
     Law("MonadReader laws: reader derived") {
-      MR.readerDerived(Gen.functionAToB(Gen.int()), eqK.liftEq(Int.eq()))
+      MR.readerDerived(Arb.functionAToB(Arb.int()), eqK.liftEq(Int.eq()))
     }
   )
 
-  private fun <F, D, A> MonadReader<F, D>.askHasNoSideEffects(
-    genFA: Gen<Kind<F, A>>,
+  private suspend fun <F, D, A> MonadReader<F, D>.askHasNoSideEffects(
+    genFA: Arb<Kind<F, A>>,
     EQ: Eq<Kind<F, A>>
   ) {
     forAll(genFA) { fa ->
@@ -72,8 +74,8 @@ object MonadReaderLaws {
     }
   }
 
-  private fun <F, D, A> MonadReader<F, D>.askProducesTheSameResult(
-    genFun: Gen<(D, D) -> Kind<F, A>>,
+  private suspend fun <F, D, A> MonadReader<F, D>.askProducesTheSameResult(
+    genFun: Arb<(D, D) -> Kind<F, A>>,
     EQ: Eq<Kind<F, A>>
   ) {
     forAll(genFun) { fa ->
@@ -81,8 +83,8 @@ object MonadReaderLaws {
     }
   }
 
-  private fun <F, D> MonadReader<F, D>.localChangesTheEnvProducedByAsk(
-    genFun: Gen<(D) -> D>,
+  private suspend fun <F, D> MonadReader<F, D>.localChangesTheEnvProducedByAsk(
+    genFun: Arb<(D) -> D>,
     EQ: Eq<Kind<F, D>>
   ) {
     forAll(genFun) { f ->
@@ -90,9 +92,9 @@ object MonadReaderLaws {
     }
   }
 
-  private fun <F, D, A> MonadReader<F, D>.localChangesTheCorrectEnv(
-    genFun: Gen<(D) -> D>,
-    genFA: Gen<Kind<F, A>>,
+  private suspend fun <F, D, A> MonadReader<F, D>.localChangesTheCorrectEnv(
+    genFun: Arb<(D) -> D>,
+    genFA: Arb<Kind<F, A>>,
     EQ: Eq<Kind<F, A>>
   ) {
     forAll(genFun, genFA) { f, fa ->
@@ -100,8 +102,8 @@ object MonadReaderLaws {
     }
   }
 
-  private fun <F, D, A> MonadReader<F, D>.localWithIdNoChanges(
-    genFA: Gen<Kind<F, A>>,
+  private suspend fun <F, D, A> MonadReader<F, D>.localWithIdNoChanges(
+    genFA: Arb<Kind<F, A>>,
     EQ: Eq<Kind<F, A>>
   ) {
     forAll(genFA) { fa ->
@@ -109,9 +111,9 @@ object MonadReaderLaws {
     }
   }
 
-  private fun <F, D, A> MonadReader<F, D>.localIsAFunctionMorphism(
-    genFun: Gen<(D) -> D>,
-    genFA: Gen<Kind<F, A>>,
+  private suspend fun <F, D, A> MonadReader<F, D>.localIsAFunctionMorphism(
+    genFun: Arb<(D) -> D>,
+    genFA: Arb<Kind<F, A>>,
     EQ: Eq<Kind<F, A>>
   ) {
     forAll(genFun, genFun, genFA) { f, g, fa ->
@@ -119,9 +121,9 @@ object MonadReaderLaws {
     }
   }
 
-  private fun <F, D, A> MonadReader<F, D>.localPerformsNoSideEffects(
-    genFun: Gen<(D) -> D>,
-    genFA: Gen<A>,
+  private suspend fun <F, D, A> MonadReader<F, D>.localPerformsNoSideEffects(
+    genFun: Arb<(D) -> D>,
+    genFA: Arb<A>,
     EQ: Eq<Kind<F, A>>
   ) {
     forAll(genFun, genFA) { f, a ->
@@ -129,10 +131,10 @@ object MonadReaderLaws {
     }
   }
 
-  private fun <F, D, A, B> MonadReader<F, D>.localDistributesOverFlatMap(
-    genFun: Gen<(D) -> D>,
-    genFA: Gen<Kind<F, A>>,
-    genFunFA: Gen<(A) -> Kind<F, B>>,
+  private suspend fun <F, D, A, B> MonadReader<F, D>.localDistributesOverFlatMap(
+    genFun: Arb<(D) -> D>,
+    genFA: Arb<Kind<F, A>>,
+    genFunFA: Arb<(A) -> Kind<F, B>>,
     EQ: Eq<Kind<F, B>>
   ) {
     forAll(genFun, genFA, genFunFA) { f, fa, ffa ->
@@ -140,8 +142,8 @@ object MonadReaderLaws {
     }
   }
 
-  private fun <F, D, A> MonadReader<F, D>.readerDerived(
-    genF: Gen<(D) -> A>,
+  private suspend fun <F, D, A> MonadReader<F, D>.readerDerived(
+    genF: Arb<(D) -> A>,
     EQ: Eq<Kind<F, A>>
   ) {
     forAll(genF) { f ->

@@ -11,8 +11,8 @@ import arrow.mtl.Cokleisli
 import arrow.mtl.Coreader
 import arrow.mtl.coreader
 import arrow.mtl.runId
-import io.kotlintest.properties.forAll
-import io.kotlintest.shouldBe
+import io.kotest.property.forAll
+import io.kotest.matchers.shouldBe
 
 class CoreaderTest : UnitSpec() {
   init {

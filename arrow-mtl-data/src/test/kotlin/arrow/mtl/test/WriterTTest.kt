@@ -72,8 +72,12 @@ import arrow.mtl.test.laws.MonadReaderLaws
 import arrow.mtl.test.laws.MonadStateLaws
 import arrow.mtl.test.laws.MonadTransLaws
 import arrow.mtl.test.laws.MonadWriterLaws
-import io.kotlintest.properties.Gen
+import io.kotest.property.Arb
 import arrow.mtl.WriterTPartialOf
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.list
+import io.kotest.property.arbitrary.map
+import io.kotest.property.arbitrary.string
 
 class WriterTTest : UnitSpec() {
 
@@ -97,12 +101,12 @@ class WriterTTest : UnitSpec() {
       ),
       AlternativeLaws.laws(
         WriterT.alternative(ListK.monoid<Int>(), Option.alternative()),
-        WriterT.genK(Option.genK(), Gen.list(Gen.int()).map { it.k() }),
+        WriterT.genK(Option.genK(), Arb.list(Arb.int()).map { it.k() }),
         optionEQK()
       ),
       DivisibleLaws.laws(
         WriterT.divisible<ListK<Int>, ConstPartialOf<Int>>(Const.divisible(Int.monoid())),
-        WriterT.genK(Const.genK(Gen.int()), Gen.list(Gen.int()).map { it.k() }),
+        WriterT.genK(Const.genK(Arb.int()), Arb.list(Arb.int()).map { it.k() }),
         constEQK()
       ),
       ConcurrentLaws.laws<WriterTPartialOf<ListK<Int>, ForIO>>(
@@ -111,12 +115,12 @@ class WriterTTest : UnitSpec() {
         WriterT.functor(IO.functor()),
         WriterT.applicative(IO.applicative(), ListK.monoid()),
         WriterT.monad(IO.monad(), ListK.monoid()),
-        WriterT.genK(IO.genK(), Gen.list(Gen.int()).map { it.k() }),
+        WriterT.genK(IO.genK(), Arb.list(Arb.int()).map { it.k() }),
         ioEQK()
       ),
       MonoidKLaws.laws(
         WriterT.monoidK<ListK<Int>, ForListK>(ListK.monoidK()),
-        WriterT.genK(ListK.genK(), Gen.list(Gen.int()).map { it.k() }),
+        WriterT.genK(ListK.genK(), Arb.list(Arb.int()).map { it.k() }),
         listEQK()
       ),
 
@@ -125,15 +129,15 @@ class WriterTTest : UnitSpec() {
         WriterT.functor<ListK<Int>, ForOption>(Option.functor()),
         WriterT.applicative(Option.applicative(), ListK.monoid<Int>()),
         WriterT.monad(Option.monad(), ListK.monoid<Int>()),
-        WriterT.genK(Option.genK(), Gen.list(Gen.int()).map { it.k() }),
+        WriterT.genK(Option.genK(), Arb.list(Arb.int()).map { it.k() }),
         optionEQK()
       ),
 
       MonadWriterLaws.laws(
         WriterT.monadWriter(Option.monad(), ListK.monoid<Int>()),
         ListK.monoid(),
-        Gen.list(Gen.int()).map { it.k() },
-        WriterT.genK(Option.genK(), Gen.list(Gen.int()).map { it.k() }),
+        Arb.list(Arb.int()).map { it.k() },
+        WriterT.genK(Option.genK(), Arb.list(Arb.int()).map { it.k() }),
         optionEQK(),
         ListK.eq(Int.eq())
       ),
@@ -143,23 +147,23 @@ class WriterTTest : UnitSpec() {
         WriterT.functor<ListK<Int>, ForOption>(Option.functor()),
         WriterT.applicative(Option.applicative(), ListK.monoid<Int>()),
         WriterT.monad(Option.monad(), ListK.monoid<Int>()),
-        WriterT.genK(Option.genK(), Gen.list(Gen.int()).map { it.k() }),
+        WriterT.genK(Option.genK(), Arb.list(Arb.int()).map { it.k() }),
         optionEQK()
       ),
       MonadPlusLaws.laws(
         WriterT.monadPlus(ListK.monad(), String.monoid(), ListK.alternative()),
-        WriterT.genK(ListK.genK(), Gen.string()),
+        WriterT.genK(ListK.genK(), Arb.string()),
         WriterT.eqK(ListK.eqK(), String.eq())
       ),
       MonadReaderLaws.laws(
         WriterT.monadReader<String, KleisliPartialOf<Int, ForId>, Int>(Kleisli.monadReader(Id.monad()), String.monoid()),
-        WriterT.genK(Kleisli.genK<Int, ForId>(Id.genK()), Gen.string()), Gen.int(),
+        WriterT.genK(Kleisli.genK<Int, ForId>(Id.genK()), Arb.string()), Arb.int(),
         WriterT.eqK(Kleisli.eqK(Id.eqK(), 1), String.eq()), Int.eq()
       ),
 
       MonadStateLaws.laws(
         WriterT.monadState<String, StateTPartialOf<Int, ForId>, Int>(StateT.monadState(Id.monad()), String.monoid()),
-        WriterT.genK(StateT.genK(Id.genK(), Gen.int()), Gen.string()), Gen.int(),
+        WriterT.genK(StateT.genK(Id.genK(), Arb.int()), Arb.string()), Arb.int(),
         WriterT.eqK(StateT.eqK(Id.eqK(), Int.eq(), 1), String.eq()), Int.eq()
       )
     )

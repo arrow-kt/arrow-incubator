@@ -11,8 +11,9 @@ import arrow.core.test.generators.GenK
 import arrow.core.test.laws.FunctorLaws
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
-import io.kotlintest.properties.Gen
-import io.kotlintest.properties.forAll
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.map
+import io.kotest.property.forAll
 
 class YonedaTest : UnitSpec() {
 
@@ -23,7 +24,7 @@ class YonedaTest : UnitSpec() {
   }
 
   fun genk() = object : GenK<Kind<ForYoneda, ForId>> {
-    override fun <A> genK(gen: Gen<A>): Gen<Kind<Kind<ForYoneda, ForId>, A>> =
+    override fun <A> genK(gen: Arb<A>): Arb<Kind<Kind<ForYoneda, ForId>, A>> =
       gen.map {
         Yoneda(Id(it), Id.functor())
       }

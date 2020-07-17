@@ -20,7 +20,10 @@ import arrow.core.test.UnitSpec
 import arrow.core.test.generators.intSmall
 import arrow.core.value
 import arrow.recursion.test.BirecursiveLaws
-import io.kotlintest.properties.Gen
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.constant
+import io.kotest.property.arbitrary.filter
+import io.kotest.property.arbitrary.map
 
 class FreeBirecursive : UnitSpec() {
   init {
@@ -28,8 +31,8 @@ class FreeBirecursive : UnitSpec() {
       BirecursiveLaws.laws(
         FreeF.traverse<ForOption, Int>(Option.traverse()),
         Free.birecursive<ForOption, Int>(Option.functor()),
-        Gen.intSmall().filter { it in 0..100 }.map { it.unfoldFree() },
-        Gen.constant(5000).map { it.unfoldFree() },
+        Arb.intSmall().filter { it in 0..100 }.map { it.unfoldFree() },
+        Arb.constant(5000).map { it.unfoldFree() },
         Free.eq(Option.monad(), FunctionK.id()),
         {
           it.fix().let { f ->

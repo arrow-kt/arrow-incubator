@@ -1,15 +1,18 @@
 package arrow.validation.test
 
-import io.kotlintest.properties.Gen
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.filter
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.string
 
-fun Gen.Companion.lessThan(max: Int): Gen<Int> = Gen.int().filter { it < max }
+fun Arb.Companion.lessThan(max: Int): Arb<Int> = Arb.int().filter { it < max }
 
-fun Gen.Companion.lessEqual(max: Int): Gen<Int> = Gen.int().filter { it <= max }
+fun Arb.Companion.lessEqual(max: Int): Arb<Int> = Arb.int().filter { it <= max }
 
-fun Gen.Companion.greaterThan(min: Int): Gen<Int> = Gen.int().filter { it > min }
+fun Arb.Companion.greaterThan(min: Int): Arb<Int> = Arb.int().filter { it > min }
 
-fun Gen.Companion.greaterEqual(min: Int): Gen<Int> = Gen.int().filter { it >= min }
+fun Arb.Companion.greaterEqual(min: Int): Arb<Int> = Arb.int().filter { it >= min }
 
-fun Gen.Companion.greaterOrEqThan(max: Int): Gen<Int> = Gen.int().filter { it >= max }
+fun Arb.Companion.greaterOrEqThan(max: Int): Arb<Int> = Arb.int().filter { it >= max }
 
-fun Gen.Companion.nonEmptyString(): Gen<String> = Gen.string().filter { it.isNotEmpty() }
+fun Arb.Companion.nonEmptyString(): Arb<String> = Arb.string().filter { it.isNotEmpty() }

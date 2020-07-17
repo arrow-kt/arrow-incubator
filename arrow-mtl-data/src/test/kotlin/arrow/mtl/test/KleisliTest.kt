@@ -61,8 +61,10 @@ import arrow.mtl.test.laws.MonadWriterLaws
 import arrow.mtl.extensions.kleisli.functor.functor
 import arrow.mtl.extensions.kleisli.monad.monad
 import arrow.typeclasses.EqK
-import io.kotlintest.properties.Gen
-import io.kotlintest.shouldBe
+import io.kotest.property.Arb
+import io.kotest.matchers.shouldBe
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.string
 
 class KleisliTest : UnitSpec() {
 
@@ -90,7 +92,7 @@ class KleisliTest : UnitSpec() {
       ),
       DivisibleLaws.laws(
         Kleisli.divisible<Int, ConstPartialOf<Int>>(Const.divisible(Int.monoid())),
-        Kleisli.genK<Int, ConstPartialOf<Int>>(Const.genK(Gen.int())),
+        Kleisli.genK<Int, ConstPartialOf<Int>>(Const.genK(Arb.int())),
         constEQK
       ),
       MonadLogicLaws.laws(
@@ -101,20 +103,20 @@ class KleisliTest : UnitSpec() {
       MonadReaderLaws.laws<KleisliPartialOf<Int, ForId>, Int>(
         Kleisli.monadReader(Id.monad()),
         Kleisli.genK(Id.genK()),
-        Gen.int(),
+        Arb.int(),
         Kleisli.eqK(Id.eqK(), 1),
         Int.eq()
       ),
       MonadWriterLaws.laws(
         Kleisli.monadWriter<Int, WriterTPartialOf<String, ForId>, String>(WriterT.monadWriter(Id.monad(), String.monoid())),
-        String.monoid(), Gen.string(),
-        Kleisli.genK<Int, WriterTPartialOf<String, ForId>>(WriterT.genK(Id.genK(), Gen.string())),
+        String.monoid(), Arb.string(),
+        Kleisli.genK<Int, WriterTPartialOf<String, ForId>>(WriterT.genK(Id.genK(), Arb.string())),
         Kleisli.eqK(WriterT.eqK(Id.eqK(), String.eq()), 1), String.eq()
       ),
       MonadStateLaws.laws(
         Kleisli.monadState<Int, StateTPartialOf<Int, ForId>, Int>(StateT.monadState(Id.monad())),
-        Kleisli.genK<Int, StateTPartialOf<Int, ForId>>(StateT.genK(Id.genK(), Gen.int())),
-        Gen.int(), Kleisli.eqK(StateT.eqK(Id.eqK(), Int.eq(), 0), 1), Int.eq()
+        Kleisli.genK<Int, StateTPartialOf<Int, ForId>>(StateT.genK(Id.genK(), Arb.int())),
+        Arb.int(), Kleisli.eqK(StateT.eqK(Id.eqK(), Int.eq(), 0), 1), Int.eq()
       )
     )
 

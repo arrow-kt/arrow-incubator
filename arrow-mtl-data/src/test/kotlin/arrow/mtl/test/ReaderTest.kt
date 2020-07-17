@@ -11,7 +11,7 @@ import arrow.mtl.map
 import arrow.mtl.reader
 import arrow.mtl.runId
 import arrow.mtl.zip
-import io.kotlintest.shouldBe
+import io.kotest.matchers.shouldBe
 
 class ReaderTest : UnitSpec() {
   init {

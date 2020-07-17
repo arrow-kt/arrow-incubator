@@ -60,9 +60,12 @@ import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
 import arrow.typeclasses.Monad
 import arrow.typeclasses.Monoid
-import io.kotlintest.properties.Gen
-import io.kotlintest.properties.forAll
-import io.kotlintest.shouldBe
+import io.kotest.matchers.shouldBe
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bool
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.string
+import io.kotest.property.forAll
 
 class AccumTTest : UnitSpec() {
   init {
@@ -79,7 +82,7 @@ class AccumTTest : UnitSpec() {
 
       AlternativeLaws.laws(
         AccumT.alternative(Option.alternative(), Option.monad(), Int.monoid()),
-        AccumT.genK(Option.genK(), Gen.int()),
+        AccumT.genK(Option.genK(), Arb.int()),
         AccumT.eqK(Option.eqK(), Int.eq(), 10)
       ),
 
@@ -88,35 +91,35 @@ class AccumTTest : UnitSpec() {
         AccumT.functor(Either.functor()),
         AccumT.monad(Int.monoid(), Either.monad()),
         AccumT.monad(Int.monoid(), Either.monad()),
-        AccumT.genK(Either.genK(Gen.throwable()), Gen.int()),
+        AccumT.genK(Either.genK(Arb.throwable()), Arb.int()),
         AccumT.eqK(Either.eqK(Eq.any()) as EqK<EitherPartialOf<Throwable>>, Int.eq(), 10)
       ),
 
       MonadStateLaws.laws(
         AccumT.monadState<Int, Int, StateTPartialOf<Int, ForId>>(StateT.monadState(Id.monad()), Int.monoid()),
-        AccumT.genK(StateT.genK(Id.genK(), Gen.int()), Gen.int()),
-        Gen.int(),
+        AccumT.genK(StateT.genK(Id.genK(), Arb.int()), Arb.int()),
+        Arb.int(),
         AccumT.eqK(StateT.eqK(Id.eqK(), Int.eq(), 1), Int.eq(), 1),
         Int.eq()
       ),
 
       MonadWriterLaws.laws(
         AccumT.monadWriter(WriterT.monadWriter(Id.monad(), String.monoid()), String.monoid()),
-        String.monoid(), Gen.string(),
-        AccumT.genK(WriterT.genK(Id.genK(), Gen.string()), Gen.string()),
+        String.monoid(), Arb.string(),
+        AccumT.genK(WriterT.genK(Id.genK(), Arb.string()), Arb.string()),
         AccumT.eqK(WriterT.eqK(Id.eqK(), String.eq()), String.eq(), ""),
         String.eq()
       ),
 
       MonadReaderLaws.laws(
         AccumT.monadReader(Kleisli.monadReader<String, ForId>(Id.monad()), String.monoid()),
-        AccumT.genK(Kleisli.genK<String, ForId>(Id.genK()), Gen.string()),
-        Gen.string(), AccumT.eqK(Kleisli.eqK(Id.eqK(), ""), String.eq(), ""), String.eq()
+        AccumT.genK(Kleisli.genK<String, ForId>(Id.genK()), Arb.string()),
+        Arb.string(), AccumT.eqK(Kleisli.eqK(Id.eqK(), ""), String.eq(), ""), String.eq()
       ),
 
       MonadPlusLaws.laws(
         AccumT.monadPlus(Option.monad(), Int.monoid(), Option.alternative()),
-        AccumT.genK(Option.genK(), Gen.int()),
+        AccumT.genK(Option.genK(), Arb.int()),
         AccumT.eqK(Option.eqK(), Int.eq(), 10)
       )
     )
@@ -125,8 +128,8 @@ class AccumTTest : UnitSpec() {
       flatMapCombinesState(
         String.monoid(),
         Id.monad(),
-        Gen.string(),
-        Gen.bool(),
+        Arb.string(),
+        Arb.bool(),
         Id.eqK().liftEq(String.eq())
       )
     }
@@ -135,8 +138,8 @@ class AccumTTest : UnitSpec() {
       apCombinesState(
         String.monoid(),
         Id.monad(),
-        Gen.string(),
-        Gen.bool(),
+        Arb.string(),
+        Arb.bool(),
         Id.eqK().liftEq(String.eq())
       )
     }
@@ -153,13 +156,13 @@ class AccumTTest : UnitSpec() {
   }
 }
 
-private fun <S, F, A> flatMapCombinesState(
+private suspend fun <S, F, A> flatMapCombinesState(
   MS: Monoid<S>,
   MF: Monad<F>,
-  GENS: Gen<S>,
-  GENA: Gen<A>,
+  GENS: Arb<S>,
+  GENA: Arb<A>,
   eq: Eq<Kind<F, S>>
-): Unit =
+) =
   forAll(GENS, GENS, GENS, GENA) { g1, g2, g3, a ->
 
     val accumT = AccumT.add(MF, g1)
@@ -173,13 +176,13 @@ private fun <S, F, A> flatMapCombinesState(
     ls.equalUnderTheLaw(rs, eq)
   }
 
-private fun <S, F, A> apCombinesState(
+private suspend fun <S, F, A> apCombinesState(
   MS: Monoid<S>,
   MF: Monad<F>,
-  GENS: Gen<S>,
-  GENA: Gen<A>,
+  GENS: Arb<S>,
+  GENA: Arb<A>,
   eq: Eq<Kind<F, S>>
-): Unit =
+) =
   forAll(GENS, GENS, GENS, GENA) { s1, s2, s3, a ->
 
     val accumT = AccumT { _: S ->

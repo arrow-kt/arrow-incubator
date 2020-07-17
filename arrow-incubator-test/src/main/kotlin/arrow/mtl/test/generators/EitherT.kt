@@ -5,10 +5,11 @@ import arrow.core.test.generators.GenK
 import arrow.core.test.generators.either
 import arrow.mtl.EitherT
 import arrow.mtl.EitherTPartialOf
-import io.kotlintest.properties.Gen
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.map
 
-fun <L, F> EitherT.Companion.genK(genkF: GenK<F>, genL: Gen<L>) =
+fun <L, F> EitherT.Companion.genK(genkF: GenK<F>, genL: Arb<L>) =
   object : GenK<EitherTPartialOf<L, F>> {
-    override fun <R> genK(gen: Gen<R>): Gen<Kind<EitherTPartialOf<L, F>, R>> =
-      genkF.genK(Gen.either(genL, gen)).map { EitherT(it) }
+    override fun <R> genK(gen: Arb<R>): Arb<Kind<EitherTPartialOf<L, F>, R>> =
+      genkF.genK(Arb.either(genL, gen)).map { EitherT(it) }
   }

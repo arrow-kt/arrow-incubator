@@ -27,7 +27,7 @@ import arrow.core.Some
 import arrow.core.None
 import arrow.core.extensions.order
 import arrow.core.test.UnitSpec
-import io.kotlintest.shouldBe
+import io.kotest.matchers.shouldBe
 
 class AQLTests : UnitSpec() {
 

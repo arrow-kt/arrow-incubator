@@ -11,7 +11,10 @@ import arrow.recursion.extensions.birecursive
 import arrow.core.test.UnitSpec
 import arrow.core.test.generators.intSmall
 import arrow.recursion.test.BirecursiveLaws
-import io.kotlintest.properties.Gen
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.constant
+import io.kotest.property.arbitrary.filter
+import io.kotest.property.arbitrary.map
 
 class IntBirecursive : UnitSpec() {
   init {
@@ -20,8 +23,8 @@ class IntBirecursive : UnitSpec() {
       BirecursiveLaws.laws(
         Option.traverse(),
         Int.birecursive(),
-        Gen.intSmall().filter { it in 0..100 },
-        Gen.constant(5000),
+        Arb.intSmall().filter { it in 0..100 },
+        Arb.constant(5000),
         Int.eq(),
         {
           it.fold(Int.monoid())
@@ -48,8 +51,8 @@ class LongBirecursive : UnitSpec() {
       BirecursiveLaws.laws(
         Option.traverse(),
         Long.birecursive(),
-        Gen.intSmall().filter { it in 0..100 }.map { it.toLong() },
-        Gen.constant(5000L),
+        Arb.intSmall().filter { it in 0..100 }.map { it.toLong() },
+        Arb.constant(5000L),
         Long.eq(),
         {
           it.fold(Int.monoid())

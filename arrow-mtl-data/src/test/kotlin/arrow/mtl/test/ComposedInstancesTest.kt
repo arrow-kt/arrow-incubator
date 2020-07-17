@@ -64,7 +64,11 @@ import arrow.typeclasses.EqK
 import arrow.typeclasses.EqK2
 import arrow.typeclasses.conest
 import arrow.typeclasses.counnest
-import io.kotlintest.properties.Gen
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.map
+import io.kotest.property.arbitrary.orNull
 
 class ComposedInstancesTest : UnitSpec() {
   init {
@@ -85,10 +89,10 @@ class ComposedInstancesTest : UnitSpec() {
 
     val EQK_OPTION_FN1: EqK<Nested<ForOption, Conested<ForFunction1, Int>>> = Option.eqK().nested(EQK_FN1())
 
-    fun <A> GENK_OPTION_FN1(genA: Gen<A>): GenK<Nested<ForOption, Conested<ForFunction1, A>>> =
+    fun <A> GENK_OPTION_FN1(genA: Arb<A>): GenK<Nested<ForOption, Conested<ForFunction1, A>>> =
       object : GenK<Nested<ForOption, Conested<ForFunction1, A>>> {
-        override fun <B> genK(gen: Gen<B>): Gen<Kind<Nested<ForOption, Conested<ForFunction1, A>>, B>> =
-          Gen.functionAToB<B, A>(genA).map { it.k().conest() }.orNull().map {
+        override fun <B> genK(gen: Arb<B>): Arb<Kind<Nested<ForOption, Conested<ForFunction1, A>>, B>> =
+          Arb.functionAToB<B, A>(genA).map { it.k().conest() }.orNull().map {
             Option.fromNullable(it).nest()
           }
       }
@@ -100,8 +104,8 @@ class ComposedInstancesTest : UnitSpec() {
       Option.genK().nested(NonEmptyList.genK())
 
     val biFunctorGenk = object : GenK2<Nested<ForTuple2, ForTuple2>> {
-      override fun <A, B> genK(genA: Gen<A>, genB: Gen<B>): Gen<Kind2<Nested<ForTuple2, ForTuple2>, A, B>> =
-        Gen.bind(genA, genB) { a, b ->
+      override fun <A, B> genK(genA: Arb<A>, genB: Arb<B>): Arb<Kind2<Nested<ForTuple2, ForTuple2>, A, B>> =
+        Arb.bind(genA, genB) { a, b ->
           Tuple2(Tuple2(a, b), Tuple2(a, b)).binest()
         }
     }
@@ -118,7 +122,7 @@ class ComposedInstancesTest : UnitSpec() {
     )
 
     testLaws(
-      InvariantLaws.laws(ComposedInvariantContravariant(Option.functor(), Function1.contravariant<Int>()), GENK_OPTION_FN1(Gen.int()), EQK_OPTION_FN1)
+      InvariantLaws.laws(ComposedInvariantContravariant(Option.functor(), Function1.contravariant<Int>()), GENK_OPTION_FN1(Arb.int()), EQK_OPTION_FN1)
     )
 
     testLaws(

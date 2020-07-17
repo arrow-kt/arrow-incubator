@@ -36,8 +36,9 @@ import arrow.core.test.generators.nonEmptyList
 import arrow.core.test.laws.ComonadLaws
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
-import io.kotlintest.properties.Gen
-import io.kotlintest.shouldBe
+import io.kotest.property.Arb
+import io.kotest.matchers.shouldBe
+import io.kotest.property.arbitrary.map
 
 class CofreeTest : UnitSpec() {
 
@@ -47,8 +48,8 @@ class CofreeTest : UnitSpec() {
       private fun <A> NonEmptyList<A>.toCofree(): Cofree<ForOption, A> =
         Cofree(Option.functor(), this.head, Eval.later { Nel.fromList(this.tail).map { it.toCofree() } })
 
-      override fun <A> genK(gen: Gen<A>): Gen<Kind<CofreePartialOf<ForOption>, A>> =
-        Gen.nonEmptyList(gen).map {
+      override fun <A> genK(gen: Arb<A>): Arb<Kind<CofreePartialOf<ForOption>, A>> =
+        Arb.nonEmptyList(gen).map {
           it.toCofree()
         }
     }

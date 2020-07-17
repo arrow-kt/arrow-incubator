@@ -16,7 +16,7 @@ import arrow.core.test.UnitSpec
 import arrow.typeclasses.Functor
 import arrow.typeclasses.Invariant
 import arrow.typeclasses.MonadError
-import io.kotlintest.shouldBe
+import io.kotest.matchers.shouldBe
 
 object Bogus
 

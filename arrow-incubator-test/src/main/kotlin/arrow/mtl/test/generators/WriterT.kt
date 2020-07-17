@@ -5,12 +5,13 @@ import arrow.core.test.generators.GenK
 import arrow.core.test.generators.tuple2
 import arrow.mtl.WriterT
 import arrow.mtl.WriterTPartialOf
-import io.kotlintest.properties.Gen
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.map
 
 fun <W, F> WriterT.Companion.genK(
   GENKF: GenK<F>,
-  GENW: Gen<W>
+  GENW: Arb<W>
 ) = object : GenK<WriterTPartialOf<W, F>> {
-  override fun <A> genK(gen: Gen<A>): Gen<Kind<WriterTPartialOf<W, F>, A>> =
-    GENKF.genK(Gen.tuple2(GENW, gen)).map(::WriterT)
+  override fun <A> genK(gen: Arb<A>): Arb<Kind<WriterTPartialOf<W, F>, A>> =
+    GENKF.genK(Arb.tuple2(GENW, gen)).map(::WriterT)
 }

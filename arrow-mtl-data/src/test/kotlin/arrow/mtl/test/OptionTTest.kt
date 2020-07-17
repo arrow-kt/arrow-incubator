@@ -75,8 +75,10 @@ import arrow.mtl.test.laws.MonadStateLaws
 import arrow.mtl.test.laws.MonadTransLaws
 import arrow.mtl.test.laws.MonadWriterLaws
 import arrow.typeclasses.Monad
-import io.kotlintest.properties.Gen
-import io.kotlintest.properties.forAll
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.string
+import io.kotest.property.forAll
 
 typealias OptionTNel = Kind<OptionTPartialOf<ForNonEmptyList>, Int>
 
@@ -133,7 +135,7 @@ class OptionTTest : UnitSpec() {
         OptionT.divisible(
           Const.divisible(Int.monoid())
         ),
-        OptionT.genK(Const.genK(Gen.int())),
+        OptionT.genK(Const.genK(Arb.int())),
         OptionT.eqK(Const.eqK(Int.eq()))
       ),
 
@@ -153,19 +155,19 @@ class OptionTTest : UnitSpec() {
 
       MonadReaderLaws.laws(
         OptionT.monadReader<KleisliPartialOf<Int, ForId>, Int>(Kleisli.monadReader(Id.monad())),
-        OptionT.genK(Kleisli.genK<Int, ForId>(Id.genK())), Gen.int(),
+        OptionT.genK(Kleisli.genK<Int, ForId>(Id.genK())), Arb.int(),
         OptionT.eqK(Kleisli.eqK(Id.eqK(), 1)), Int.eq()
       ),
 
       MonadWriterLaws.laws(
-        OptionT.monadWriter(WriterT.monadWriter(Id.monad(), String.monoid())), String.monoid(), Gen.string(),
-        OptionT.genK(WriterT.genK(Id.genK(), Gen.string())),
+        OptionT.monadWriter(WriterT.monadWriter(Id.monad(), String.monoid())), String.monoid(), Arb.string(),
+        OptionT.genK(WriterT.genK(Id.genK(), Arb.string())),
         OptionT.eqK(WriterT.eqK(Id.eqK(), String.eq())), String.eq()
       ),
 
       MonadStateLaws.laws(
         OptionT.monadState<StateTPartialOf<Int, ForId>, Int>(StateT.monadState(Id.monad())),
-        OptionT.genK(StateT.genK(Id.genK(), Gen.int())), Gen.int(),
+        OptionT.genK(StateT.genK(Id.genK(), Arb.int())), Arb.int(),
         OptionT.eqK(StateT.eqK(Id.eqK(), Int.eq(), 1)), Int.eq()
       )
     )

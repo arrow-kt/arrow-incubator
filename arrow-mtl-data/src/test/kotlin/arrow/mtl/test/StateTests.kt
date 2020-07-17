@@ -12,7 +12,7 @@ import arrow.mtl.flatMap
 import arrow.mtl.run
 import arrow.mtl.runA
 import arrow.mtl.runS
-import io.kotlintest.shouldBe
+import io.kotest.matchers.shouldBe
 
 class StateTests : UnitSpec() {
 

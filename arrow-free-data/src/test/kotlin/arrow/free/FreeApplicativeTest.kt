@@ -12,18 +12,22 @@ import arrow.core.extensions.id.monad.monad
 import arrow.core.extensions.nonemptylist.applicative.applicative
 import arrow.core.extensions.option.applicative.applicative
 import arrow.core.fix
-import arrow.free.extensions.FreeApplicativeApplicative
-import arrow.free.extensions.FreeApplicativeEq
-import arrow.free.extensions.freeapplicative.applicative.applicative
-import arrow.free.extensions.freeapplicative.eq.eq
 import arrow.core.test.UnitSpec
 import arrow.core.test.generators.GenK
 import arrow.core.test.laws.ApplicativeLaws
 import arrow.core.test.laws.EqLaws
+import arrow.free.extensions.FreeApplicativeApplicative
+import arrow.free.extensions.FreeApplicativeEq
+import arrow.free.extensions.freeapplicative.applicative.applicative
+import arrow.free.extensions.freeapplicative.eq.eq
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
-import io.kotlintest.properties.Gen
-import io.kotlintest.shouldBe
+import io.kotest.matchers.shouldBe
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.choice
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.map
 
 sealed class OpsAp<out A> : Kind<OpsAp.F, A> {
 
@@ -62,12 +66,12 @@ class FreeApplicativeTest : UnitSpec() {
     }
 
     fun GENK() = object : GenK<FreeApplicativePartialOf<OpsAp.F>> {
-      override fun <A> genK(gen: Gen<A>): Gen<Kind<FreeApplicativePartialOf<OpsAp.F>, A>> =
+      override fun <A> genK(gen: Arb<A>): Arb<Kind<FreeApplicativePartialOf<OpsAp.F>, A>> =
         gen.map { OpsAp.just(it) }
     }
 
     testLaws(
-      EqLaws.laws(EQ, Gen.opsAp()),
+      EqLaws.laws(EQ, Arb.opsAp()),
       ApplicativeLaws.laws(OpsAp, GENK(), EQK()),
       ApplicativeLaws.laws(FreeApplicative.applicative(), GENK(), EQK())
     )
@@ -91,17 +95,17 @@ class FreeApplicativeTest : UnitSpec() {
   }
 }
 
-private fun Gen.Companion.opsAp() =
-  oneOf(valueGen, addGen, subtractGen)
+private fun Arb.Companion.opsAp() =
+  choice(valueGen, addGen, subtractGen)
 
-private val valueGen = Gen.bind(Gen.int()) {
+private val valueGen = Arb.int().map {
   OpsAp.value(it)
 }
 
-private val addGen = Gen.bind(Gen.int(), Gen.int()) { a, b ->
+private val addGen = Arb.bind(Arb.int(), Arb.int()) { a, b ->
   OpsAp.add(a, b)
 }
 
-private val subtractGen = Gen.bind(Gen.int(), Gen.int()) { a, b ->
+private val subtractGen = Arb.bind(Arb.int(), Arb.int()) { a, b ->
   OpsAp.subtract(a, b)
 }

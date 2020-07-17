@@ -16,7 +16,11 @@ import arrow.core.test.UnitSpec
 import arrow.core.value
 import arrow.recursion.test.BirecursiveLaws
 import arrow.typeclasses.Eq
-import io.kotlintest.properties.Gen
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.constant
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.list
+import io.kotest.property.arbitrary.map
 
 class FixBirecursive : UnitSpec() {
   init {
@@ -24,8 +28,8 @@ class FixBirecursive : UnitSpec() {
       BirecursiveLaws.laws(
         Option.traverse(),
         Fix.birecursive(Option.functor()),
-        Gen.list(Gen.int()).map { it.toFix() },
-        Gen.constant((0..5000).toList()).map { it.toFix() },
+        Arb.list(Arb.int()).map { it.toFix() },
+        Arb.constant((0..5000).toList()).map { it.toFix() },
         Eq.any(),
         {
           it.fix().fold({ 0 }, { it + 1 })

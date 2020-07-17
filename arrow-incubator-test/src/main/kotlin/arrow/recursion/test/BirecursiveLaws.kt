@@ -9,13 +9,13 @@ import arrow.recursion.typeclasses.Birecursive
 import arrow.core.test.laws.Law
 import arrow.typeclasses.Eq
 import arrow.typeclasses.Traverse
-import io.kotlintest.properties.Gen
+import io.kotest.property.Arb
 
 object BirecursiveLaws {
 
   fun <T, F> laws(
     BR: Birecursive<T, F>,
-    genSmallT: Gen<T>,
+    genSmallT: Arb<T>,
     eqT: Eq<T>,
     alg: Algebra<F, Int>,
     coalg: Coalgebra<F, Int>
@@ -24,8 +24,8 @@ object BirecursiveLaws {
   fun <T, F> laws(
     TF: Traverse<F>,
     BR: Birecursive<T, F>,
-    genSmallT: Gen<T>,
-    genLargeT: Gen<T>,
+    genSmallT: Arb<T>,
+    genLargeT: Arb<T>,
     eqT: Eq<T>,
     alg: Algebra<F, Int>,
     algM: AlgebraM<F, ForEval, Int>,

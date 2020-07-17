@@ -69,8 +69,10 @@ import arrow.mtl.test.laws.MonadStateLaws
 import arrow.mtl.test.laws.MonadWriterLaws
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
-import io.kotlintest.properties.Gen
-import io.kotlintest.properties.forAll
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.string
+import io.kotest.property.forAll
 
 class EitherTTest : UnitSpec() {
 
@@ -84,13 +86,13 @@ class EitherTTest : UnitSpec() {
     testLaws(
       DivisibleLaws.laws(
         EitherT.divisible<Int, ConstPartialOf<Int>>(Const.divisible(Int.monoid())),
-        EitherT.genK(Const.genK(Gen.int()), Gen.int()),
+        EitherT.genK(Const.genK(Arb.int()), Arb.int()),
         constEQK
       ),
 
       AlternativeLaws.laws(
         EitherT.alternative(Id.monad(), Int.monoid()),
-        EitherT.genK(Id.genK(), Gen.int()),
+        EitherT.genK(Id.genK(), Arb.int()),
         idEQK
       ),
 
@@ -100,12 +102,12 @@ class EitherTTest : UnitSpec() {
         EitherT.functor(IO.functor()),
         EitherT.applicative(IO.monad()),
         EitherT.monad(IO.monad()),
-        EitherT.genK(IO.genK(), Gen.string()),
+        EitherT.genK(IO.genK(), Arb.string()),
         ioEQK
       ),
 
       TraverseLaws.laws(EitherT.traverse<Int, ForId>(Id.traverse()),
-        EitherT.genK(Id.genK(), Gen.int()),
+        EitherT.genK(Id.genK(), Arb.int()),
         idEQK
       ),
 
@@ -114,25 +116,25 @@ class EitherTTest : UnitSpec() {
         EitherT.functor(Id.monad()),
         EitherT.apply(Id.monad()),
         EitherT.monad(Id.monad()),
-        EitherT.genK(Id.genK(), Gen.throwable()),
+        EitherT.genK(Id.genK(), Arb.throwable()),
         EitherT.eqK(Id.eqK(), throwableEq())
       ),
 
       MonadReaderLaws.laws(
         EitherT.monadReader<String, KleisliPartialOf<String, ForId>, String>(Kleisli.monadReader(Id.monad())),
-        EitherT.genK(Kleisli.genK<String, ForId>(Id.genK()), Gen.string()),
-        Gen.string(), EitherT.eqK(Kleisli.eqK(Id.eqK(), "H"), String.eq()), String.eq()
+        EitherT.genK(Kleisli.genK<String, ForId>(Id.genK()), Arb.string()),
+        Arb.string(), EitherT.eqK(Kleisli.eqK(Id.eqK(), "H"), String.eq()), String.eq()
       ),
 
       MonadWriterLaws.laws(
         EitherT.monadWriter<String, WriterTPartialOf<String, ForId>, String>(WriterT.monadWriter(Id.monad(), String.monoid())),
-        String.monoid(), Gen.string(), EitherT.genK(WriterT.genK(Id.genK(), Gen.string()), Gen.string()),
+        String.monoid(), Arb.string(), EitherT.genK(WriterT.genK(Id.genK(), Arb.string()), Arb.string()),
         EitherT.eqK(WriterT.eqK(Id.eqK(), String.eq()), String.eq()), String.eq()
       ),
 
       MonadStateLaws.laws(
         EitherT.monadState<String, StateTPartialOf<Int, ForId>, Int>(StateT.monadState(Id.monad())),
-        EitherT.genK(StateT.genK(Id.genK(), Gen.int()), Gen.string()), Gen.int(),
+        EitherT.genK(StateT.genK(Id.genK(), Arb.int()), Arb.string()), Arb.int(),
         EitherT.eqK(StateT.eqK(Id.eqK(), Int.eq(), 1), String.eq()), Int.eq()
       )
     )

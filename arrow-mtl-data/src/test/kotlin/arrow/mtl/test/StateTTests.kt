@@ -54,7 +54,9 @@ import arrow.mtl.test.generators.genK
 import arrow.mtl.test.laws.MonadReaderLaws
 import arrow.mtl.test.laws.MonadStateLaws
 import arrow.mtl.test.laws.MonadWriterLaws
-import io.kotlintest.properties.Gen
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.string
 
 class StateTTests : UnitSpec() {
 
@@ -65,13 +67,13 @@ class StateTTests : UnitSpec() {
         StateT.functor(IO.functor()),
         StateT.applicative(IO.monad()),
         StateT.monad(IO.monad()),
-        StateT.genK(IO.genK(), Gen.int()),
+        StateT.genK(IO.genK(), Arb.int()),
         StateT.eqK(IO.eqK(), Int.eq(), 0)
       ),
 
       SemigroupKLaws.laws(
         StateT.semigroupK<Int, ForOption>(Option.semigroupK()),
-        StateT.genK(Option.genK(), Gen.int()),
+        StateT.genK(Option.genK(), Arb.int()),
         StateT.eqK(Option.eqK(), Int.eq(), 0)
       ),
 
@@ -80,34 +82,34 @@ class StateTTests : UnitSpec() {
         StateT.functor(Option.functor()),
         StateT.applicative(Option.monad()),
         StateT.monad(Option.monad()),
-        StateT.genK(Option.genK(), Gen.int()),
+        StateT.genK(Option.genK(), Arb.int()),
         StateT.eqK(Option.eqK(), Int.eq(), 0)
       ),
 
       MonadLogicLaws.laws(
         StateT.monadLogic<Int, ForListK>(ListK.monadLogic()),
-        StateT.genK(ListK.genK(withMaxSize = 20), Gen.int()),
+        StateT.genK(ListK.genK(withMaxSize = 20), Arb.int()),
         StateT.eqK(ListK.eqK(), Int.eq(), 1), 50
       ),
 
       MonadStateLaws.laws<StateTPartialOf<Int, ForIO>, Int>(
         StateT.monadState(IO.monad()),
-        StateT.genK(IO.genK(), Gen.int()),
-        Gen.int(),
+        StateT.genK(IO.genK(), Arb.int()),
+        Arb.int(),
         StateT.eqK(IO.eqK(), Int.eq(), 0),
         Int.eq()
       ),
 
       MonadReaderLaws.laws(
         StateT.monadReader<Int, KleisliPartialOf<Int, ForId>, Int>(Kleisli.monadReader(Id.monad())),
-        StateT.genK(Kleisli.genK<Int, ForId>(Id.genK()), Gen.int()), Gen.int(),
+        StateT.genK(Kleisli.genK<Int, ForId>(Id.genK()), Arb.int()), Arb.int(),
         StateT.eqK<Int, KleisliPartialOf<Int, ForId>>(Kleisli.eqK(Id.eqK(), 1), Int.eq(), 0), Int.eq()
       ),
 
       MonadWriterLaws.laws(
         StateT.monadWriter<Int, WriterTPartialOf<String, ForId>, String>(WriterT.monadWriter(Id.monad(), String.monoid())),
-        String.monoid(), Gen.string(),
-        StateT.genK(WriterT.genK(Id.genK(), Gen.string()), Gen.int()),
+        String.monoid(), Arb.string(),
+        StateT.genK(WriterT.genK(Id.genK(), Arb.string()), Arb.int()),
         StateT.eqK(WriterT.eqK(Id.eqK(), String.eq()), Int.eq(), 1), String.eq()
       )
     )

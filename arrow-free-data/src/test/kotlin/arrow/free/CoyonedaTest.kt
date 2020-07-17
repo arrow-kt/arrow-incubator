@@ -17,9 +17,10 @@ import arrow.core.test.generators.GenK
 import arrow.core.test.laws.FunctorLaws
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
-import io.kotlintest.properties.Gen
-import io.kotlintest.properties.forAll
-import io.kotlintest.shouldBe
+import io.kotest.property.Arb
+import io.kotest.property.forAll
+import io.kotest.matchers.shouldBe
+import io.kotest.property.arbitrary.map
 
 class CoyonedaTest : UnitSpec() {
 
@@ -30,12 +31,12 @@ class CoyonedaTest : UnitSpec() {
   }
 
   fun genk() = object : GenK<Kind2<ForCoyoneda, ForId, Int>> {
-    override fun <A> genK(gen: Gen<A>): Gen<Kind<Kind2<ForCoyoneda, ForId, Int>, A>> =
+    override fun <A> genK(gen: Arb<A>): Arb<Kind<Kind2<ForCoyoneda, ForId, Int>, A>> =
       gen.map {
         Coyoneda(Id(0)) {
           it
         }
-      } as Gen<Kind<Kind2<ForCoyoneda, ForId, Int>, A>>
+      } as Arb<Kind<Kind2<ForCoyoneda, ForId, Int>, A>>
   }
 
   init {

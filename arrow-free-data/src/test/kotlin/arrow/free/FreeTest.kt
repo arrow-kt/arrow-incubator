@@ -31,8 +31,12 @@ import arrow.core.test.laws.MonadLaws
 import arrow.core.test.laws.TraverseLaws
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
-import io.kotlintest.properties.Gen
-import io.kotlintest.shouldBe
+import io.kotest.property.Arb
+import io.kotest.matchers.shouldBe
+import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.choice
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.map
 
 @higherkind
 sealed class Ops<out A> : OpsOf<A> {
@@ -68,7 +72,7 @@ class FreeTest : UnitSpec() {
     val EQ: FreeEq<ForOps, ForId, Int> = Free.eq(IdMonad, idInterpreter)
 
     fun <S> freeGENK() = object : GenK<FreePartialOf<S>> {
-      override fun <A> genK(gen: Gen<A>): Gen<Kind<FreePartialOf<S>, A>> =
+      override fun <A> genK(gen: Arb<A>): Arb<Kind<FreePartialOf<S>, A>> =
         gen.map {
           it.free<S, A>()
         }
@@ -93,12 +97,12 @@ class FreeTest : UnitSpec() {
     }
 
     fun opsGENK() = object : GenK<FreePartialOf<ForOps>> {
-      override fun <A> genK(gen: Gen<A>): Gen<Kind<FreePartialOf<ForOps>, A>> =
-        Gen.ops(Gen.int()) as Gen<Kind<FreePartialOf<ForOps>, A>>
+      override fun <A> genK(gen: Arb<A>): Arb<Kind<FreePartialOf<ForOps>, A>> =
+        Arb.ops(Arb.int()) as Arb<Kind<FreePartialOf<ForOps>, A>>
     }
 
     testLaws(
-      EqLaws.laws(EQ, Gen.ops(Gen.int())),
+      EqLaws.laws(EQ, Arb.ops(Arb.int())),
       // TODO
       // MonadLaws.laws(Ops, opsGENK(), opsEQK),
       MonadLaws.laws(Free.monad(), Free.functor(), Free.applicative(), Free.monad(), freeGENK(), idEQK),
@@ -136,13 +140,13 @@ class FreeTest : UnitSpec() {
   }
 }
 
-private fun Gen.Companion.ops(gen: Gen<Int>) =
-  Gen.oneOf(
+private fun Arb.Companion.ops(gen: Arb<Int>) =
+  Arb.choice(
     gen.map { Ops.value(it) },
-    Gen.bind(gen, gen) { a, b ->
+    Arb.bind(gen, gen) { a, b ->
       Ops.add(a, b)
     },
-    Gen.bind(gen, gen) { a, b ->
+    Arb.bind(gen, gen) { a, b ->
       Ops.subtract(a, b)
     }
   )

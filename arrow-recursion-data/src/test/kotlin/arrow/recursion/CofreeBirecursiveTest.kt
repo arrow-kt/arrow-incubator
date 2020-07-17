@@ -22,7 +22,12 @@ import arrow.core.test.UnitSpec
 import arrow.core.value
 import arrow.recursion.test.BirecursiveLaws
 import arrow.typeclasses.Eq
-import io.kotlintest.properties.Gen
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.constant
+import io.kotest.property.arbitrary.filter
+import io.kotest.property.arbitrary.int
+import io.kotest.property.arbitrary.list
+import io.kotest.property.arbitrary.map
 
 class CofreeBirecursive : UnitSpec() {
   init {
@@ -30,8 +35,8 @@ class CofreeBirecursive : UnitSpec() {
       BirecursiveLaws.laws(
         CofreeF.traverse<ForOption, Int>(Option.traverse()),
         Cofree.birecursive<ForOption, Int>(Option.functor()),
-        Gen.list(Gen.int()).filter { it.isNotEmpty() }.map { Nel.fromListUnsafe(it) }.map { it.toCofree() },
-        Gen.constant((0..5000).toList()).map { Nel.fromListUnsafe(it) }.map { it.toCofree() },
+        Arb.list(Arb.int()).filter { it.isNotEmpty() }.map { Nel.fromListUnsafe(it) }.map { it.toCofree() },
+        Arb.constant((0..5000).toList()).map { Nel.fromListUnsafe(it) }.map { it.toCofree() },
         Eq.any(),
         {
           it.fix().let { co ->
