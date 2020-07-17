@@ -15,7 +15,7 @@ apply from: "$PUBLISH_CONF"
 
 dependencies {
     compileOnly project(":arrow-mtl")
-    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$KOTLIN_VERSION"
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$KOTLIN_VERSION"
     compileOnly "io.arrow-kt:arrow-annotations:$VERSION_NAME"
     compileOnly "io.arrow-kt:arrow-fx:$VERSION_NAME"
     compileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME"
@@ -23,6 +23,5 @@ dependencies {
     kaptTest "io.arrow-kt:arrow-meta:$VERSION_NAME"
     testCompileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME"
     testRuntime "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
-    testCompile "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION", excludeArrow
     testCompile project(":arrow-incubator-test")
 }

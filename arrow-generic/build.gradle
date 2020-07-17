@@ -14,13 +14,12 @@ apply from: "$DOC_CONF"
 apply from: "$PUBLISH_CONF"
 
 dependencies {
-    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$KOTLIN_VERSION"
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$KOTLIN_VERSION"
     compileOnly "io.arrow-kt:arrow-core:$VERSION_NAME"
     compileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME"
     kapt "io.arrow-kt:arrow-meta:$VERSION_NAME"
     kaptTest "io.arrow-kt:arrow-meta:$VERSION_NAME"
     testCompileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME"
-    testCompileOnly "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION", excludeArrow
     testCompileOnly "io.arrow-kt:arrow-syntax:$VERSION_NAME"
     testImplementation project(":arrow-incubator-test")
     testRuntime "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"

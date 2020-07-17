@@ -12,16 +12,21 @@ apply from: "$SUBPROJECT_CONF"
 apply from: "$PUBLISH_CONF"
 
 dependencies {
-    api "io.arrow-kt:arrow-core-test:$VERSION_NAME", excludeArrow
+    api "io.arrow-kt:arrow-fx-test:$VERSION_NAME"
 
     compile project(":arrow-mtl-data")
     compile project(":arrow-free-data")
     compile project(":arrow-recursion-data")
     compile "io.arrow-kt:arrow-fx:$VERSION_NAME"
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$KOTLIN_VERSION"
-    compile "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION", excludeArrow
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$KOTLIN_VERSION"
 
     kapt "io.arrow-kt:arrow-meta:$VERSION_NAME"
 
     testRuntime "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = JAVA_VERSION
+    }
 }
