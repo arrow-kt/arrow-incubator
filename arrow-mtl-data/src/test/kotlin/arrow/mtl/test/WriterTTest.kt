@@ -27,7 +27,6 @@ import arrow.core.extensions.option.functor.functor
 import arrow.core.extensions.option.monad.monad
 import arrow.core.extensions.option.monadFilter.monadFilter
 import arrow.core.k
-import arrow.fx.IOPartialOf
 import arrow.core.test.UnitSpec
 import arrow.core.test.generators.genK
 import arrow.core.test.laws.AlternativeLaws
@@ -35,6 +34,7 @@ import arrow.core.test.laws.DivisibleLaws
 import arrow.core.test.laws.MonadFilterLaws
 import arrow.core.test.laws.MonadPlusLaws
 import arrow.core.test.laws.MonoidKLaws
+import arrow.fx.ForIO
 import arrow.fx.IO
 import arrow.fx.test.eq.eqK
 import arrow.mtl.Kleisli
@@ -77,7 +77,7 @@ import arrow.mtl.WriterTPartialOf
 
 class WriterTTest : UnitSpec() {
 
-  fun ioEQK(): WriterTEqK<ListK<Int>, IOPartialOf<Nothing>> = WriterT.eqK(IO.eqK(), ListK.eq(Int.eq()))
+  fun ioEQK(): WriterTEqK<ListK<Int>, ForIO> = WriterT.eqK(IO.eqK(), ListK.eq(Int.eq()))
 
   fun optionEQK(): WriterTEqK<ListK<Int>, ForOption> = WriterT.eqK(Option.eqK(), ListK.eq(Int.eq()))
 
@@ -105,7 +105,7 @@ class WriterTTest : UnitSpec() {
         WriterT.genK(Const.genK(Gen.int()), Gen.list(Gen.int()).map { it.k() }),
         constEQK()
       ),
-      ConcurrentLaws.laws<WriterTPartialOf<ListK<Int>, IOPartialOf<Nothing>>>(
+      ConcurrentLaws.laws<WriterTPartialOf<ListK<Int>, ForIO>>(
         WriterT.concurrent(IO.concurrent(), ListK.monoid()),
         WriterT.timer(IO.concurrent(), ListK.monoid()),
         WriterT.functor(IO.functor()),

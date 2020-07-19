@@ -53,13 +53,14 @@ import arrow.mtl.extensions.*
 import arrow.core.extensions.fx
 
 fun getCountryCode(maybePerson : Option<Person>): Option<String> =
-  Option.fx {
-    val (person) = maybePerson
-    val (address) = person.address
-    val (country) = address.country
-    val (code) = country.code
-    code
-  }
+  TODO()
+  //option {
+  //  val person = maybePerson.bind()
+  //  val address = person.address.bind()
+  //  val country = address.country.bind()
+  //  val code = country.code.bind()
+  //  code
+  //}
 ```
 
 Alright, a piece of cake right? That's because we were dealing with a simple type `Option`. But here's where things can get more complicated. Let's introduce another monad in the middle of the computation. For example, what happens when we need to load a person by id, then their address and country to obtain the country code from a remote service?

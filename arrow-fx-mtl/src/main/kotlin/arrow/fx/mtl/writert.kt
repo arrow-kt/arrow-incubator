@@ -177,7 +177,7 @@ interface WriterTMonadIO<W, F> : MonadIO<WriterTPartialOf<W, F>>, WriterTMonad<W
   fun FIO(): MonadIO<F>
   override fun MF(): Monad<F> = FIO()
   override fun MM(): Monoid<W>
-  override fun <A> IO<Nothing, A>.liftIO(): Kind<WriterTPartialOf<W, F>, A> = FIO().run {
+  override fun <A> IO<A>.liftIO(): Kind<WriterTPartialOf<W, F>, A> = FIO().run {
     WriterT.liftF(liftIO(), MM(), this)
   }
 }

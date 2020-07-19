@@ -16,7 +16,7 @@ interface AccumTMonadIO<S, F> : MonadIO<AccumTPartialOf<S, F>>, AccumTMonad<S, F
   override fun MS(): Monoid<S>
   override fun MF(): Monad<F> = FIO()
 
-  override fun <A> IO<Nothing, A>.liftIO(): Kind<AccumTPartialOf<S, F>, A> = FIO().run {
+  override fun <A> IO<A>.liftIO(): Kind<AccumTPartialOf<S, F>, A> = FIO().run {
     liftIO().liftT(MS(), MF())
   }
 }
