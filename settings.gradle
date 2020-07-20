@@ -1,6 +1,4 @@
-plugins {
-    id "com.pablisco.gradle.automodule" version "$AUTO_MODULE_VERSION"
-}
+apply from: "$AUTO_MODULE_CONF"
 
 rootProject.name = 'arrow-incubator-lib'
 
