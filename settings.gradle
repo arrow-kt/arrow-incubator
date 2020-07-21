@@ -1,4 +1,4 @@
-apply from: "$AUTO_MODULE_CONF"
+apply from: "$SETTINGS_CONF"
 
 rootProject.name = 'arrow-incubator-lib'
 
