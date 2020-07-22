@@ -87,7 +87,7 @@ import arrow.typeclasses.Show
  * typealias CoffeeInstructions = Can<Milk, Sugar>
  * ```
  *
- * This means that the called of our API can define what type of milk they want, how many spoons of sugar or neither of them if they prefer to have plain coffee.
+ * This means that the caller of our API can define what type of milk they want, how many spoons of sugar or neither of them if they prefer to have plain coffee.
  *
  * ```kotlin:ank
  *
