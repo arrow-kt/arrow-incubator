@@ -270,7 +270,7 @@ import arrow.typeclasses.Show
  *
  * If you want to provide an alternative in case that the side you are looking for is not present you can use:
  *
- * - [Can]<[A], [B]>.getOrElse(f: () -> [A]): [A]
+ * - [Can]<[A], [B]>.getOrElse(f: () -> [B]): [B]
  * ```kotlin:ank
  * import arrow.mtl.getOrElse
  *
@@ -279,7 +279,7 @@ import arrow.typeclasses.Show
  * check(Can.Right("this").getOrElse { "not this" } == "this")
  * check(Can.Left("not this").getOrElse { "this" } == "this")
  * ```
- * - [Can]<[A], [B]>.getLeftOrElse(f: () -> [B]): [B]
+ * - [Can]<[A], [B]>.getLeftOrElse(f: () -> [A]): [A]
  * ```kotlin:ank
  * import arrow.mtl.getLeftOrElse
  *
