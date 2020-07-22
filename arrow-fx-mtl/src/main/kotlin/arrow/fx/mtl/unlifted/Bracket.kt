@@ -3,9 +3,9 @@ package arrow.fx.mtl.unlifted
 import arrow.Kind
 import arrow.core.None
 import arrow.core.Option
-import arrow.core.internal.AtomicRefW
 import arrow.core.some
 import arrow.core.toT
+import arrow.fx.internal.AtomicRefW
 import arrow.fx.typeclasses.Bracket
 import arrow.fx.typeclasses.ExitCase
 import arrow.mtl.typeclasses.MonadBaseControl
