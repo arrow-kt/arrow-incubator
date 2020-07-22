@@ -122,7 +122,7 @@ import arrow.typeclasses.Show
  *
  * Then, we apply a [Option.fold] on the current sugar. If absent you create a new sugar instance with one spoon, otherwise you increment the current number of spoons
  *
- * As for decreasing the number of sugar spoon:
+ * As for decreasing the number of sugar spoons:
  *
  * ```kotlin:ank
  * import arrow.mtl.component1
