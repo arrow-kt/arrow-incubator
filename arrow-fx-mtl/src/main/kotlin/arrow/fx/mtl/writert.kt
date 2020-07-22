@@ -156,6 +156,7 @@ fun <W, F> WriterT.Companion.concurrent(CF: Concurrent<F>, MM: Monoid<W>): Concu
 fun <W, F> WriterT.Companion.timer(CF: Concurrent<F>, MM: Monoid<W>): Timer<WriterTPartialOf<W, F>> =
   Timer(concurrent(CF, MM))
 
+@extension
 interface WriterTMonadIO<W, F> : MonadIO<WriterTPartialOf<W, F>>, WriterTMonad<W, F> {
   fun FIO(): MonadIO<F>
   override fun MF(): Monad<F> = FIO()

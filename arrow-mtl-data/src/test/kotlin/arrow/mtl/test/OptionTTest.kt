@@ -61,6 +61,7 @@ import arrow.mtl.extensions.optiont.divisible.divisible
 import arrow.mtl.extensions.optiont.eqK.eqK
 import arrow.mtl.extensions.optiont.functor.functor
 import arrow.mtl.extensions.optiont.functorFilter.functorFilter
+import arrow.mtl.extensions.optiont.monad.monad
 import arrow.mtl.extensions.optiont.monadPlus.monadPlus
 import arrow.mtl.extensions.optiont.monadReader.monadReader
 import arrow.mtl.extensions.optiont.monadState.monadState

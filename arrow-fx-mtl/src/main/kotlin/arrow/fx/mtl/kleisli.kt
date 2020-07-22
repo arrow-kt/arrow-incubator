@@ -178,6 +178,7 @@ fun <D, F> Kleisli.Companion.concurrent(CF: Concurrent<F>): Concurrent<KleisliPa
 fun <D, F> Kleisli.Companion.timer(CF: Concurrent<F>): Timer<KleisliPartialOf<D, F>> =
   Timer(concurrent<D, F>(CF))
 
+@extension
 interface KleisliMonadIO<D, F> : MonadIO<KleisliPartialOf<D, F>>, KleisliMonad<D, F> {
   fun FIO(): MonadIO<F>
   override fun MF(): Monad<F> = FIO()
