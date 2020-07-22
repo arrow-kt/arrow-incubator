@@ -4,7 +4,7 @@ import arrow.Kind
 import arrow.core.Either
 import arrow.core.Tuple2
 import arrow.core.Tuple3
-import arrow.core.internal.AtomicRefW
+import arrow.core.andThen
 import arrow.extension
 import arrow.fx.IO
 import arrow.fx.RacePair
@@ -48,17 +48,18 @@ interface WriterTBracket<W, F> : Bracket<WriterTPartialOf<W, F>, Throwable>, Wri
     use: (A) -> WriterTOf<W, F, B>
   ): WriterT<W, F, B> = MM().run {
     MD().run {
-      val atomic: AtomicRefW<W> = AtomicRefW(empty())
-      WriterT(value().bracketCase(use = { wa ->
-        WriterT(wa.just()).flatMap(use).value()
-      }, release = { wa, exitCase ->
-        val r = release(wa.b, exitCase).value()
-        when (exitCase) {
-          is ExitCase.Completed -> r.flatMap { (l, _) -> later { atomic.value = l } }
-          else -> r.unit()
+      WriterT(Ref(empty()).flatMap { ref ->
+        value().bracketCase(use = { wa ->
+          WriterT(wa.just()).flatMap(use).value()
+        }, release = { wa, exitCase ->
+          val r = release(wa.b, exitCase).value()
+          when (exitCase) {
+            is ExitCase.Completed -> r.flatMap { (l, _) -> ref.set(l) }
+            else -> r.unit()
+          }
+        }).flatMap { (w, b) ->
+          ref.get().map { ww -> Tuple2(w.combine(ww), b) }
         }
-      }).map { (w, b) ->
-        Tuple2(w.combine(atomic.value), b)
       })
     }
   }
@@ -110,8 +111,8 @@ interface WriterTConcurrent<W, F> : Concurrent<WriterTPartialOf<W, F>>, WriterTA
   override fun dispatchers(): Dispatchers<WriterTPartialOf<W, F>> =
     CF().dispatchers() as Dispatchers<WriterTPartialOf<W, F>>
 
-  override fun <A> cancelable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<WriterTPartialOf<W, F>>): WriterT<W, F, A> = CF().run {
-    WriterT.liftF(cancelable { cb -> k(cb).value().unit() }, MM(), this)
+  override fun <A> cancellable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<WriterTPartialOf<W, F>>): WriterT<W, F, A> = CF().run {
+    WriterT.liftF(cancellable(k.andThen { it.value().void() }), MM(), this)
   }
 
   override fun <A> WriterTOf<W, F, A>.fork(ctx: CoroutineContext): WriterT<W, F, Fiber<WriterTPartialOf<W, F>, A>> = CF().run {
@@ -172,7 +173,6 @@ fun <W, F> WriterT.Companion.concurrent(CF: Concurrent<F>, MM: Monoid<W>): Concu
 fun <W, F> WriterT.Companion.timer(CF: Concurrent<F>, MM: Monoid<W>): Timer<WriterTPartialOf<W, F>> =
   Timer(concurrent(CF, MM))
 
-@extension
 interface WriterTMonadIO<W, F> : MonadIO<WriterTPartialOf<W, F>>, WriterTMonad<W, F> {
   fun FIO(): MonadIO<F>
   override fun MF(): Monad<F> = FIO()

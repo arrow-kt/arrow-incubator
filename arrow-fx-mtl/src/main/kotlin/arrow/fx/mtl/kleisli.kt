@@ -5,6 +5,7 @@ import arrow.core.AndThen
 import arrow.core.Either
 import arrow.core.Tuple2
 import arrow.core.Tuple3
+import arrow.core.andThen
 import arrow.extension
 import arrow.fx.IO
 import arrow.fx.RacePair
@@ -54,8 +55,8 @@ interface KleisliBracket<D, F, E> : Bracket<KleisliPartialOf<D, F>, E>, KleisliM
     }
   }
 
-  override fun <A> KleisliOf<D, F, A>.uncancelable(): Kleisli<D, F, A> = BF().run {
-    Kleisli { r -> this@uncancelable.run(r).uncancelable() }
+  override fun <A> KleisliOf<D, F, A>.uncancellable(): Kleisli<D, F, A> = BF().run {
+    Kleisli { r -> this@uncancellable.run(r).uncancellable() }
   }
 }
 
@@ -79,8 +80,8 @@ interface KleisliMonadDefer<D, F> : MonadDefer<KleisliPartialOf<D, F>>, KleisliB
     Kleisli { d -> defer { run(d).flatMap { a -> f(a).run(d) } } }
   }
 
-  override fun <A> KleisliOf<D, F, A>.uncancelable(): Kleisli<D, F, A> = MDF().run {
-    Kleisli { d -> defer { run(d).uncancelable() } }
+  override fun <A> KleisliOf<D, F, A>.uncancellable(): Kleisli<D, F, A> = MDF().run {
+    Kleisli { d -> defer { run(d).uncancellable() } }
   }
 }
 
@@ -121,8 +122,8 @@ interface KleisliConcurrent<D, F> : Concurrent<KleisliPartialOf<D, F>>, KleisliA
   override fun dispatchers(): Dispatchers<KleisliPartialOf<D, F>> =
     CF().dispatchers() as Dispatchers<KleisliPartialOf<D, F>>
 
-  override fun <A> cancelable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<KleisliPartialOf<D, F>>): Kleisli<D, F, A> = CF().run {
-    Kleisli { d -> cancelable { cb -> k(cb).run(d).map { Unit } } }
+  override fun <A> cancellable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<KleisliPartialOf<D, F>>): Kleisli<D, F, A> = CF().run {
+    Kleisli { d -> cancellable(k.andThen { it.run(d).void() }) }
   }
 
   override fun <A> KleisliOf<D, F, A>.fork(ctx: CoroutineContext): Kleisli<D, F, Fiber<KleisliPartialOf<D, F>, A>> = CF().run {
@@ -184,7 +185,6 @@ fun <D, F> Kleisli.Companion.concurrent(CF: Concurrent<F>): Concurrent<KleisliPa
 fun <D, F> Kleisli.Companion.timer(CF: Concurrent<F>): Timer<KleisliPartialOf<D, F>> =
   Timer(concurrent<D, F>(CF))
 
-@extension
 interface KleisliMonadIO<D, F> : MonadIO<KleisliPartialOf<D, F>>, KleisliMonad<D, F> {
   fun FIO(): MonadIO<F>
   override fun MF(): Monad<F> = FIO()

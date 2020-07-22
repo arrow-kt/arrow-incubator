@@ -18,6 +18,7 @@ import arrow.core.extensions.id.monad.monad
 import arrow.core.extensions.id.traverse.traverse
 import arrow.core.extensions.monoid
 import arrow.core.extensions.option.functor.functor
+import arrow.fx.IO
 import arrow.core.test.UnitSpec
 import arrow.core.test.generators.genK
 import arrow.core.test.generators.throwable
@@ -26,9 +27,16 @@ import arrow.core.test.laws.DivisibleLaws
 import arrow.core.test.laws.MonadErrorLaws
 import arrow.core.test.laws.TraverseLaws
 import arrow.fx.ForIO
-import arrow.fx.IO
 import arrow.fx.test.eq.eqK
+import arrow.fx.extensions.io.applicative.applicative
+import arrow.fx.extensions.io.concurrent.concurrent
+import arrow.fx.extensions.io.functor.functor
+import arrow.fx.extensions.io.monad.monad
+import arrow.fx.mtl.concurrent
+import arrow.fx.mtl.timer
 import arrow.fx.test.eq.throwableEq
+import arrow.fx.test.generators.genK
+import arrow.fx.test.laws.ConcurrentLaws
 import arrow.mtl.EitherT
 import arrow.mtl.EitherTPartialOf
 import arrow.mtl.ForEitherT
@@ -39,6 +47,7 @@ import arrow.mtl.StateTPartialOf
 import arrow.mtl.WriterT
 import arrow.mtl.WriterTPartialOf
 import arrow.mtl.extensions.eithert.alternative.alternative
+import arrow.mtl.extensions.eithert.applicative.applicative
 import arrow.mtl.extensions.eithert.apply.apply
 import arrow.mtl.extensions.eithert.divisible.divisible
 import arrow.mtl.extensions.eithert.eqK.eqK
@@ -68,7 +77,7 @@ class EitherTTest : UnitSpec() {
   init {
     val idEQK: EqK<Kind<Kind<ForEitherT, Int>, ForId>> = EitherT.eqK(Id.eqK(), Int.eq())
 
-    val ioEQK: EqK<Kind<Kind<ForEitherT, String>, ForIO>> = EitherT.eqK(IO.eqK(), Eq.any())
+    val ioEQK: EqK<EitherTPartialOf<String, ForIO>> = EitherT.eqK(IO.eqK(), Eq.any())
 
     val constEQK: EqK<Kind<Kind<ForEitherT, Int>, Kind<ForConst, Int>>> = EitherT.eqK(Const.eqK(Int.eq()), Int.eq())
 
@@ -85,15 +94,15 @@ class EitherTTest : UnitSpec() {
         idEQK
       ),
 
-      // ConcurrentLaws.laws<EitherTPartialOf<String, ForIO>>(
-      //   EitherT.concurrent(IO.concurrent()),
-      //   EitherT.timer(IO.concurrent()),
-      //   EitherT.functor(IO.functor()),
-      //   EitherT.applicative(IO.applicative()),
-      //   EitherT.monad(IO.monad()),
-      //   EitherT.genK(IO.genK(), Gen.string()),
-      //   ioEQK
-      // ),
+      ConcurrentLaws.laws<EitherTPartialOf<String, ForIO>>(
+        EitherT.concurrent(IO.concurrent()),
+        EitherT.timer(IO.concurrent()),
+        EitherT.functor(IO.functor()),
+        EitherT.applicative(IO.monad()),
+        EitherT.monad(IO.monad()),
+        EitherT.genK(IO.genK(), Gen.string()),
+        ioEQK
+      ),
 
       TraverseLaws.laws(EitherT.traverse<Int, ForId>(Id.traverse()),
         EitherT.genK(Id.genK(), Gen.int()),

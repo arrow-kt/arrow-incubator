@@ -7,6 +7,7 @@ import arrow.core.Option
 import arrow.core.Some
 import arrow.core.Tuple2
 import arrow.core.Tuple3
+import arrow.core.andThen
 import arrow.extension
 import arrow.fx.IO
 import arrow.fx.RacePair
@@ -111,8 +112,8 @@ interface OptionTConcurrent<F> : Concurrent<OptionTPartialOf<F>>, OptionTAsync<F
   override fun dispatchers(): Dispatchers<OptionTPartialOf<F>> =
     CF().dispatchers() as Dispatchers<OptionTPartialOf<F>>
 
-  override fun <A> cancelable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<OptionTPartialOf<F>>): OptionT<F, A> = CF().run {
-    OptionT.liftF(this, cancelable { cb -> k(cb).value().map { Unit } })
+  override fun <A> cancellable(k: ((Either<Throwable, A>) -> Unit) -> CancelToken<OptionTPartialOf<F>>): OptionT<F, A> = CF().run {
+    OptionT.liftF(this, cancellable(k.andThen { it.value().void() }))
   }
 
   override fun <A> OptionTOf<F, A>.fork(ctx: CoroutineContext): OptionT<F, Fiber<OptionTPartialOf<F>, A>> = CF().run {
@@ -190,7 +191,6 @@ fun <F> OptionT.Companion.concurrent(CF: Concurrent<F>): Concurrent<OptionTParti
 fun <F> OptionT.Companion.timer(CF: Concurrent<F>): Timer<OptionTPartialOf<F>> =
   Timer(concurrent(CF))
 
-@extension
 interface OptionTMonadIO<F> : MonadIO<OptionTPartialOf<F>>, OptionTMonad<F> {
   fun FIO(): MonadIO<F>
   override fun MF(): Monad<F> = FIO()
