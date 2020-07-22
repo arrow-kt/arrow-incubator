@@ -135,7 +135,7 @@ import arrow.typeclasses.Show
  * }
  * ```
  *
- * In this case you also want to make sure that there is no [Can.Right] of sugar if there are no spoons so you need to add a filter at the end that removes the sugar if `spoons` is less than 1.
+ * In this case you also want to make sure that there is no [Can.Right] of sugar if there are no spoons left, so you need to add a filter at the end that removes the sugar if `spoons` is less than 1.
  *
  * For the milk operations it's a bit simpler:
  *
