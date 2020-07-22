@@ -220,7 +220,7 @@ import arrow.typeclasses.Show
  * check(None.toRightCan<Sugar>() == Can.Neither)
  * ```
  *
- * ## Safe access values
+ * ## Safe access to values
  *
  * Most of the time you'll be transforming the contents of a [Can]. However, there are several ways you can also look into the contents of a [Can].
  *
