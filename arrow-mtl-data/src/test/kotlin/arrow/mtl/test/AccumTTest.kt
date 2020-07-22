@@ -27,8 +27,8 @@ import arrow.core.test.laws.MonadPlusLaws
 import arrow.core.toT
 import arrow.fx.IO
 import arrow.fx.extensions.io.monadIO.monadIO
-import arrow.fx.mtl.monadIO
 import arrow.fx.fix
+import arrow.fx.mtl.accumt.monadIO.monadIO
 import arrow.fx.test.laws.equalUnderTheLaw
 import arrow.mtl.AccumT
 import arrow.mtl.AccumTPartialOf
@@ -156,7 +156,7 @@ class AccumTTest : UnitSpec() {
     }
 
     "AccumT: monadIO" {
-      val accumT = AccumT.monadIO(IO.monadIO(), String.monoid()).run {
+      val accumT = AccumT.monadIO(String.monoid(), IO.monadIO()).run {
         IO.just(1).liftIO().fix()
       }
 

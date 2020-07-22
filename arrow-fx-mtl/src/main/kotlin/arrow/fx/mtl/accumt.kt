@@ -68,7 +68,7 @@ interface AccumTAsync<S, F> : Async<AccumTPartialOf<S, F>>, AccumTMonadDefer<S, 
 @extension
 @undocumented
 interface AccumTMonadIO<S, F> : MonadIO<AccumTPartialOf<S, F>>, AccumTMonad<S, F> {
-  override fun MF(): Monad<F>
+  override fun MF(): Monad<F> = FIO()
   override fun MS(): Monoid<S>
   fun FIO(): MonadIO<F>
   override fun <A> IO<A>.liftIO(): Kind<AccumTPartialOf<S, F>, A> = FIO().run {
