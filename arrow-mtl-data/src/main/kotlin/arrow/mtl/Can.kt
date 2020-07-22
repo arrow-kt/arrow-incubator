@@ -66,7 +66,7 @@ import arrow.typeclasses.Show
  *
  * ### The coffee maker use case
  *
- * Imagine you are working on a Smart Coffee maker. You are working on an MVP that takes instructions from the server about how to make the nest coffee.
+ * Imagine you are working on a Smart Coffee maker. You are working on an MVP that takes instructions from the server about how to make good coffee.
  * You have to define an API that takes optional milk and/or sugar to be added to the coffee.
  *
  * ```kotlin:ank
