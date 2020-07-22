@@ -40,7 +40,7 @@ import arrow.typeclasses.Show
  * ```
  * (1 + a) * (1 + b)   // (1 + a) is the union of an empty case (None) and a base case (Some)
  * ~ 1 + a + b + a*b   // This is expressed as the union of: Neither (1), Left (a), Right (b), or Both (a*b)
- * ~ Option (Ior a b)  // Ior (or There in Haskell) can be defined as `a + b + a*b`, therefore joining it, with Option, adds the empty case
+ * ~ Option (Ior a b)  // Ior (or These in Haskell) can be defined as `a + b + a*b`, therefore joining it with Option adds the empty case
  * ~ Can a b           // And that's how we get to Can of <A, B>
  * ```
  * It can be easier to visualize in a picture:
