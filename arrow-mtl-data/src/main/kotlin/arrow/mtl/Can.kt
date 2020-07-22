@@ -60,7 +60,7 @@ import arrow.typeclasses.Show
  *  - [Can.Both]<[A], [B]>
  *
  * Similarly to [Ior], [Can] differs from [Either] in that it can contain both [A] and [B]. On top of that it can contain neither of them.
- * This means that it's isomorphic to using [Option]<[Ior]<[A], [B]>>.
+ * This means that it is isomorphic to [Option]<[Ior]<[A], [B]>>.
  *
  * Operations available are biased towards [B]
  *
