@@ -323,7 +323,7 @@ sealed class Can<out A, out B>(
    */
   val isLeft: Boolean = false,
   /**
-   * `true` if this is a [Can.Left], `false` otherwise.
+   * `true` if this is a [Can.Right], `false` otherwise.
    * @note Used only for performance instead of fold.
    *
    * Example:
