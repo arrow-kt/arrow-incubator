@@ -5,9 +5,12 @@ import arrow.Kind2
 import arrow.core.AndThen
 import arrow.core.Either
 import arrow.core.Eval
+import arrow.core.ForId
+import arrow.core.Id
 import arrow.core.Option
 import arrow.core.Tuple2
 import arrow.core.andThen
+import arrow.core.extensions.id.monad.monad
 import arrow.core.toT
 import arrow.extension
 import arrow.mtl.ForLogicT
@@ -94,6 +97,10 @@ interface LogicTMonadLogic<M> : MonadLogic<LogicTPartialOf<M>>, LogicTMonadPlus<
 
   override fun <A> Kind<LogicTPartialOf<M>, A>.voidIfValue(): Kind<LogicTPartialOf<M>, Unit> =
     fix().voidIfValue()
+}
+
+fun LogicT.Companion.monadLogic(): MonadLogic<LogicTPartialOf<ForId>> = object: LogicTMonadLogic<ForId> {
+  override fun MM(): Monad<ForId> = Id.monad()
 }
 
 @extension

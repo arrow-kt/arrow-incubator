@@ -1,19 +1,16 @@
-package arrow.mtl
+package arrow.mtl.test
 
 import arrow.Kind
-import arrow.core.Eval
-import arrow.core.ForEval
 import arrow.core.ForId
 import arrow.core.Id
 import arrow.core.SequenceK
-import arrow.core.extensions.eval.monad.monad
 import arrow.core.extensions.id.monad.monad
 import arrow.core.extensions.sequencek.foldable.foldable
-import arrow.core.extensions.sequencek.monadLogic.monadLogic
 import arrow.core.k
 import arrow.core.value
-import arrow.fx.extensions.io.monad.monad
+import arrow.mtl.LogicT
 import arrow.mtl.extensions.logict.monadLogic.monadLogic
+import arrow.mtl.fix
 import arrow.syntax.collections.tail
 import arrow.typeclasses.MonadLogic
 import arrow.typeclasses.altFromList

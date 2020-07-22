@@ -6,6 +6,7 @@ import arrow.core.Id
 import arrow.core.Option
 import arrow.core.extensions.id.monad.monad
 import arrow.core.value
+import arrow.typeclasses.MonadLogic
 
 typealias Logic<A> = LogicT<ForId, A>
 

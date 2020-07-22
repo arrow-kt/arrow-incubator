@@ -11,13 +11,53 @@ import arrow.core.toT
 import arrow.higherkind
 import arrow.typeclasses.Monad
 
-typealias SuccessFn<M, A, R> = (Tuple2<A, Eval<Kind<M, R>>>) -> Eval<Kind<M, R>>
+typealias ChoiceFn<M, A, R> = (Tuple2<A, Eval<Kind<M, R>>>) -> Eval<Kind<M, R>>
 
-// Why does this not work? Well because the empty part is fully strict.
-// Solution: Wrap Kind<M, Any?> in Eval. Maybe this also adds enough trampolining to get rid of AndThen...
+/**
+ * LogicT is a church encoded datatype that enables logic programming with fairness guarantees that other carriers simply cannot offer.
+ *
+ * Usage of LogicT will mostly go through the [MonadLogic] typeclass:
+ *
+ * ```kotlin:ank
+ * fun <F> MonadLogic<F>.odds(): Kind<F, Int> = just(1)
+ *   // unit().flatMap makes the tail lazy so we don't stackoverflow on construction
+ *   .plusM(unit().flatMap { odds().map { 2 + it } })
+ * //sampleStart
+ * val prog = Logic.monadLogic().run {
+ *   val as = just(10).plusM(just(20)).plusM(just(30))
+ *   // we can also use fx here!
+ *   fx.monad {
+ *     val res = odds().interleave(as).bind()
+ *     if (res.rem(2) == 0) res
+ *     else zeroM<Int>().bind()
+ *   }.fix()
+ * }
+ * //sampleEnd
+ * prog.observe()
+ * ```
+ *
+ * We can run a LogicT in a few different ways:
+ * - [observeT] Returns the first result and throws away all others
+ * - [observeAllT] Returns all results. May diverge if it produces infinite or a *very* large number of results
+ * - [observeManyT] Returns n results.
+ * > All of the above also have an analog without the T-postfix for the [Logic] typealias.
+ *
+ * ```kotlin:ank
+ * fun <F> MonadLogic<F>.odds(): Kind<F, Int> = just(1)
+ *   // unit().flatMap makes the tail lazy so we don't stackoverflow on construction
+ *   .plusM(unit().flatMap { odds().map { 2 + it } })
+ * //sampleStart
+ * val prog = Logic.monadLogic().odds()
+ * prog.observeMany(10)
+ * //sampleEnd
+ * ```
+ *
+ * It is encoded as a function which takes a choice function and an empty case.
+ * This encoding turns most, if not all, combinators into function composition, which then gets complicated again by having to worry about stacksafety and laziness.
+ */
 @higherkind
 class LogicT<M, A>(
-  internal val unLogicT: AndThen<Tuple2<SuccessFn<M, A, Any?>, Eval<Kind<M, Any?>>>, Eval<Kind<M, Any?>>>
+  internal val unLogicT: AndThen<Tuple2<ChoiceFn<M, A, Any?>, Eval<Kind<M, Any?>>>, Eval<Kind<M, Any?>>>
 ): LogicTOf<M, A> {
 
   fun <B> map(f: (A) -> B): LogicT<M, B> =
@@ -33,7 +73,7 @@ class LogicT<M, A>(
     })
 
   fun orElse(other: LogicT<M, A>): LogicT<M, A> =
-    LogicT(AndThen.id<Tuple2<SuccessFn<M, A, Any?>, Eval<Kind<M, Any?>>>>().flatMap { (fn, _) ->
+    LogicT(AndThen.id<Tuple2<ChoiceFn<M, A, Any?>, Eval<Kind<M, Any?>>>>().flatMap { (fn, _) ->
       unLogicT.composeF(other.unLogicT.andThen { fn toT it })
     })
 
@@ -41,7 +81,7 @@ class LogicT<M, A>(
   fun <R> runLogicT(f: (A, Eval<Kind<M, R>>) -> Eval<Kind<M, R>>, empty: Eval<Kind<M, R>>): Kind<M, R> =
     unLogicT((AndThen<Tuple2<A, Eval<Kind<M, R>>>, Eval<Kind<M, R>>> {
       f(it.a, it.b)
-    } toT empty) as Tuple2<SuccessFn<M, A, Any?>, Eval<Kind<M, Any?>>>).value() as Kind<M, R>
+    } toT empty) as Tuple2<ChoiceFn<M, A, Any?>, Eval<Kind<M, Any?>>>).value() as Kind<M, R>
 
   fun observeT(MM: Monad<M>): Kind<M, Option<A>> =
     runLogicT({ a, _ -> Eval.now(MM.just(a.some())) }, Eval.now(MM.just(none())))
@@ -75,11 +115,11 @@ class LogicT<M, A>(
   })
 
   fun voidIfValue(): LogicT<M, Unit> =
-    LogicT(AndThen.id<Tuple2<SuccessFn<M, Unit, Any?>, Eval<Kind<M, Any?>>>>().flatMap { (fn, xs) ->
+    LogicT(AndThen.id<Tuple2<ChoiceFn<M, Unit, Any?>, Eval<Kind<M, Any?>>>>().flatMap { (fn, xs) ->
       // "run" fn in a stacksafe way to obtain Kind<M, Unit>
-      AndThen(fn).compose<Tuple2<SuccessFn<M, Unit, Any?>, Eval<Kind<M, Any?>>>> { Unit toT xs }.flatMap { ma ->
+      AndThen(fn).compose<Tuple2<ChoiceFn<M, Unit, Any?>, Eval<Kind<M, Any?>>>> { Unit toT xs }.flatMap { ma ->
         // new choice function that always goes xs and feed in ma
-        unLogicT.compose<Tuple2<SuccessFn<M, Unit, Any?>, Eval<Kind<M, Any?>>>> { (_, _) ->
+        unLogicT.compose<Tuple2<ChoiceFn<M, Unit, Any?>, Eval<Kind<M, Any?>>>> { (_, _) ->
           AndThen<Tuple2<A, Eval<Kind<M, Any?>>>, Eval<Kind<M, Any?>>> { xs } toT ma
         }
       }
