@@ -19,15 +19,26 @@ typealias ChoiceFn<M, A, R> = (Tuple2<A, Eval<Kind<M, R>>>) -> Eval<Kind<M, R>>
  * Usage of LogicT will mostly go through the [MonadLogic] typeclass:
  *
  * ```kotlin:ank
+ * import arrow.Kind
+ * import arrow.mtl.observe
+ * import arrow.mtl.LogicT
+ * import arrow.mtl.Logic
+ * import arrow.core.extensions.id.monad.monad
+ * import arrow.mtl.extensions.logict.monadLogic.monadLogic
+ * import arrow.mtl.fix
+ * import arrow.typeclasses.MonadLogic
+ * import arrow.core.Id
+ *
+ * //sampleStart
  * fun <F> MonadLogic<F>.odds(): Kind<F, Int> = just(1)
  *   // unit().flatMap makes the tail lazy so we don't stackoverflow on construction
  *   .plusM(unit().flatMap { odds().map { 2 + it } })
- * //sampleStart
- * val prog = Logic.monadLogic().run {
- *   val as = just(10).plusM(just(20)).plusM(just(30))
+ *
+ * val prog = LogicT.monadLogic(Id.monad()).run {
+ *   val vals = just(10).plusM(just(20)).plusM(just(30))
  *   // we can also use fx here!
  *   fx.monad {
- *     val res = odds().interleave(as).bind()
+ *     val res = odds().interleave(vals).bind()
  *     if (res.rem(2) == 0) res
  *     else zeroM<Int>().bind()
  *   }.fix()
@@ -43,11 +54,10 @@ typealias ChoiceFn<M, A, R> = (Tuple2<A, Eval<Kind<M, R>>>) -> Eval<Kind<M, R>>
  * > All of the above also have an analog without the T-postfix for the [Logic] typealias.
  *
  * ```kotlin:ank
- * fun <F> MonadLogic<F>.odds(): Kind<F, Int> = just(1)
- *   // unit().flatMap makes the tail lazy so we don't stackoverflow on construction
- *   .plusM(unit().flatMap { odds().map { 2 + it } })
+ * import arrow.mtl.observeMany
+ *
  * //sampleStart
- * val prog = Logic.monadLogic().odds()
+ * val prog: Logic<Int> = LogicT.monadLogic(Id.monad()).odds().fix()
  * prog.observeMany(10)
  * //sampleEnd
  * ```
