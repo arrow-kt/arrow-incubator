@@ -182,10 +182,6 @@ interface CanBifoldable : Bifoldable<ForCan> {
     fix().bifoldRight(c, f, g)
 }
 
-fun <G, A, B, C> CanOf<A, B>.traverse(GA: Applicative<G>, f: (B) -> Kind<G, C>): Kind<G, Can<A, C>> = GA.run {
-  fold({ just(Neither) }, { just(Left(it)) }, { b -> f(b).map(::Right) }, { _, b -> f(b).map(::Right) })
-}
-
 @extension
 interface CanTraverse<L> : Traverse<CanPartialOf<L>>, CanFoldable<L> {
 
