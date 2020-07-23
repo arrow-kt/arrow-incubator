@@ -5,11 +5,14 @@ import arrow.core.AndThen
 import arrow.core.Eval
 import arrow.core.Option
 import arrow.core.Tuple2
+import arrow.core.andThen
 import arrow.core.none
 import arrow.core.some
 import arrow.core.toT
 import arrow.higherkind
+import arrow.mtl.typeclasses.MonadReader
 import arrow.typeclasses.Monad
+import arrow.typeclasses.MonadError
 
 typealias ChoiceFn<M, A, R> = (Tuple2<A, Eval<Kind<M, R>>>) -> Eval<Kind<M, R>>
 
@@ -68,7 +71,7 @@ typealias ChoiceFn<M, A, R> = (Tuple2<A, Eval<Kind<M, R>>>) -> Eval<Kind<M, R>>
 @higherkind
 class LogicT<M, A>(
   internal val unLogicT: AndThen<Tuple2<ChoiceFn<M, A, Any?>, Eval<Kind<M, Any?>>>, Eval<Kind<M, Any?>>>
-): LogicTOf<M, A> {
+) : LogicTOf<M, A> {
 
   fun <B> map(f: (A) -> B): LogicT<M, B> =
     LogicT(unLogicT.compose { (fn, xs) ->
@@ -162,3 +165,27 @@ fun <M, A, B> LogicTOf<M, A>.ap(ff: LogicTOf<M, (A) -> B>): LogicT<M, B> =
 
 fun <M, A> reflect(opt: Option<Tuple2<LogicT<M, A>, A>>): LogicT<M, A> =
   opt.fold({ LogicT.empty() }, { (rem, a) -> LogicT.just<M, A>(a).orElse(rem) })
+
+fun <M, A, E> LogicTOf<M, A>.handleErrorWith(ME: MonadError<M, E>, f: (E) -> LogicTOf<M, A>): LogicT<M, A> =
+  LogicT(AndThen.id<Tuple2<ChoiceFn<M, A, Any?>, Eval<Kind<M, Any?>>>>().flatMap { (fn, xs) ->
+    fun Kind<M, Any?>.handle(): Kind<M, Any?> = ME.run {
+      // TODO add curry and uncurry as inbuilts for AndThen up to some arity.
+      //  This could help make the below call to fn stacksafer
+      handleErrorWith { e -> f(e).fix().runLogicT({ a, xs2 -> fn(a toT xs2) }, xs) }
+    }
+    fix().unLogicT.compose<Tuple2<ChoiceFn<M, A, Any?>, Eval<Kind<M, Any?>>>> { (fn, xs) ->
+      // handle the errors in all the possibly recursive effects for the "tail"
+      AndThen(fn).compose<Tuple2<A, Eval<Kind<M, Any?>>>> { (a, xs2) -> a toT xs2.map { it.handle() } } toT xs
+    } // handle the final result
+      // The reason we need this is because the choice function itself might perform side effects which then would not
+      //  have been handled
+      .andThen { it.map { it.handle() } }
+  })
+
+fun <M, A, D> LogicTOf<M, A>.local(MR: MonadReader<M, D>, f: (D) -> D): LogicT<M, A> =
+  LogicT(
+    fix().unLogicT
+      .compose<Tuple2<ChoiceFn<M, A, Any?>, Eval<Kind<M, Any?>>>> { (fn, xs) ->
+        fn.andThen { it.map { MR.run { it.local(f) } } } toT xs
+      }.andThen { it.map { mRes -> MR.run { mRes.local(f) } } }
+  )

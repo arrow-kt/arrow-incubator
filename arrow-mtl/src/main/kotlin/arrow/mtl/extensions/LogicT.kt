@@ -5,13 +5,9 @@ import arrow.Kind2
 import arrow.core.AndThen
 import arrow.core.Either
 import arrow.core.Eval
-import arrow.core.ForId
-import arrow.core.Id
 import arrow.core.Option
 import arrow.core.Tuple2
 import arrow.core.andThen
-import arrow.core.extensions.id.monad.monad
-import arrow.core.toT
 import arrow.extension
 import arrow.mtl.ForLogicT
 import arrow.mtl.LogicT
@@ -23,14 +19,18 @@ import arrow.mtl.typeclasses.MonadTrans
 import arrow.typeclasses.Alternative
 import arrow.typeclasses.Applicative
 import arrow.typeclasses.ApplicativeError
+import arrow.typeclasses.Foldable
 import arrow.typeclasses.Functor
 import arrow.typeclasses.Monad
 import arrow.typeclasses.MonadError
 import arrow.typeclasses.MonadLogic
 import arrow.typeclasses.MonadPlus
+import arrow.typeclasses.Monoid
 import arrow.typeclasses.MonoidK
 import arrow.typeclasses.SemigroupK
 import arrow.mtl.ap as logicTAp
+import arrow.mtl.handleErrorWith as logicTHandleErrorWith
+import arrow.mtl.local as logicTLocal
 
 @extension
 interface LogicTFunctor<M> : Functor<LogicTPartialOf<M>> {
@@ -99,8 +99,37 @@ interface LogicTMonadLogic<M> : MonadLogic<LogicTPartialOf<M>>, LogicTMonadPlus<
     fix().voidIfValue()
 }
 
-fun LogicT.Companion.monadLogic(): MonadLogic<LogicTPartialOf<ForId>> = object: LogicTMonadLogic<ForId> {
-  override fun MM(): Monad<ForId> = Id.monad()
+@extension
+interface LogicTFoldable<M> : Foldable<LogicTPartialOf<M>> {
+  fun MM(): Monad<M>
+  fun FM(): Foldable<M>
+
+  override fun <A, B> Kind<LogicTPartialOf<M>, A>.foldMap(MN: Monoid<B>, f: (A) -> B): B =
+    fix().runLogicT({ a, mxsEval ->
+      mxsEval.map { mxs -> MM().run { mxs.map { xs -> MN.run { f(a).combine(xs) } } } } },
+      Eval.now(MM().just(MN.empty()))
+    ).let { FM().run { it.fold(MN) } }
+
+  override fun <A, B> Kind<LogicTPartialOf<M>, A>.foldLeft(b: B, f: (B, A) -> B): B =
+    foldMap(
+      // this is a composed monoid of Dual and Endo. TODO add those to core individually?
+      object: Monoid<AndThen<B, B>> {
+        override fun empty(): AndThen<B, B> = AndThen.id()
+        override fun AndThen<B, B>.combine(b: AndThen<B, B>): AndThen<B, B> = b.andThen(this)
+      },
+      { AndThen { b -> f(b, it) } } // TODO I have no idea if this is stacksafe
+    ).invoke(b)
+
+  override fun <A, B> Kind<LogicTPartialOf<M>, A>.foldRight(lb: Eval<B>, f: (A, Eval<B>) -> Eval<B>): Eval<B> =
+    foldMap(
+      // this is Endo but with AndThen TODO change endo in core?
+      object: Monoid<AndThen<Eval<B>, Eval<B>>> {
+        override fun empty(): AndThen<Eval<B>, Eval<B>> = AndThen.id()
+        override fun AndThen<Eval<B>, Eval<B>>.combine(b: AndThen<Eval<B>, Eval<B>>): AndThen<Eval<B>, Eval<B>> =
+          andThen(b)
+      },
+      { AndThen { b -> f(it, b) } } // TODO I have no idea if this is stacksafe
+    ).invoke(lb)
 }
 
 @extension
@@ -109,25 +138,12 @@ interface LogicTMonadTrans : MonadTrans<ForLogicT> {
     LogicT.lift(MG, this)
 }
 
-/*
 @extension
 interface LogicTMonadReader<M, D> : MonadReader<LogicTPartialOf<M>, D>, LogicTMonad<M> {
   fun MR(): MonadReader<M, D>
   override fun ask(): Kind<LogicTPartialOf<M>, D> = LogicT.lift(MR(), MR().ask())
   override fun <A> Kind<LogicTPartialOf<M>, A>.local(f: (D) -> D): Kind<LogicTPartialOf<M>, A> =
-    LogicT(AndThen { (fn, mxs) ->
-      Eval.later {
-        MR().run {
-          ask().flatMap { d ->
-            fix().let { l ->
-              l.runLogicT({ a, mxs2Eval ->
-                fn(a toT mxs2Eval).map { it.local { d } }
-              }, mxs.map { it.local { d } })
-            }.local(f)
-          }
-        }
-      }.
-    })
+    logicTLocal(MR(), f)
 }
 
 @extension
@@ -144,13 +160,10 @@ interface LogicTApplicativeError<M, E> : ApplicativeError<LogicTPartialOf<M>, E>
   override fun <A> raiseError(e: E): Kind<LogicTPartialOf<M>, A> = LogicT.lift(ME(), ME().raiseError(e))
 
   override fun <A> Kind<LogicTPartialOf<M>, A>.handleErrorWith(f: (E) -> Kind<LogicTPartialOf<M>, A>): Kind<LogicTPartialOf<M>, A> =
-    LogicT(AndThen { (fn, mxs) ->
-      ME().run {
-        fun Kind<M, Any?>.handle(): Kind<M, Any?> =
-          handleErrorWith { e -> f(e).fix().runLogicT({ a, mxs2 -> fn(a toT mxs2) }, mxs) }
-
-        fix().runLogicT({ a, mxs2 -> fn(a toT mxs2.handle()) }, mxs).handle()
-      }
-    })
+    logicTHandleErrorWith(ME(), f)
 }
-*/
+
+@extension
+interface LogicTMonadError<M, E> : MonadError<LogicTPartialOf<M>, E>, LogicTApplicativeError<M, E>, LogicTMonad<M> {
+  override fun ME(): MonadError<M, E>
+}
