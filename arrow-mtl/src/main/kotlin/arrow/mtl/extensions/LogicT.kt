@@ -113,7 +113,7 @@ interface LogicTFoldable<M> : Foldable<LogicTPartialOf<M>> {
   override fun <A, B> Kind<LogicTPartialOf<M>, A>.foldLeft(b: B, f: (B, A) -> B): B =
     foldMap(
       // this is a composed monoid of Dual and Endo. TODO add those to core individually?
-      object: Monoid<AndThen<B, B>> {
+      object : Monoid<AndThen<B, B>> {
         override fun empty(): AndThen<B, B> = AndThen.id()
         override fun AndThen<B, B>.combine(b: AndThen<B, B>): AndThen<B, B> = b.andThen(this)
       },
@@ -123,7 +123,7 @@ interface LogicTFoldable<M> : Foldable<LogicTPartialOf<M>> {
   override fun <A, B> Kind<LogicTPartialOf<M>, A>.foldRight(lb: Eval<B>, f: (A, Eval<B>) -> Eval<B>): Eval<B> =
     foldMap(
       // this is Endo but with AndThen TODO change endo in core?
-      object: Monoid<AndThen<Eval<B>, Eval<B>>> {
+      object : Monoid<AndThen<Eval<B>, Eval<B>>> {
         override fun empty(): AndThen<Eval<B>, Eval<B>> = AndThen.id()
         override fun AndThen<Eval<B>, Eval<B>>.combine(b: AndThen<Eval<B>, Eval<B>>): AndThen<Eval<B>, Eval<B>> =
           andThen(b)
