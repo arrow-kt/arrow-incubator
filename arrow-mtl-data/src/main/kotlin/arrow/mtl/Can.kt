@@ -61,7 +61,8 @@ import arrow.typeclasses.Show
  * Similarly to [Ior], [Can] differs from [Either] in that it can contain both [A] and [B]. On top of that it can contain neither of them.
  * This means that it is isomorphic to [Option]<[Ior]<[A], [B]>>.
  *
- * Operations available are biased towards [B]
+ * Operations available are biased towards the right side ([B]).
+ * This means that, unless specified otherwise, operations like `map` or `flatMap` assume we are doing transformations on the right side.
  *
  * ### The coffee maker use case
  *
