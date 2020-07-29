@@ -69,16 +69,15 @@ We can further simplify this case by using Arrow `fx` facilities
 that enable monad comprehensions for all datatypes for which a monad instance is available.
 
 ```kotlin:ank
-import arrow.core.either
+import arrow.core.computations.either
 
 fun getCountryCode(maybePerson : Either<BizError, Person>): Either<BizError, String> =
-  TODO()
-  //either<BizError, String> {
-  //  val person = maybePerson.bind()
-  //  val address = person.address.toEither { AddressNotFound(person.id) }.bind()
-  //  val country = address.country.toEither { CountryNotFound(address.id)}.bind()
-  //  country.code
-  //}
+  either.eager<BizError, String> {
+    val person = maybePerson.bind()
+    val address = person.address.toEither { AddressNotFound(person.id) }.bind()
+    val country = address.country.toEither { CountryNotFound(address.id)}.bind()
+    country.code
+  }
 ```
 
 Alright, a piece of cake right? That's because we were dealing with a simple type `Either`. But here's where things can get more complicated. Let's introduce another monad in the middle of the computation. For example, what happens when we need to load a person by id, then their address and country to obtain the country code from a remote service?
