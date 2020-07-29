@@ -26,10 +26,9 @@ import arrow.typeclasses.Show
  *
  * Implementation of Haskell's [Can](https://hackage.haskell.org/package/smash-0.1.1.0/docs/Data-Can.html)
  *
- * It's rare, but you may have come across a situation when you need to represent whether you have one of two values or both at the same time.
- * If that's the case, then [Ior] is the ADT for you.
+ * If we want to represent the possibility one of two values, let's say `A` or `B`, as well as the option to have both values at the same time, we can use [Ior]`<A, B>`.
  *
- * However, sometimes you may also want to represent such cases as well as none of them. This is where [Can] comes in handy.
+ * However, sometimes you may also want to represent those cases as well as neither of them. This is where [Can]`<A, B>` comes in handy.
  *
  * ## Mathematical explanation:
  *
