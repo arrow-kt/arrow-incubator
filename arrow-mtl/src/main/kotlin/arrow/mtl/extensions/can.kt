@@ -48,12 +48,7 @@ fun <L, R> Can<L, R>.combine(
   SGR: Semigroup<R>,
   b: Can<L, R>
 ): Can<L, R> = when (val a = this) {
-  is Neither -> when (b) {
-    is Neither -> a
-    is Left -> b
-    is Right -> a
-    is Both -> b
-  }
+  is Neither -> b
   is Left -> when (b) {
     is Neither -> a
     is Left -> Left(SGL.run { a.a.combine(b.a) })
