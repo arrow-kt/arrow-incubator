@@ -43,29 +43,30 @@ import arrow.typeclasses.Semigroup
 import arrow.typeclasses.Show
 import arrow.typeclasses.Traverse
 
-fun <L, R> Can<L, R>.combine(
-  SGL: Semigroup<L>,
-  SGR: Semigroup<R>,
-  b: Can<L, R>
-): Can<L, R> = when (val a = this) {
-  is Neither -> b
-  is Left -> when (b) {
-    is Neither -> a
-    is Left -> Left(SGL.run { a.a.combine(b.a) })
-    is Right -> b
-    is Both -> Both(SGL.run { a.a.combine(b.a) }, b.b)
-  }
-  is Right -> when (b) {
-    is Neither -> a
-    is Left -> Both(b.a, a.b)
-    is Right -> Right(SGR.run { a.b.combine(b.b) })
-    is Both -> Both(b.a, SGR.run { a.b.combine(b.b) })
-  }
-  is Both -> when (b) {
-    is Neither -> a
-    is Left -> Both(SGL.run { a.a.combine(a.a) }, a.b)
-    is Right -> Both(a.a, SGR.run { a.b.combine(b.b) })
-    is Both -> Both(SGL.run { a.a.combine(b.a) }, SGR.run { a.b.combine(b.b) })
+fun <L, R> Can<L, R>.combine(SGL: Semigroup<L>, SGR: Semigroup<R>, b: Can<L, R>): Can<L, R> =
+  SGL.combine(SGR, this, b)
+
+private fun <L, R> Semigroup<L>.combine(SGR: Semigroup<R>, a: Can<L, R>, b: Can<L, R>): Can<L, R> = SGR.run {
+  when (a) {
+    is Neither -> b
+    is Left -> when (b) {
+      is Neither -> a
+      is Left -> Left(a.a + b.a)
+      is Right -> Both(a.a, b.b)
+      is Both -> Both(a.a + b.a, b.b)
+    }
+    is Right -> when (b) {
+      is Neither -> a
+      is Left -> Both(b.a, a.b)
+      is Right -> Right(a.b + b.b)
+      is Both -> Both(b.a, a.b + b.b)
+    }
+    is Both -> when (b) {
+      is Neither -> a
+      is Left -> Both(a.a + b.a, a.b)
+      is Right -> Both(a.a, a.b + b.b)
+      is Both -> Both(a.a + b.a, a.b + b.b)
+    }
   }
 }
 
