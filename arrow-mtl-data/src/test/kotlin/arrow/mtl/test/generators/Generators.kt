@@ -1,8 +1,12 @@
 package arrow.mtl.test.generators
 
-import arrow.core.*
+import arrow.core.Ior
+import arrow.core.ListK
+import arrow.core.SequenceK
 import arrow.core.extensions.listk.semialign.semialign
 import arrow.core.extensions.sequencek.semialign.semialign
+import arrow.core.fix
+import arrow.core.k
 import arrow.mtl.Can
 import io.kotlintest.properties.Gen
 
