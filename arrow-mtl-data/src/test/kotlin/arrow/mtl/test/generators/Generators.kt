@@ -1,27 +1,13 @@
 package arrow.mtl.test.generators
 
-import arrow.core.Option
-import arrow.core.SequenceK
-import arrow.core.extensions.sequencek.apply.apply
-import arrow.core.extensions.sequencek.monad.map
-import arrow.core.k
-import arrow.core.test.generators.option
 import arrow.mtl.Can
 import io.kotlintest.properties.Gen
 
 fun <A, B> Gen.Companion.can(genA: Gen<A>, genB: Gen<B>): Gen<Can<A, B>> =
-  object : Gen<Can<A, B>> {
-    override fun constants(): Iterable<Can<A, B>> =
-      (genA.orNull().constants().asSequence().k() to genB.orNull().constants().asSequence().k()).let { (ls, rs) ->
-        SequenceK.apply().run { ls.product(rs) }.map {
-          Can.fromOptions(Option.fromNullable(it.a), Option.fromNullable(it.b))
-        }.asIterable()
-      }
+  genA.zip(genB) { a, b -> Can.fromNullables(a, b) }
 
-    override fun random(): Sequence<Can<A, B>> =
-      (Gen.option(genA).random() to Gen.option(genB).random()).let { (ls, rs) ->
-        ls.zip(rs).map {
-          Can.fromOptions(it.first, it.second)
-        }
-      }
+private fun <A, B, R> Gen<A>.zip(genB: Gen<B>, transform: (A, B) -> R): Gen<R> =
+  object : Gen<R> {
+    override fun constants(): Iterable<R> = this@zip.constants().zip(genB.constants(), transform)
+    override fun random(): Sequence<R> = this@zip.random().zip(genB.random(), transform)
   }
