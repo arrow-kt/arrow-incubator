@@ -7,16 +7,8 @@ import arrow.core.Option
 import arrow.core.Some
 import arrow.core.Valid
 import arrow.core.extensions.*
-import arrow.mtl.test.generators.can
 import arrow.core.test.UnitSpec
-import arrow.core.test.laws.BicrosswalkLaws
-import arrow.core.test.laws.BifunctorLaws
-import arrow.core.test.laws.BitraverseLaws
-import arrow.core.test.laws.EqK2Laws
-import arrow.core.test.laws.HashLaws
-import arrow.core.test.laws.MonadLaws
-import arrow.core.test.laws.ShowLaws
-import arrow.core.test.laws.TraverseLaws
+import arrow.core.test.laws.*
 import arrow.core.toT
 import arrow.mtl.*
 import arrow.mtl.extensions.can.applicative.applicative
@@ -29,8 +21,10 @@ import arrow.mtl.extensions.can.eqK2.eqK2
 import arrow.mtl.extensions.can.functor.functor
 import arrow.mtl.extensions.can.hash.hash
 import arrow.mtl.extensions.can.monad.monad
+import arrow.mtl.extensions.can.monoid.monoid
 import arrow.mtl.extensions.can.show.show
 import arrow.mtl.extensions.can.traverse.traverse
+import arrow.mtl.test.generators.can
 import arrow.mtl.test.generators.genK
 import arrow.mtl.test.generators.genK2
 import arrow.typeclasses.Eq
@@ -43,13 +37,14 @@ class CanTest : UnitSpec() {
   init {
 
     val stringCanMonad = Can.monad(String.semigroup())
-
     val EQ = Can.eq(Eq.any(), Eq.any())
+    val GEN = Gen.can(Gen.string(), Gen.int())
 
     testLaws(
       EqK2Laws.laws(Can.eqK2(), Can.genK2()),
       BifunctorLaws.laws(Can.bifunctor(), Can.genK2(), Can.eqK2()),
-      ShowLaws.laws(Can.show(String.show(), Int.show()), EQ, Gen.can(Gen.string(), Gen.int())),
+      ShowLaws.laws(Can.show(String.show(), Int.show()), EQ, GEN),
+      MonoidLaws.laws(Can.monoid(String.monoid(), Int.monoid()), GEN, EQ),
       MonadLaws.laws(
         Can.monad(Int.semigroup()),
         Can.functor(),
