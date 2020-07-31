@@ -6,13 +6,8 @@ import arrow.core.None
 import arrow.core.Option
 import arrow.core.Some
 import arrow.core.Valid
-import arrow.core.extensions.eq
-import arrow.core.extensions.hash
-import arrow.core.extensions.semigroup
-import arrow.core.extensions.show
+import arrow.core.extensions.*
 import arrow.mtl.test.generators.can
-import arrow.core.left
-import arrow.core.right
 import arrow.core.test.UnitSpec
 import arrow.core.test.laws.BicrosswalkLaws
 import arrow.core.test.laws.BifunctorLaws
@@ -23,10 +18,7 @@ import arrow.core.test.laws.MonadLaws
 import arrow.core.test.laws.ShowLaws
 import arrow.core.test.laws.TraverseLaws
 import arrow.core.toT
-import arrow.mtl.Can
-import arrow.mtl.CanPartialOf
-import arrow.mtl.component1
-import arrow.mtl.component2
+import arrow.mtl.*
 import arrow.mtl.extensions.can.applicative.applicative
 import arrow.mtl.extensions.can.bicrosswalk.bicrosswalk
 import arrow.mtl.extensions.can.bifunctor.bifunctor
@@ -39,20 +31,9 @@ import arrow.mtl.extensions.can.hash.hash
 import arrow.mtl.extensions.can.monad.monad
 import arrow.mtl.extensions.can.show.show
 import arrow.mtl.extensions.can.traverse.traverse
-import arrow.mtl.getLeftOrElse
-import arrow.mtl.getOrElse
-import arrow.mtl.leftOption
-import arrow.mtl.rightOption
 import arrow.mtl.test.generators.genK
 import arrow.mtl.test.generators.genK2
-import arrow.mtl.toCan
-import arrow.mtl.toIor
-import arrow.mtl.toLeftCan
-import arrow.mtl.toRightCan
-import arrow.mtl.toValidated
-import arrow.mtl.toValidatedLeft
 import arrow.typeclasses.Eq
-import arrow.typeclasses.Monad
 import io.kotlintest.properties.Gen
 import io.kotlintest.properties.forAll
 import io.kotlintest.shouldBe
@@ -61,7 +42,7 @@ class CanTest : UnitSpec() {
 
   init {
 
-    val intCanMonad: Monad<CanPartialOf<Int>> = Can.monad(Int.semigroup())
+    val stringCanMonad = Can.monad(String.semigroup())
 
     val EQ = Can.eq(Eq.any(), Eq.any())
 
@@ -239,9 +220,11 @@ class CanTest : UnitSpec() {
     }
 
     "Can.monad.flatMap should combine left values" {
-      val can = Can.Both(3, "Hello, world!")
-      val result = intCanMonad.run { can.flatMap { Can.Left(7) } }
-      result shouldBe Can.Left(10)
+      val can = Can.Both("some", "Hello, world!")
+      val result = stringCanMonad.run {
+        can.flatMap { Can.Left("thing") }
+      }
+      result shouldBe Can.Left("something")
     }
 
     "Can<A, B> can be deconstructed" {
