@@ -13,3 +13,6 @@ include 'arrow-kindedj'
 include 'arrow-validation'
 include 'arrow-fx-mtl'
 include 'arrow-incubator-test'
+include 'arrow-smash'
+include 'arrow-smash-data'
+project(':arrow-smash-data').projectDir = file('arrow-smash/data')

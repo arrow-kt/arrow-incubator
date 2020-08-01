@@ -1,28 +1,28 @@
 @file:Suppress("UnusedImports")
 
-package arrow.mtl.extensions
+package arrow.smash.extensions
 
 import arrow.Kind
 import arrow.Kind2
 import arrow.core.Either
 import arrow.core.Eval
 import arrow.extension
-import arrow.mtl.Can
-import arrow.mtl.Can.Both
-import arrow.mtl.Can.Left
-import arrow.mtl.Can.Neither
-import arrow.mtl.Can.Right
-import arrow.mtl.CanOf
-import arrow.mtl.CanPartialOf
-import arrow.mtl.ForCan
-import arrow.mtl.ap
-import arrow.mtl.extensions.can.eq.eq
-import arrow.mtl.extensions.can.monad.monad
-import arrow.mtl.fix
-import arrow.mtl.flatMap
-import arrow.mtl.fold
-import arrow.mtl.toCan
-import arrow.mtl.toLeftCan
+import arrow.smash.Can
+import arrow.smash.Can.Both
+import arrow.smash.Can.Left
+import arrow.smash.Can.Neither
+import arrow.smash.Can.Right
+import arrow.smash.CanOf
+import arrow.smash.CanPartialOf
+import arrow.smash.ForCan
+import arrow.smash.ap
+import arrow.smash.extensions.can.eq.eq
+import arrow.smash.extensions.can.monad.monad
+import arrow.smash.fix
+import arrow.smash.flatMap
+import arrow.smash.fold
+import arrow.smash.toCan
+import arrow.smash.toLeftCan
 import arrow.typeclasses.Align
 import arrow.typeclasses.Applicative
 import arrow.typeclasses.Apply

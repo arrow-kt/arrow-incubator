@@ -1,9 +1,9 @@
-package arrow.mtl.test.generators
+package arrow.smash.generators
 
 import arrow.Kind2
 import arrow.core.test.generators.GenK2
-import arrow.mtl.Can
-import arrow.mtl.ForCan
+import arrow.smash.Can
+import arrow.smash.ForCan
 import io.kotlintest.properties.Gen
 
 fun Can.Companion.genK2() =

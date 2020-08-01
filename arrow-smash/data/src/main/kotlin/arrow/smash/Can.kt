@@ -1,8 +1,7 @@
-package arrow.mtl
+package arrow.smash
 
 import arrow.core.Either
 import arrow.core.Eval
-import arrow.core.Invalid
 import arrow.core.Ior
 import arrow.core.IorOf
 import arrow.core.None
@@ -11,8 +10,9 @@ import arrow.core.OptionOf
 import arrow.core.Predicate
 import arrow.core.Some
 import arrow.core.Tuple2
-import arrow.core.Valid
 import arrow.core.Validated
+import arrow.core.Validated.Invalid
+import arrow.core.Validated.Valid
 import arrow.core.fix
 import arrow.core.getOrElse
 import arrow.core.toOption
@@ -22,7 +22,7 @@ import arrow.typeclasses.Semigroup
 import arrow.typeclasses.Show
 
 /**
- * ank_macro_hierarchy(arrow.mtl.Can)
+ * ank_macro_hierarchy(Can)
  *
  * Implementation of Haskell's [Can](https://hackage.haskell.org/package/smash-0.1.1.0/docs/Data-Can.html)
  *
@@ -81,7 +81,7 @@ import arrow.typeclasses.Show
  * The coffee instructions could be defined using [Can]
  *
  * ```kotlin:ank
- * import arrow.mtl.Can
+ * import Can
  *
  * //sampleStart
  * typealias CoffeeInstructions = Can<Milk, Sugar>
@@ -107,10 +107,10 @@ import arrow.typeclasses.Show
  * From the perspective of the client, be it a terminal on the machine or a remote client, you can create functions to modify the instructions depending on the input from the user:
  *
  * ```kotlin:ank
- * import arrow.mtl.component1
- * import arrow.mtl.component2
+ * import component1
+ * import component2
  * import arrow.core.Some
- * import arrow.mtl.Can.Companion.fromOptions
+ * import Can.Companion.fromOptions
  *
  * //sampleStart
  * fun CoffeeInstructions.incrementSugar(): CoffeeInstructions = let { (milk, sugar) ->
@@ -125,9 +125,9 @@ import arrow.typeclasses.Show
  * As for decreasing the number of sugar spoons:
  *
  * ```kotlin:ank
- * import arrow.mtl.component1
- * import arrow.mtl.component2
- * import arrow.mtl.Can.Companion.fromOptions
+ * import component1
+ * import component2
+ * import Can.Companion.fromOptions
  *
  * //sampleStart
  * fun CoffeeInstructions.decreaseSugar(): CoffeeInstructions = let { (milk, sugar) ->
@@ -140,9 +140,9 @@ import arrow.typeclasses.Show
  * For the milk operations it's a bit simpler:
  *
  * ```kotlin:ank
- * import arrow.mtl.Can.Companion.fromOptions
- * import arrow.mtl.component1
- * import arrow.mtl.component2
+ * import Can.Companion.fromOptions
+ * import component1
+ * import component2
  * import arrow.core.Some
  * import arrow.core.None
  *
@@ -183,7 +183,7 @@ import arrow.typeclasses.Show
  *
  * - [Pair]<[A], [B]>.toCan(): [Can.Both]<[A], [B]>
  * ``` kotlin:ank
- * import arrow.mtl.toCan
+ * import toCan
  *
  * //sampleStart
  * check(("Over" to 9000).toCan() == Can.Both("Over", 9000))
@@ -197,14 +197,14 @@ import arrow.typeclasses.Show
  * ```
  * - [A].toLeftCan(): [Can]<[A], [Nothing]>
  * ```kotlin:ank
- * import arrow.mtl.toLeftCan
+ * import toLeftCan
  *
  * //sampleStart
  * check(Milk.Semi.toLeftCan() == Can.Left(Milk.Semi))
  * ```
  * - [B].toRightCan(): [Can]<[Nothing], [B]>
  * ```kotlin:ank
- * import arrow.mtl.toRightCan
+ * import toRightCan
  *
  * //sampleStart
  * check(Sugar(spoons = 2).toRightCan() == Can.Right(Sugar(spoons = 2)))
@@ -237,7 +237,7 @@ import arrow.typeclasses.Show
  *
  * - [Can]<[A], [B]>.left(): [Option]<[A]>
  * ```kotlin:ank
- * import arrow.mtl.leftOption
+ * import leftOption
  *
  * //sampleStart
  * check(Can.both("Over", 9000).leftOption() == Some("Over"))
@@ -245,7 +245,7 @@ import arrow.typeclasses.Show
  * ```
  * - [Can]<[A], [B]>.right(): [Option]<[A]>
  * ```kotlin:ank
- * import arrow.mtl.rightOption
+ * import rightOption
  *
  * //sampleStart
  * check(Can.both("Over", 9000).rightOption() == Some(9000))
@@ -253,7 +253,7 @@ import arrow.typeclasses.Show
  * ```
  * - [Can]<[A], [B]>.leftOrNull(): [A]?
  * ```kotlin:ank
- * import arrow.mtl.leftOrNull
+ * import leftOrNull
  *
  * //sampleStart
  * check(Can.both("Over", 9000).leftOrNull() == "Over")
@@ -261,7 +261,7 @@ import arrow.typeclasses.Show
  * ```
  * - [Can]<[A], [B]>.rightOrNull(): [B]?
  * ```kotlin:ank
- * import arrow.mtl.rightOrNull
+ * import rightOrNull
  *
  * //sampleStart
  * check(Can.both("Over", 9000).rightOrNull() == 9000)
@@ -272,7 +272,7 @@ import arrow.typeclasses.Show
  *
  * - [Can]<[A], [B]>.getOrElse(f: () -> [B]): [B]
  * ```kotlin:ank
- * import arrow.mtl.getOrElse
+ * import getOrElse
  *
  * //sampleStart
  * check(Can.Both("Over", 9000).getOrElse { "not this" } == 9000)
@@ -281,7 +281,7 @@ import arrow.typeclasses.Show
  * ```
  * - [Can]<[A], [B]>.getLeftOrElse(f: () -> [A]): [A]
  * ```kotlin:ank
- * import arrow.mtl.getLeftOrElse
+ * import getLeftOrElse
  *
  * //sampleStart
  * check(Can.Both("Over", 9000).getLeftOrElse { "not this" } == "Over")
