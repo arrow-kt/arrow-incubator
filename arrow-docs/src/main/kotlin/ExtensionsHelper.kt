@@ -48,7 +48,9 @@ private val moduleNames: Map<String, String> = mapOf(
   "arrow.validation.refinedTypes" to "arrow-validation",
   "arrow.validation.refinedTypes.bool" to "arrow-validation",
   "arrow.validation.refinedTypes.generic" to "arrow-validation",
-  "arrow.validation.refinedTypes.numeric" to "arrow-validation"
+  "arrow.validation.refinedTypes.numeric" to "arrow-validation",
+  "arrow.smash.extensions" to "arrow-smash",
+  "arrow.smash" to "arrow-smash-data"
 )
 
 /**

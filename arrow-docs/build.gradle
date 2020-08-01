@@ -33,6 +33,8 @@ dependencies {
     implementation project(":arrow-mtl-data")
     implementation project(":arrow-recursion")
     implementation project(":arrow-validation")
+    implementation project(":arrow-smash")
+    implementation project(":arrow-smash-data")
     implementation "io.arrow-kt:arrow-syntax:$VERSION_NAME"
     implementation "io.arrow-kt:arrow-fx-rx2:$VERSION_NAME"
 }

@@ -1,4 +1,4 @@
-package arrow.mtl.test.generators
+package arrow.smash.generators
 
 import arrow.core.Ior
 import arrow.core.ListK
@@ -7,7 +7,7 @@ import arrow.core.extensions.listk.semialign.semialign
 import arrow.core.extensions.sequencek.semialign.semialign
 import arrow.core.fix
 import arrow.core.k
-import arrow.mtl.Can
+import arrow.smash.Can
 import io.kotlintest.properties.Gen
 
 fun <A, B> Gen.Companion.can(genA: Gen<A>, genB: Gen<B>): Gen<Can<A, B>> =
