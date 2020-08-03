@@ -31,6 +31,7 @@ android {
 
   sourceSets["main"].java.srcDir("src/main/kotlin")
   sourceSets["test"].java.srcDir("src/test/kotlin")
+  sourceSets["androidTest"].java.srcDir("src/androidTest/kotlin")
 }
 
 tasks.withType<Test> {
