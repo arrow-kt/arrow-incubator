@@ -1,119 +1,106 @@
 package arrow.android.binding.core
 
 import android.annotation.TargetApi
+import android.graphics.Rect
 import android.os.Build
 import android.view.DragEvent
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
-import arrow.android.binding.core.LayoutChange.Bounds
+import arrow.core.Tuple2
+import arrow.core.Tuple3
 import arrow.fx.coroutines.CancelToken
 import arrow.fx.coroutines.stream.Stream
 import arrow.fx.coroutines.stream.cancellable
 
-val <V : View> V.clicks: Stream<Unit>
-  get() = Stream.cancellable {
-    setOnClickListener { emit(Unit) }
-    CancelToken { setOnClickListener(null) }
-  }
-
-val <V : View> V.longClicks: PartialStream<Unit, Boolean>
-  get() = { applyReturn ->
-    Stream.cancellable {
-      setOnLongClickListener {
-        emit(Unit)
-        applyReturn(Unit)
-      }
-      CancelToken { setOnLongClickListener(null) }
-    }
-  }
-
-val <V : View> V.keys: PartialStream<OnKey, Boolean>
-  get() = { applyReturn ->
-    Stream.cancellable {
-      setOnKeyListener { _, keyCode, event ->
-        val onKey = OnKey(keyCode, event)
-        emit(onKey)
-        applyReturn(onKey)
-      }
-      CancelToken { setOnKeyListener(null) }
-    }
-  }
-
-data class OnKey(val keyCode: Int, val event: KeyEvent)
-
-@get:TargetApi(Build.VERSION_CODES.M)
-val <V : View> V.scrollChangeEvents: Stream<ScrollChange>
-  get() = Stream.cancellable {
-    setOnScrollChangeListener { _, x, y, oldX, oldY ->
-      emit(ScrollChange(new = Scroll(x, y), old = Scroll(oldX, oldY)))
-    }
-    CancelToken { setOnScrollChangeListener(null) }
-  }
-
-data class Scroll(val x: Int, val y: Int)
-data class ScrollChange(val new: Scroll, val old: Scroll)
-
-val <V : View> V.attachStates: Stream<Boolean>
-  get() = Stream.cancellable {
-    val listener = object : View.OnAttachStateChangeListener {
-      override fun onViewDetachedFromWindow(v: View): Unit = emit(false)
-      override fun onViewAttachedToWindow(v: View): Unit = emit(true)
-    }
-    addOnAttachStateChangeListener(listener)
-    CancelToken { removeOnAttachStateChangeListener(listener) }
-  }
-
-val <V : View> V.drags: PartialStream<DragEvent, Boolean>
-  get() = { applyReturn ->
-    Stream.cancellable {
-      setOnDragListener { _, event ->
-        emit(event)
-        applyReturn(event)
-      }
-      CancelToken { setOnDragListener(null) }
-    }
-  }
-
-val <V : View> V.focusChanges: Stream<Boolean>
-  get() = Stream.cancellable {
-    setOnFocusChangeListener { _, hasFocus -> emit(hasFocus) }
-    CancelToken { onFocusChangeListener = null }
-  }
-
-val <V : View> V.hovers: PartialStream<MotionEvent, Boolean>
-  get() = { applyReturn ->
-    Stream.cancellable {
-      setOnHoverListener { _, event ->
-        emit(event)
-        applyReturn(event)
-      }
-      CancelToken { setOnHoverListener(null) }
-    }
-  }
-
-
-val <V : View> V.layoutChanges: Stream<LayoutChange>
-  get() = Stream.cancellable {
-    val listener: (View, Int, Int, Int, Int, Int, Int, Int, Int) -> Unit = { _, l, t, r, b, oL, oT, oR, oB ->
-      emit(LayoutChange(old = Bounds(oL, oT, oR, oB), new = Bounds(l, t, r, b)))
-    }
-    addOnLayoutChangeListener(listener)
-    CancelToken { removeOnLayoutChangeListener(listener) }
-  }
-
-data class LayoutChange(val old: Bounds, val new: Bounds) {
-  data class Bounds(val left: Int, val top: Int, val right: Int, val bottom: Int)
+fun <V : View> V.clicks(): Stream<Unit> = Stream.cancellable {
+  setOnClickListener { emit(Unit) }
+  CancelToken { setOnClickListener(null) }
 }
 
-val <V : View> V.visibilities: Stream<Visibility>
-  get() = Stream.cancellable {
-    val listener: (Int) -> Unit = { emit(Visibility(it)) }
-    setOnSystemUiVisibilityChangeListener(listener)
-    CancelToken { setOnSystemUiVisibilityChangeListener(null) }
+fun <V : View> V.longClicks(handle: (View) -> Boolean = AlwaysHandle): Stream<Unit> = Stream.cancellable {
+  setOnLongClickListener {
+    emit(Unit)
+    handle(it)
   }
+  CancelToken { setOnLongClickListener(null) }
+}
 
-sealed class Visibility {
+fun <V : View, T> V.keys(handle: (View, Int, KeyEvent) -> Boolean = AlwaysHandle): Stream<OnKey> = Stream.cancellable {
+  setOnKeyListener { v, keyCode, event ->
+    emit(OnKey(v, keyCode, event))
+    handle(v, keyCode, event)
+  }
+  CancelToken { setOnKeyListener(null) }
+}
+
+typealias OnKey = Tuple3<View, Int, KeyEvent>
+
+@TargetApi(Build.VERSION_CODES.M)
+fun <V : View> V.scrollChangeEvents(): Stream<ScrollChange> = Stream.cancellable {
+  setOnScrollChangeListener { _, x, y, oldX, oldY ->
+    emit(ScrollChange(OldScroll(oldX, oldY), NewScroll(x, y)))
+  }
+  CancelToken { setOnScrollChangeListener(null) }
+}
+
+typealias OldScroll = Tuple2<X, Y>
+typealias NewScroll = Tuple2<X, Y>
+typealias X = Int
+typealias Y = Int
+typealias ScrollChange = Tuple2<OldScroll, NewScroll>
+
+fun <V : View> V.attachStates(): Stream<Boolean> = Stream.cancellable {
+  val listener = object : View.OnAttachStateChangeListener {
+    override fun onViewDetachedFromWindow(v: View): Unit = emit(false)
+    override fun onViewAttachedToWindow(v: View): Unit = emit(true)
+  }
+  addOnAttachStateChangeListener(listener)
+  CancelToken { removeOnAttachStateChangeListener(listener) }
+}
+
+fun <V : View> V.drags(handle: (DragEvent) -> Boolean = AlwaysHandle): Stream<DragEvent> = Stream.cancellable {
+  setOnDragListener { _, event ->
+    emit(event)
+    handle(event)
+  }
+  CancelToken { setOnDragListener(null) }
+}
+
+fun <V : View> V.focusChanges(): Stream<Boolean> = Stream.cancellable {
+  setOnFocusChangeListener { _, hasFocus -> emit(hasFocus) }
+  CancelToken { onFocusChangeListener = null }
+}
+
+fun <V : View> V.hovers(handle: (MotionEvent) -> Boolean): Stream<MotionEvent> = Stream.cancellable {
+  setOnHoverListener { _, event ->
+    emit(event)
+    handle(event)
+  }
+  CancelToken { setOnHoverListener(null) }
+}
+
+fun <V : View> V.layoutChanges(): Stream<LayoutChange> = Stream.cancellable {
+  val listener: (View, Int, Int, Int, Int, Int, Int, Int, Int) -> Unit = { _, l, t, r, b, oL, oT, oR, oB ->
+    emit(LayoutChange(OldBounds(oL, oT, oR, oB), NewBounds(l, t, r, b)))
+  }
+  addOnLayoutChangeListener(listener)
+  CancelToken { removeOnLayoutChangeListener(listener) }
+}
+
+typealias LayoutChange = Tuple2<OldBounds, NewBounds>
+typealias OldBounds = Rect
+typealias NewBounds = Rect
+
+fun <V : View> V.visibilities(): Stream<Visibility> = Stream.cancellable {
+  val listener: (Int) -> Unit = { emit(Visibility(it)) }
+  setOnSystemUiVisibilityChangeListener(listener)
+  CancelToken { setOnSystemUiVisibilityChangeListener(null) }
+}
+
+enum class Visibility {
+
+  Visible, Invisible, Gone;
 
   companion object {
     operator fun invoke(visibility: Int): Visibility =
@@ -125,9 +112,9 @@ sealed class Visibility {
       }
   }
 
-  object Visible : Visibility()
-  object Invisible : Visibility()
-  object Gone : Visibility()
 }
 
-typealias PartialStream<A, R> = ((A) -> R) -> Stream<A>
+private object AlwaysHandle : (Any) -> Boolean, (Any, Any, Any) -> Boolean {
+  override fun invoke(p1: Any): Boolean = true
+  override fun invoke(p1: Any, p2: Any, p3: Any): Boolean = true
+}
