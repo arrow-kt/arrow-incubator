@@ -7,36 +7,36 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import arrow.android.binding.core.LayoutChange.Bounds
-import arrow.fx.coroutines.onCancel
+import arrow.fx.coroutines.CancelToken
 import arrow.fx.coroutines.stream.Stream
-import arrow.fx.coroutines.stream.callback
+import arrow.fx.coroutines.stream.cancellable
 
 val <V : View> V.clicks: Stream<Unit>
-  get() = Stream.callback {
+  get() = Stream.cancellable {
     setOnClickListener { emit(Unit) }
-    onCancel({}, { setOnClickListener(null) })
+    CancelToken { setOnClickListener(null) }
   }
 
 val <V : View> V.longClicks: PartialStream<Unit, Boolean>
   get() = { applyReturn ->
-    Stream.callback {
+    Stream.cancellable {
       setOnLongClickListener {
         emit(Unit)
         applyReturn(Unit)
       }
-      onCancel({}, { setOnLongClickListener(null) })
+      CancelToken { setOnLongClickListener(null) }
     }
   }
 
 val <V : View> V.keys: PartialStream<OnKey, Boolean>
   get() = { applyReturn ->
-    Stream.callback {
+    Stream.cancellable {
       setOnKeyListener { _, keyCode, event ->
         val onKey = OnKey(keyCode, event)
         emit(onKey)
         applyReturn(onKey)
       }
-      onCancel({}, { setOnKeyListener(null) })
+      CancelToken { setOnKeyListener(null) }
     }
   }
 
@@ -44,62 +44,62 @@ data class OnKey(val keyCode: Int, val event: KeyEvent)
 
 @get:TargetApi(Build.VERSION_CODES.M)
 val <V : View> V.scrollChangeEvents: Stream<ScrollChange>
-  get() = Stream.callback {
+  get() = Stream.cancellable {
     setOnScrollChangeListener { _, x, y, oldX, oldY ->
       emit(ScrollChange(new = Scroll(x, y), old = Scroll(oldX, oldY)))
     }
-    onCancel({}, { setOnScrollChangeListener(null) })
+    CancelToken { setOnScrollChangeListener(null) }
   }
 
 data class Scroll(val x: Int, val y: Int)
 data class ScrollChange(val new: Scroll, val old: Scroll)
 
 val <V : View> V.attachStates: Stream<Boolean>
-  get() = Stream.callback {
+  get() = Stream.cancellable {
     val listener = object : View.OnAttachStateChangeListener {
       override fun onViewDetachedFromWindow(v: View): Unit = emit(false)
       override fun onViewAttachedToWindow(v: View): Unit = emit(true)
     }
     addOnAttachStateChangeListener(listener)
-    onCancel({ false }, onCancel = { removeOnAttachStateChangeListener(listener) })
+    CancelToken { removeOnAttachStateChangeListener(listener) }
   }
 
 val <V : View> V.drags: PartialStream<DragEvent, Boolean>
   get() = { applyReturn ->
-    Stream.callback {
+    Stream.cancellable {
       setOnDragListener { _, event ->
         emit(event)
         applyReturn(event)
       }
-      onCancel({ }, { setOnDragListener(null) })
+      CancelToken { setOnDragListener(null) }
     }
   }
 
 val <V : View> V.focusChanges: Stream<Boolean>
-  get() = Stream.callback {
+  get() = Stream.cancellable {
     setOnFocusChangeListener { _, hasFocus -> emit(hasFocus) }
-    onCancel({}, { onFocusChangeListener = null })
+    CancelToken { onFocusChangeListener = null }
   }
 
 val <V : View> V.hovers: PartialStream<MotionEvent, Boolean>
   get() = { applyReturn ->
-    Stream.callback {
+    Stream.cancellable {
       setOnHoverListener { _, event ->
         emit(event)
         applyReturn(event)
       }
-      onCancel({}, { setOnHoverListener(null) })
+      CancelToken { setOnHoverListener(null) }
     }
   }
 
 
 val <V : View> V.layoutChanges: Stream<LayoutChange>
-  get() = Stream.callback {
-    val callback: (View, Int, Int, Int, Int, Int, Int, Int, Int) -> Unit = { _, l, t, r, b, oL, oT, oR, oB ->
+  get() = Stream.cancellable {
+    val listener: (View, Int, Int, Int, Int, Int, Int, Int, Int) -> Unit = { _, l, t, r, b, oL, oT, oR, oB ->
       emit(LayoutChange(old = Bounds(oL, oT, oR, oB), new = Bounds(l, t, r, b)))
     }
-    addOnLayoutChangeListener(callback)
-    onCancel({ }, { removeOnLayoutChangeListener(callback) })
+    addOnLayoutChangeListener(listener)
+    CancelToken { removeOnLayoutChangeListener(listener) }
   }
 
 data class LayoutChange(val old: Bounds, val new: Bounds) {
@@ -107,10 +107,10 @@ data class LayoutChange(val old: Bounds, val new: Bounds) {
 }
 
 val <V : View> V.visibilities: Stream<Visibility>
-  get() = Stream.callback {
+  get() = Stream.cancellable {
     val listener: (Int) -> Unit = { emit(Visibility(it)) }
     setOnSystemUiVisibilityChangeListener(listener)
-    onCancel({}, { setOnSystemUiVisibilityChangeListener(null) })
+    CancelToken { setOnSystemUiVisibilityChangeListener(null) }
   }
 
 sealed class Visibility {
