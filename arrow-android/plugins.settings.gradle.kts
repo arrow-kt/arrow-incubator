@@ -1,5 +1,4 @@
-@file:Suppress("PropertyName") // properties use SHOUT_CASE
-
+@file:Suppress("PropertyName")
 
 val ROOT_PROPERTIES: String by settings
 
