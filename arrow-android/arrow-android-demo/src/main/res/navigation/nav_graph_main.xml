@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_nav_graph"
+    app:startDestination="@id/fragment_demos"
+    tools:ignore="UnusedNavigation">
+
+    <fragment
+        android:id="@+id/fragment_demos"
+        android:name="arrow.android.demo.DemoListFragment"
+        android:label="Demos"
+        tools:layout="@layout/fragment_demos_list">
+
+        <action
+            android:id="@+id/select_clicks_demo"
+            app:popUpTo="@id/fragment_demos"
+            app:destination="@id/fragment_clicks" />
+
+        <action
+            android:id="@+id/select_password_demo"
+            app:destination="@id/fragment_password" />
+
+        <action
+            android:id="@+id/select_game_of_selection_demo"
+            app:destination="@id/fragment_game_of_selection" />
+
+        <action
+            android:id="@+id/select_tic_tac_toe_demo"
+            app:destination="@id/fragment_tic_tac_toe" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragment_clicks"
+        android:name="arrow.android.demo.cases.clicks.ClicksFragment"
+        android:label="Clicks Demo"
+        tools:layout="@layout/fragment_clicks" />
+
+    <fragment
+        android:id="@+id/fragment_password"
+        android:name="arrow.android.demo.cases.login.LoginFragment"
+        android:label="Password Demo"
+        tools:layout="@layout/fragment_login" />
+
+    <fragment
+        android:id="@+id/fragment_game_of_selection"
+        android:name="arrow.android.demo.cases.gameoflife.GameOfLifeFragment"
+        android:label="Password Demo"
+        tools:layout="@layout/fragment_game_of_life" />
+
+    <fragment
+        android:id="@+id/fragment_tic_tac_toe"
+        android:name="arrow.android.demo.cases.tictactoe.TicTacToeFragment"
+        android:label="Tic-Tac-Toe Demo"
+        tools:layout="@layout/fragment_tic_tac_toe" />
+
+</navigation>

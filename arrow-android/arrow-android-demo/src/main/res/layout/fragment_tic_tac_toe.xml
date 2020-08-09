@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".cases.tictactoe.TicTacToeFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/message_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="32dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            app:layout_constraintBottom_toTopOf="@id/tile_00"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="This is a message" />
+
+        <ImageView
+            android:id="@+id/tile_00"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:contentDescription="@string/description_top_left"
+            app:layout_constraintBottom_toTopOf="@id/separator_horizontal_0"
+            app:layout_constraintDimensionRatio="1"
+            app:layout_constraintEnd_toStartOf="@id/separator_vertical_0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/message_view"
+            tools:src="@drawable/ic_circle" />
+
+        <ImageView
+            android:id="@+id/tile_01"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:contentDescription="@string/description_top_middle"
+            app:layout_constraintBottom_toBottomOf="@id/tile_00"
+            app:layout_constraintDimensionRatio="1"
+            app:layout_constraintEnd_toStartOf="@+id/separator_vertical_1"
+            app:layout_constraintStart_toEndOf="@id/separator_vertical_0"
+            app:layout_constraintTop_toTopOf="@id/tile_00"
+            tools:src="@drawable/ic_circle" />
+
+        <ImageView
+            android:id="@+id/tile_02"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:contentDescription="@string/description_top_right"
+            app:layout_constraintBottom_toBottomOf="@id/tile_00"
+            app:layout_constraintDimensionRatio="1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/separator_vertical_1"
+            app:layout_constraintTop_toTopOf="@id/tile_00"
+            tools:src="@drawable/ic_circle" />
+
+        <ImageView
+            android:id="@+id/tile_10"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:contentDescription="@string/description_left_middle"
+            app:layout_constraintBottom_toTopOf="@id/separator_horizontal_1"
+            app:layout_constraintDimensionRatio="1"
+            app:layout_constraintEnd_toEndOf="@id/tile_00"
+            app:layout_constraintStart_toStartOf="@id/tile_00"
+            app:layout_constraintTop_toBottomOf="@id/separator_horizontal_0"
+            tools:src="@drawable/ic_circle" />
+
+        <ImageView
+            android:id="@+id/tile_11"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:contentDescription="@string/description_middle"
+            app:layout_constraintBottom_toBottomOf="@id/tile_10"
+            app:layout_constraintDimensionRatio="1"
+            app:layout_constraintEnd_toEndOf="@+id/tile_01"
+            app:layout_constraintStart_toStartOf="@id/tile_01"
+            app:layout_constraintTop_toTopOf="@id/tile_10"
+            tools:src="@drawable/ic_cross" />
+
+        <ImageView
+            android:id="@+id/tile_12"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:contentDescription="@string/description_right_middle"
+            app:layout_constraintBottom_toBottomOf="@id/tile_10"
+            app:layout_constraintDimensionRatio="1"
+            app:layout_constraintEnd_toEndOf="@+id/tile_02"
+            app:layout_constraintStart_toStartOf="@id/tile_02"
+            app:layout_constraintTop_toTopOf="@id/tile_10"
+            tools:src="@drawable/ic_circle" />
+
+        <ImageView
+            android:id="@+id/tile_20"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:contentDescription="@string/description_bottom_left"
+            app:layout_constraintDimensionRatio="1"
+            app:layout_constraintEnd_toEndOf="@+id/tile_10"
+            app:layout_constraintStart_toStartOf="@id/tile_10"
+            app:layout_constraintTop_toBottomOf="@id/separator_horizontal_1"
+            tools:src="@drawable/ic_circle" />
+
+        <ImageView
+            android:id="@+id/tile_21"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:contentDescription="@string/description_bottom_middle"
+            app:layout_constraintBottom_toBottomOf="@id/tile_20"
+            app:layout_constraintDimensionRatio="1"
+            app:layout_constraintEnd_toEndOf="@+id/tile_11"
+            app:layout_constraintStart_toStartOf="@id/tile_11"
+            app:layout_constraintTop_toTopOf="@id/tile_20"
+            tools:src="@drawable/ic_circle" />
+
+        <ImageView
+            android:id="@+id/tile_22"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="@id/tile_20"
+            app:layout_constraintDimensionRatio="1"
+            app:layout_constraintEnd_toEndOf="@+id/tile_12"
+            app:layout_constraintStart_toStartOf="@id/tile_12"
+            app:layout_constraintTop_toTopOf="@id/tile_20"
+            android:contentDescription="@string/description_bottom_right"
+            tools:src="@drawable/ic_circle" />
+
+        <View
+            android:id="@+id/separator_vertical_0"
+            android:layout_width="16dp"
+            android:layout_height="0dp"
+            android:background="@android:color/black"
+            app:layout_constraintBottom_toBottomOf="@id/tile_20"
+            app:layout_constraintEnd_toStartOf="@id/tile_01"
+            app:layout_constraintStart_toEndOf="@id/tile_00"
+            app:layout_constraintTop_toTopOf="@id/tile_00" />
+
+        <View
+            android:id="@+id/separator_vertical_1"
+            android:layout_width="16dp"
+            android:layout_height="0dp"
+            android:background="@android:color/black"
+            app:layout_constraintBottom_toBottomOf="@id/tile_20"
+            app:layout_constraintEnd_toStartOf="@id/tile_02"
+            app:layout_constraintStart_toEndOf="@id/tile_01"
+            app:layout_constraintTop_toTopOf="@id/tile_02" />
+
+        <View
+            android:id="@+id/separator_horizontal_0"
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:background="@android:color/black"
+            app:layout_constraintBottom_toTopOf="@+id/tile_10"
+            app:layout_constraintEnd_toEndOf="@id/tile_02"
+            app:layout_constraintStart_toStartOf="@id/tile_00"
+            app:layout_constraintTop_toBottomOf="@id/tile_00" />
+
+        <View
+            android:id="@+id/separator_horizontal_1"
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:background="@android:color/black"
+            app:layout_constraintBottom_toBottomOf="@id/tile_10"
+            app:layout_constraintEnd_toEndOf="@id/tile_02"
+            app:layout_constraintStart_toStartOf="@id/tile_00"
+            app:layout_constraintTop_toBottomOf="@id/tile_10" />
+
+        <Button
+            android:id="@+id/reset_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/reset"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tile_20" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</FrameLayout>

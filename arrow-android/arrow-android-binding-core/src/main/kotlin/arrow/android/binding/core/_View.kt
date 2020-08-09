@@ -8,33 +8,33 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import arrow.core.Tuple2
-import arrow.core.Tuple3
 import arrow.fx.coroutines.CancelToken
 import arrow.fx.coroutines.stream.Stream
 import arrow.fx.coroutines.stream.cancellable
 
 fun <V : View> V.clicks(): Stream<Unit> = Stream.cancellable {
-  setOnClickListener { emit(Unit) }
-  CancelToken { setOnClickListener(null) }
+  // TODO(pabs): Create View/Fragment/Activity dispatcher
+  post { setOnClickListener { emit(Unit) } }
+  CancelToken { post { setOnClickListener(null) } }
 }
 
-fun <V : View> V.longClicks(handle: (View) -> Boolean = AlwaysHandle): Stream<Unit> = Stream.cancellable {
+fun <V : View> V.longClicks(handle: (V) -> Boolean = AlwaysHandle): Stream<Unit> = Stream.cancellable {
   setOnLongClickListener {
     emit(Unit)
-    handle(it)
+    handle(this@longClicks)
   }
   CancelToken { setOnLongClickListener(null) }
 }
 
-fun <V : View, T> V.keys(handle: (View, Int, KeyEvent) -> Boolean = AlwaysHandle): Stream<OnKey> = Stream.cancellable {
-  setOnKeyListener { v, keyCode, event ->
-    emit(OnKey(v, keyCode, event))
-    handle(v, keyCode, event)
+fun <V : View, T> V.keys(handle: (V, Int, KeyEvent) -> Boolean = AlwaysHandle): Stream<OnKey> = Stream.cancellable {
+  setOnKeyListener { _, keyCode, event ->
+    emit(OnKey(keyCode, event))
+    handle(this@keys, keyCode, event)
   }
   CancelToken { setOnKeyListener(null) }
 }
 
-typealias OnKey = Tuple3<View, Int, KeyEvent>
+typealias OnKey = Tuple2<Int, KeyEvent>
 
 @TargetApi(Build.VERSION_CODES.M)
 fun <V : View> V.scrollChangeEvents(): Stream<ScrollChange> = Stream.cancellable {

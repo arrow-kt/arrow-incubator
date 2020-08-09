@@ -1,0 +1,39 @@
+<resources>
+    <string name="app_name">Arrow Android Demo</string>
+    <string name="title_item_detail">Item Detail</string>
+
+    <string name="select_a_demo"><![CDATA[<- Select a demo from the list]]></string>
+    <string name="reset">Reset</string>
+    <string name="name">Name</string>
+    <string name="name_definition">Name should be at least 2 characters long</string>
+    <string name="surname_definition">Surname(s) should be at least 2 characters long</string>
+    <string name="sign_up">Sign up</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="exit">Exit</string>
+    <string name="login">Login</string>
+
+    <string name="welcome_user">Welcome %1$s, I was expecting you.</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="step">Step</string>
+
+    <string name="playing_message" >Next turn: %1$s</string>
+    <string name="win_message" >Winner: %1$s!</string>
+    <string name="tie_message" >It\'s a tie!</string>
+    <string name="button_a">Button A</string>
+    <string name="button_b">Button B</string>
+    <string name="description_top_left">top left</string>
+    <string name="description_top_middle">top middle</string>
+    <string name="description_top_right">top right</string>
+    <string name="description_left_middle">left middle</string>
+    <string name="description_middle">middle</string>
+    <string name="description_right_middle">right middle</string>
+    <string name="description_bottom_left">bottom left</string>
+    <string name="description_bottom_middle">bottom middle</string>
+    <string name="description_bottom_right">bottom right</string>
+    <string name="hint_password">Password</string>
+    <string name="show_password">Show password</string>
+    <string name="email">Email</string>
+
+</resources>
