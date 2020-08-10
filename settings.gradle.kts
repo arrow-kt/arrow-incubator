@@ -15,5 +15,3 @@ include("arrow-fx-mtl")
 include("arrow-incubator-test")
 
 apply(from = "arrow-android/settings.gradle.kts")
-
-//includeBuild("arrow-android")
