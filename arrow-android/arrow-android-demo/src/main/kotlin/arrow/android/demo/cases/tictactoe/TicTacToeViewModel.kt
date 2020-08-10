@@ -6,10 +6,8 @@ import arrow.fx.coroutines.stream.Stream
 
 class TicTacToeViewModel : ViewModel() {
 
-  private val stateMachine = StateMachine<State, Event>(State.Playing()) { s, e ->
-    Stream(s.transition(e))
-  }
-  
+  private val stateMachine = StateMachine<State, Event>(State.Playing()) { s, e -> Stream(s.transition(e)) }
+
   suspend fun compute(events: Stream<Event>): Stream<State> = stateMachine.start(events)
 
 }
@@ -28,29 +26,15 @@ private fun State.transition(event: Event): State = when {
       newTurns.isTide() -> State.Tie(newTurns)
       else -> copy(turns = newTurns)
     }
-
-
-//        turns.lastOrNull()?.player.playTurn(event.tile)
-//            .let { turn -> copy(turns = turns + turn) }
-//            .let { state -> state.asWin() ?: state.asTide() ?: state }
   }
   event is Event.ResetGame -> State.Playing()
   else -> this
 }
 
-
-//private fun Player?.playTurn(tile: Tile): Turn =
-//    Turn(this?.opponent ?: Player.Circle, tile)
-
 private val State.Playing.tiles: List<Tile> get() = turns.map { it.tile }
-
-private fun State.Playing.asWin(): State? =
-  winingCandidates.mapNotNull { it.findWinnerIn(turns) }
-    .firstOrNull()?.let { State.Win(it, turns) }
 
 private fun List<Turn>.findWinner() =
   winingCandidates.mapNotNull { it.findWinnerIn(this) }.firstOrNull()
-
 
 private fun List<Turn>.isTide(): Boolean = size == 9
 
@@ -68,7 +52,7 @@ private val winingCandidates = listOf(
   listOf(Tile.At02, Tile.At11, Tile.At20)
 )
 
-private fun List<Tile>.findWinnerIn(turns: List<Turn>) =
+private fun List<Tile>.findWinnerIn(turns: List<Turn>): Player? =
   mapNotNull { tile -> turns.find { it.tile == tile } }
     .map { it.player }
     .let { players ->
