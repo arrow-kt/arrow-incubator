@@ -21,4 +21,8 @@ subprojects {
     dependencies {
         signature 'net.sf.androidscents.signature:android-api-level-21:5.0.1_r2@signature'
     }
+
+    animalsniffer { // Ignore tests
+        sourceSets = [sourceSets.main]
+    }
 }
