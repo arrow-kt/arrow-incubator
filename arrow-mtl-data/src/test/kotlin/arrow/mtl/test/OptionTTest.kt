@@ -21,6 +21,7 @@ import arrow.core.extensions.option.eqK.eqK
 import arrow.core.extensions.option.monad.monad
 import arrow.core.extensions.option.traverseFilter.traverseFilter
 import arrow.core.test.UnitSpec
+import arrow.core.test.generators.GenK
 import arrow.core.test.generators.genK
 import arrow.core.test.laws.DivisibleLaws
 import arrow.core.test.laws.FunctorFilterLaws
@@ -40,6 +41,7 @@ import arrow.fx.mtl.timer
 import arrow.fx.test.generators.genK
 import arrow.fx.test.laws.ConcurrentLaws
 import arrow.mtl.EitherT
+import arrow.mtl.ForOptionT
 import arrow.mtl.Kleisli
 import arrow.mtl.KleisliPartialOf
 import arrow.mtl.OptionT
@@ -47,8 +49,12 @@ import arrow.mtl.OptionTPartialOf
 import arrow.mtl.StateT
 import arrow.mtl.StateTPartialOf
 import arrow.mtl.WriterT
+import arrow.mtl.eq.EqTrans
 import arrow.mtl.extensions.ComposedFunctorFilter
+import arrow.mtl.extensions.core.monadBaseControl
 import arrow.mtl.extensions.kleisli.monadReader.monadReader
+import arrow.mtl.extensions.monadBaseControl
+import arrow.mtl.extensions.monadTransControl
 import arrow.mtl.extensions.nested
 import arrow.mtl.extensions.optiont.applicative.applicative
 import arrow.mtl.extensions.optiont.divisible.divisible
@@ -59,7 +65,6 @@ import arrow.mtl.extensions.optiont.monad.monad
 import arrow.mtl.extensions.optiont.monadPlus.monadPlus
 import arrow.mtl.extensions.optiont.monadReader.monadReader
 import arrow.mtl.extensions.optiont.monadState.monadState
-import arrow.mtl.extensions.optiont.monadTrans.monadTrans
 import arrow.mtl.extensions.optiont.monadWriter.monadWriter
 import arrow.mtl.extensions.optiont.monoidK.monoidK
 import arrow.mtl.extensions.optiont.semigroupK.semigroupK
@@ -67,13 +72,14 @@ import arrow.mtl.extensions.optiont.traverseFilter.traverseFilter
 import arrow.mtl.extensions.statet.monadState.monadState
 import arrow.mtl.extensions.writert.eqK.eqK
 import arrow.mtl.extensions.writert.monadWriter.monadWriter
+import arrow.mtl.generators.GenTrans
 import arrow.mtl.test.eq.eqK
 import arrow.mtl.test.generators.genK
 import arrow.mtl.test.generators.nested
 import arrow.mtl.test.laws.MonadReaderLaws
 import arrow.mtl.test.laws.MonadStateLaws
-import arrow.mtl.test.laws.MonadTransLaws
 import arrow.mtl.test.laws.MonadWriterLaws
+import arrow.typeclasses.EqK
 import arrow.typeclasses.Monad
 import io.kotlintest.properties.Gen
 import io.kotlintest.properties.forAll
@@ -137,10 +143,21 @@ class OptionTTest : UnitSpec() {
         OptionT.eqK(Const.eqK(Int.eq()))
       ),
 
-      MonadTransLaws.laws(
-        OptionT.monadTrans(),
-        Id.monad(),
-        OptionT.monad(Id.monad()),
+      MonadTransControlLaws.laws(
+        OptionT.monadTransControl(),
+        object : GenTrans<ForOptionT> {
+          override fun <F> liftGenK(MF: Monad<F>, genK: GenK<F>): GenK<Kind<ForOptionT, F>> =
+            OptionT.genK(genK)
+        },
+        object : EqTrans<ForOptionT> {
+          override fun <F> liftEqK(MF: Monad<F>, eqK: EqK<F>): EqK<Kind<ForOptionT, F>> =
+            OptionT.eqK(eqK)
+        }
+      ),
+
+      MonadBaseControlLaws.laws(
+        OptionT.monadBaseControl(Id.monadBaseControl()),
+        OptionT.genK(Id.genK()),
         Id.genK(),
         OptionT.eqK(Id.eqK())
       ),

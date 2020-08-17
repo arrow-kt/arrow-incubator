@@ -28,9 +28,14 @@ import arrow.mtl.extensions.statet.monad.monad
 import arrow.mtl.fix
 import arrow.mtl.run
 import arrow.mtl.typeclasses.MonadReader
+import arrow.mtl.typeclasses.MonadBase
+import arrow.mtl.typeclasses.MonadBaseControl
 import arrow.mtl.typeclasses.MonadState
 import arrow.mtl.typeclasses.MonadTrans
 import arrow.mtl.typeclasses.MonadWriter
+import arrow.mtl.typeclasses.MonadTransControl
+import arrow.mtl.typeclasses.RunT
+import arrow.mtl.typeclasses.StT
 import arrow.typeclasses.Alternative
 import arrow.typeclasses.Applicative
 import arrow.typeclasses.ApplicativeError
@@ -287,6 +292,10 @@ interface StateTAlternative<S, F> : Alternative<StateTPartialOf<S, F>>, StateTMo
 interface StateTMonadTrans<S> : MonadTrans<Kind<ForStateT, S>> {
   override fun <G, A> Kind<G, A>.liftT(MG: Monad<G>): Kind2<Kind<ForStateT, S>, G, A> =
     StateT.liftF(MG, this)
+
+  override fun <M> liftMonad(MM: Monad<M>): Monad<Kind<Kind<ForStateT, S>, M>> = object : StateTMonad<S, M> {
+    override fun MF(): Monad<M> = MM
+  }
 }
 
 @extension
@@ -416,3 +425,31 @@ interface StateTMonadWriter<S, F, W> : MonadWriter<StateTPartialOf<S, F>, W>, St
 
   override fun <A> writer(aw: Tuple2<W, A>): Kind<StateTPartialOf<S, F>, A> = StateT.liftF(MW(), MW().writer(aw))
 }
+
+interface StateTMonadTransControl<S> : MonadTransControl<Kind<ForStateT, S>> {
+
+  override fun <M, A> liftWith(MM: Monad<M>, f: (RunT<Kind<ForStateT, S>>) -> Kind<M, A>): Kind<Kind<Kind<ForStateT, S>, M>, A> =
+    StateT { s ->
+      MM.run {
+        f(object : RunT<Kind<ForStateT, S>> {
+          override fun <M, A> invoke(MM: Monad<M>, fa: Kind<Kind<Kind<ForStateT, S>, M>, A>): Kind<M, StT<Kind<ForStateT, S>, A>> =
+            MM.run { fa.run(s).map { StT<Kind<ForStateT, S>, A>(it) } }
+        }).map { s toT it }
+      }
+    }
+
+  override fun <M, A> Kind<M, StT<Kind<ForStateT, S>, A>>.restoreT(MM: Monad<M>): Kind<Kind<Kind<ForStateT, S>, M>, A> =
+    MM.run { StateT { _: S -> map { (it.unsafeState as Tuple2<S, A>) } } }
+
+  override fun <M> liftMonad(MM: Monad<M>): Monad<Kind<Kind<ForStateT, S>, M>> = object : StateTMonad<S, M> {
+    override fun MF(): Monad<M> = MM
+  }
+}
+
+fun <S> StateT.Companion.monadTransControl(): MonadTransControl<Kind<ForStateT, S>> = object : StateTMonadTransControl<S> {}
+
+fun <S, B, M> StateT.Companion.monadBase(MB: MonadBase<B, M>): MonadBase<B, StateTPartialOf<S, M>> =
+  MonadBase.defaultImpl(object : StateTMonadTrans<S> {}, MB)
+
+fun <S, B, M> StateT.Companion.monadBaseControl(MBC: MonadBaseControl<B, M>): MonadBaseControl<B, StateTPartialOf<S, M>> =
+  MonadBaseControl.defaultImpl(object : StateTMonadTransControl<S> {}, MBC)

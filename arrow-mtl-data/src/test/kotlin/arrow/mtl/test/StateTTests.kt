@@ -1,5 +1,6 @@
 package arrow.mtl.test
 
+import arrow.Kind
 import arrow.core.ForId
 import arrow.core.ForListK
 import arrow.core.ForOption
@@ -18,6 +19,7 @@ import arrow.core.extensions.option.monad.monad
 import arrow.core.extensions.option.monadCombine.monadCombine
 import arrow.core.extensions.option.semigroupK.semigroupK
 import arrow.core.test.UnitSpec
+import arrow.core.test.generators.GenK
 import arrow.core.test.generators.genK
 import arrow.core.test.laws.MonadCombineLaws
 import arrow.core.test.laws.MonadLogicLaws
@@ -31,13 +33,18 @@ import arrow.fx.mtl.statet.async.async
 import arrow.fx.test.eq.eqK
 import arrow.fx.test.generators.genK
 import arrow.fx.test.laws.AsyncLaws
+import arrow.mtl.ForStateT
 import arrow.mtl.Kleisli
 import arrow.mtl.KleisliPartialOf
 import arrow.mtl.StateT
 import arrow.mtl.StateTPartialOf
 import arrow.mtl.WriterT
 import arrow.mtl.WriterTPartialOf
+import arrow.mtl.eq.EqTrans
+import arrow.mtl.extensions.core.monadBaseControl
 import arrow.mtl.extensions.kleisli.monadReader.monadReader
+import arrow.mtl.extensions.monadBaseControl
+import arrow.mtl.extensions.monadTransControl
 import arrow.mtl.extensions.statet.applicative.applicative
 import arrow.mtl.extensions.statet.functor.functor
 import arrow.mtl.extensions.statet.monad.monad
@@ -49,11 +56,14 @@ import arrow.mtl.extensions.statet.monadWriter.monadWriter
 import arrow.mtl.extensions.statet.semigroupK.semigroupK
 import arrow.mtl.extensions.writert.eqK.eqK
 import arrow.mtl.extensions.writert.monadWriter.monadWriter
+import arrow.mtl.generators.GenTrans
 import arrow.mtl.test.eq.eqK
 import arrow.mtl.test.generators.genK
 import arrow.mtl.test.laws.MonadReaderLaws
 import arrow.mtl.test.laws.MonadStateLaws
 import arrow.mtl.test.laws.MonadWriterLaws
+import arrow.typeclasses.EqK
+import arrow.typeclasses.Monad
 import io.kotlintest.properties.Gen
 
 class StateTTests : UnitSpec() {
@@ -109,6 +119,25 @@ class StateTTests : UnitSpec() {
         String.monoid(), Gen.string(),
         StateT.genK(WriterT.genK(Id.genK(), Gen.string()), Gen.int()),
         StateT.eqK(WriterT.eqK(Id.eqK(), String.eq()), Int.eq(), 1), String.eq()
+      ),
+
+      MonadTransControlLaws.laws(
+        StateT.monadTransControl(),
+        object : GenTrans<Kind<ForStateT, Int>> {
+          override fun <F> liftGenK(MF: Monad<F>, genK: GenK<F>): GenK<Kind<Kind<ForStateT, Int>, F>> =
+            StateT.genK(genK, Gen.int())
+        },
+        object : EqTrans<Kind<ForStateT, Int>> {
+          override fun <F> liftEqK(MF: Monad<F>, eqK: EqK<F>): EqK<Kind<Kind<ForStateT, Int>, F>> =
+            StateT.eqK(eqK, Int.eq(), 1)
+        }
+      ),
+
+      MonadBaseControlLaws.laws<ForId, StateTPartialOf<Int, ForId>>(
+        StateT.monadBaseControl(Id.monadBaseControl()),
+        StateT.genK(Id.genK(), Gen.int()),
+        Id.genK(),
+        StateT.eqK(Id.eqK(), Int.eq(), 1)
       )
     )
   }

@@ -18,6 +18,7 @@ import arrow.core.extensions.option.alternative.alternative
 import arrow.core.extensions.option.eqK.eqK
 import arrow.core.extensions.option.monad.monad
 import arrow.core.test.UnitSpec
+import arrow.core.test.generators.GenK
 import arrow.core.test.generators.genK
 import arrow.core.test.generators.throwable
 import arrow.core.test.laws.AlternativeLaws
@@ -25,17 +26,18 @@ import arrow.core.test.laws.MonadErrorLaws
 import arrow.core.test.laws.MonadPlusLaws
 import arrow.core.toT
 import arrow.fx.IO
-import arrow.fx.extensions.io.monadIO.liftIO
 import arrow.fx.extensions.io.monadIO.monadIO
-import arrow.fx.mtl.monadIO
 import arrow.fx.fix
+import arrow.fx.mtl.accumt.monadIO.monadIO
 import arrow.fx.test.laws.equalUnderTheLaw
 import arrow.mtl.AccumT
 import arrow.mtl.AccumTPartialOf
+import arrow.mtl.ForAccumT
 import arrow.mtl.Kleisli
 import arrow.mtl.StateT
 import arrow.mtl.StateTPartialOf
 import arrow.mtl.WriterT
+import arrow.mtl.eq.EqTrans
 import arrow.mtl.extensions.accumt.alternative.alternative
 import arrow.mtl.extensions.accumt.functor.functor
 import arrow.mtl.extensions.accumt.monad.monad
@@ -43,18 +45,20 @@ import arrow.mtl.extensions.accumt.monadError.monadError
 import arrow.mtl.extensions.accumt.monadPlus.monadPlus
 import arrow.mtl.extensions.accumt.monadReader.monadReader
 import arrow.mtl.extensions.accumt.monadState.monadState
-import arrow.mtl.extensions.accumt.monadTrans.monadTrans
 import arrow.mtl.extensions.accumt.monadWriter.monadWriter
+import arrow.mtl.extensions.core.monadBaseControl
 import arrow.mtl.extensions.kleisli.monadReader.monadReader
+import arrow.mtl.extensions.monadBaseControl
+import arrow.mtl.extensions.monadTransControl
 import arrow.mtl.extensions.statet.monadState.monadState
 import arrow.mtl.extensions.writert.eqK.eqK
 import arrow.mtl.extensions.writert.monadWriter.monadWriter
 import arrow.mtl.fix
+import arrow.mtl.generators.GenTrans
 import arrow.mtl.test.eq.eqK
 import arrow.mtl.test.generators.genK
 import arrow.mtl.test.laws.MonadReaderLaws
 import arrow.mtl.test.laws.MonadStateLaws
-import arrow.mtl.test.laws.MonadTransLaws
 import arrow.mtl.test.laws.MonadWriterLaws
 import arrow.typeclasses.Eq
 import arrow.typeclasses.EqK
@@ -68,11 +72,21 @@ class AccumTTest : UnitSpec() {
   init {
 
     testLaws(
+      MonadTransControlLaws.laws(
+        AccumT.monadTransControl(String.monoid()),
+        object : GenTrans<Kind<ForAccumT, String>> {
+          override fun <F> liftGenK(MF: Monad<F>, genK: GenK<F>): GenK<Kind<Kind<ForAccumT, String>, F>> =
+            AccumT.genK(genK, Gen.string())
+        },
+        object : EqTrans<Kind<ForAccumT, String>> {
+          override fun <F> liftEqK(MF: Monad<F>, eqK: EqK<F>): EqK<Kind<Kind<ForAccumT, String>, F>> =
+            AccumT.eqK(eqK, String.eq(), "")
+        }
+      ),
 
-      MonadTransLaws.laws(
-        AccumT.monadTrans(String.monoid()),
-        Id.monad(),
-        AccumT.monad(String.monoid(), Id.monad()),
+      MonadBaseControlLaws.laws(
+        AccumT.monadBaseControl(Id.monadBaseControl(), String.monoid()),
+        AccumT.genK(Id.genK(), Gen.string()),
         Id.genK(),
         AccumT.eqK(Id.eqK(), String.eq(), "hello")
       ),
@@ -142,7 +156,7 @@ class AccumTTest : UnitSpec() {
     }
 
     "AccumT: monadIO" {
-      val accumT = AccumT.monadIO(IO.monadIO(), String.monoid()).run {
+      val accumT = AccumT.monadIO(String.monoid(), IO.monadIO()).run {
         IO.just(1).liftIO().fix()
       }
 

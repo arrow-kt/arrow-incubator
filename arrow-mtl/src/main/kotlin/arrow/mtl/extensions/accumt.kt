@@ -11,10 +11,15 @@ import arrow.mtl.AccumT
 import arrow.mtl.AccumTPartialOf
 import arrow.mtl.ForAccumT
 import arrow.mtl.fix
+import arrow.mtl.typeclasses.MonadBase
+import arrow.mtl.typeclasses.MonadBaseControl
 import arrow.mtl.typeclasses.MonadReader
 import arrow.mtl.typeclasses.MonadState
 import arrow.mtl.typeclasses.MonadTrans
+import arrow.mtl.typeclasses.MonadTransControl
 import arrow.mtl.typeclasses.MonadWriter
+import arrow.mtl.typeclasses.RunT
+import arrow.mtl.typeclasses.StT
 import arrow.typeclasses.Alternative
 import arrow.typeclasses.Applicative
 import arrow.typeclasses.ApplicativeError
@@ -77,7 +82,49 @@ interface AccumtTMonadTrans<S> : MonadTrans<Kind<ForAccumT, S>> {
         }
       }
     }
+
+  override fun <M> liftMonad(MM: Monad<M>): Monad<Kind<Kind<ForAccumT, S>, M>> = object : AccumTMonad<S, M> {
+    override fun MF(): Monad<M> = MM
+    override fun MS(): Monoid<S> = this@AccumtTMonadTrans.MS()
+  }
 }
+
+interface AccumTMonadTransControl<S> : MonadTransControl<Kind<ForAccumT, S>> {
+  fun MS(): Monoid<S>
+
+  override fun <M, A> liftWith(MM: Monad<M>, f: (RunT<Kind<ForAccumT, S>>) -> Kind<M, A>): Kind<Kind<Kind<ForAccumT, S>, M>, A> =
+    AccumT { s ->
+      MM.run {
+        f(object : RunT<Kind<ForAccumT, S>> {
+          override fun <M, A> invoke(MM: Monad<M>, fa: Kind<Kind<Kind<ForAccumT, S>, M>, A>): Kind<M, StT<Kind<ForAccumT, S>, A>> =
+            MM.run { fa.fix().runAccumT(s).map { StT<Kind<ForAccumT, S>, A>(it) } }
+        }).map { a -> MS().empty() toT a }
+      }
+    }
+
+  override fun <M, A> Kind<M, StT<Kind<ForAccumT, S>, A>>.restoreT(MM: Monad<M>): Kind<Kind<Kind<ForAccumT, S>, M>, A> =
+    AccumT { _: S -> MM.run { map { it.unsafeState as Tuple2<S, A> } } }
+
+  override fun <M> liftMonad(MM: Monad<M>): Monad<Kind<Kind<ForAccumT, S>, M>> = object : AccumTMonad<S, M> {
+    override fun MF(): Monad<M> = MM
+    override fun MS(): Monoid<S> = this@AccumTMonadTransControl.MS()
+  }
+}
+
+fun <S> AccumT.Companion.monadTransControl(MS: Monoid<S>): MonadTransControl<Kind<ForAccumT, S>> =
+  object : AccumTMonadTransControl<S> {
+    override fun MS(): Monoid<S> = MS
+  }
+
+fun <S, B, M> AccumT.Companion.monadBase(MBB: MonadBase<B, M>, MS: Monoid<S>): MonadBase<B, AccumTPartialOf<S, M>> =
+  MonadBase.defaultImpl(object : AccumtTMonadTrans<S> {
+    override fun MS(): Monoid<S> = MS
+  }, MBB)
+
+fun <S, B, M> AccumT.Companion.monadBaseControl(MBC: MonadBaseControl<B, M>, MS: Monoid<S>): MonadBaseControl<B, AccumTPartialOf<S, M>> =
+  MonadBaseControl.defaultImpl(object : AccumTMonadTransControl<S> {
+    override fun MS(): Monoid<S> = MS
+  }, MBC)
 
 @extension
 interface AccumTAlternative<S, F> : Alternative<AccumTPartialOf<S, F>>, AccumTApplicative<S, F> {

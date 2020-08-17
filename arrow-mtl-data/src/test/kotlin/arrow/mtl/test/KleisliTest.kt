@@ -21,6 +21,7 @@ import arrow.core.extensions.monoid
 import arrow.core.extensions.option.alternative.alternative
 import arrow.core.extensions.option.eqK.eqK
 import arrow.core.test.UnitSpec
+import arrow.core.test.generators.GenK
 import arrow.core.test.generators.genK
 import arrow.core.test.laws.AlternativeLaws
 import arrow.core.test.laws.DivisibleLaws
@@ -43,6 +44,8 @@ import arrow.mtl.StateT
 import arrow.mtl.StateTPartialOf
 import arrow.mtl.WriterT
 import arrow.mtl.WriterTPartialOf
+import arrow.mtl.eq.EqTrans
+import arrow.mtl.extensions.core.monadBaseControl
 import arrow.mtl.extensions.kleisli.alternative.alternative
 import arrow.mtl.extensions.kleisli.applicative.applicative
 import arrow.mtl.extensions.kleisli.divisible.divisible
@@ -50,9 +53,12 @@ import arrow.mtl.extensions.kleisli.monadLogic.monadLogic
 import arrow.mtl.extensions.kleisli.monadReader.monadReader
 import arrow.mtl.extensions.kleisli.monadState.monadState
 import arrow.mtl.extensions.kleisli.monadWriter.monadWriter
+import arrow.mtl.extensions.monadBaseControl
+import arrow.mtl.extensions.monadTransControl
 import arrow.mtl.extensions.statet.monadState.monadState
 import arrow.mtl.extensions.writert.eqK.eqK
 import arrow.mtl.extensions.writert.monadWriter.monadWriter
+import arrow.mtl.generators.GenTrans
 import arrow.mtl.test.eq.eqK
 import arrow.mtl.test.generators.genK
 import arrow.mtl.test.laws.MonadReaderLaws
@@ -61,6 +67,7 @@ import arrow.mtl.test.laws.MonadWriterLaws
 import arrow.mtl.extensions.kleisli.functor.functor
 import arrow.mtl.extensions.kleisli.monad.monad
 import arrow.typeclasses.EqK
+import arrow.typeclasses.Monad
 import io.kotlintest.properties.Gen
 import io.kotlintest.shouldBe
 
@@ -74,6 +81,21 @@ class KleisliTest : UnitSpec() {
     val constEQK: EqK<Kind<Kind<ForKleisli, Int>, Kind<ForConst, Int>>> = Kleisli.eqK(Const.eqK(Int.eq()), 1)
 
     testLaws(
+      MonadTransControlLaws.laws(
+        Kleisli.monadTransControl(),
+        object : GenTrans<Kind<ForKleisli, Int>> {
+          override fun <F> liftGenK(MF: Monad<F>, genK: GenK<F>): GenK<Kind<Kind<ForKleisli, Int>, F>> = Kleisli.genK(genK)
+        },
+        object : EqTrans<Kind<ForKleisli, Int>> {
+          override fun <F> liftEqK(MF: Monad<F>, eqK: EqK<F>): EqK<Kind<Kind<ForKleisli, Int>, F>> = Kleisli.eqK(eqK, 1)
+        }
+      ),
+      MonadBaseControlLaws.laws<ForId, KleisliPartialOf<Int, ForId>>(
+        Kleisli.monadBaseControl(Id.monadBaseControl()),
+        Kleisli.genK(Id.genK()),
+        Id.genK(),
+        Kleisli.eqK(Id.eqK(), 1)
+      ),
       AlternativeLaws.laws(
         Kleisli.alternative<Int, ForOption>(Option.alternative()),
         Kleisli.genK<Int, ForOption>(Option.genK()),
