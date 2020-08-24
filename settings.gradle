@@ -1,4 +1,4 @@
-apply from: "$SETTINGS_CONF"
+apply from: "$SETTINGS"
 
 rootProject.name = 'arrow-incubator-lib'
 
