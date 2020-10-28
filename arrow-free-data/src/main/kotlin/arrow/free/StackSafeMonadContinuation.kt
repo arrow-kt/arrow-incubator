@@ -36,7 +36,8 @@ open class StackSafeMonadContinuation<F, A>(M: Monad<F>, override val context: C
 
   internal fun returnedMonad(): Free<F, A> = returnedMonad
 
-  override suspend fun <B> Kind<F, B>.bind(): B = Free.liftF(this).bind()
+  override suspend fun <A> Kind<F, A>.invoke(): A =
+    Free.liftF(this).bind()
 
   override suspend fun <B> Free<F, B>.bind(): B = suspendCoroutineUninterceptedOrReturn { c ->
     val labelHere = c.stateStack // save the whole coroutine stack labels
