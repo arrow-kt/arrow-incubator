@@ -73,7 +73,7 @@ import arrow.core.computations.either
 
 fun getCountryCode(maybePerson : Either<BizError, Person>): Either<BizError, String> =
   either.eager<BizError, String> {
-    val person = maybePerson.bind()
+    val person = maybePerson.bind
     val address = person.address.toEither { AddressNotFound(person.id) }()
     val country = address.country.toEither { CountryNotFound(address.id)}()
     country.code
