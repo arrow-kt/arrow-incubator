@@ -66,7 +66,7 @@ interface EitherTBracket<L, F> : Bracket<EitherTPartialOf<L, F>, Throwable>, Eit
                 just(Unit)
               })
             }
-            else -> release(either.b, exitCase).value().unit()
+            else -> release(either.b, exitCase).value().void()
           }
           is Either.Left -> just(Unit)
         }
@@ -105,7 +105,7 @@ interface EitherTAsync<L, F> : Async<EitherTPartialOf<L, F>>, EitherTMonadDefer<
   }
 
   override fun <A> asyncF(k: ProcF<EitherTPartialOf<L, F>, A>): EitherT<L, F, A> = ASF().run {
-    EitherT.liftF(this, asyncF { cb -> k(cb).value().unit() })
+    EitherT.liftF(this, asyncF { cb -> k(cb).value().void() })
   }
 
   override fun <A> EitherTOf<L, F, A>.continueOn(ctx: CoroutineContext): EitherT<L, F, A> = ASF().run {

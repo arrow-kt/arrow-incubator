@@ -55,7 +55,7 @@ interface WriterTBracket<W, F> : Bracket<WriterTPartialOf<W, F>, Throwable>, Wri
           val r = release(wa.b, exitCase).value()
           when (exitCase) {
             is ExitCase.Completed -> r.flatMap { (l, _) -> ref.set(l) }
-            else -> r.unit()
+            else -> r.void()
           }
         }).flatMap { (w, b) ->
           ref.get().map { ww -> Tuple2(w.combine(ww), b) }
@@ -92,7 +92,7 @@ interface WriterTAsync<W, F> : Async<WriterTPartialOf<W, F>>, WriterTMonadDefer<
   }
 
   override fun <A> asyncF(k: ProcF<WriterTPartialOf<W, F>, A>): WriterTOf<W, F, A> = AS().run {
-    WriterT.liftF(asyncF { cb -> k(cb).value().unit() }, MM(), this)
+    WriterT.liftF(asyncF { cb -> k(cb).value().void() }, MM(), this)
   }
 
   override fun <A> WriterTOf<W, F, A>.continueOn(ctx: CoroutineContext): WriterT<W, F, A> = AS().run {

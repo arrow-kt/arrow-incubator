@@ -60,7 +60,7 @@ interface OptionTBracket<F> : Bracket<OptionTPartialOf<F>, Throwable>, OptionTMo
               is ExitCase.Completed -> release(a, exitCase).value().flatMap {
                 it.fold({ ref.set(true) }, { just(Unit) })
               }
-              else -> release(a, exitCase).value().unit()
+              else -> release(a, exitCase).value().void()
             }
           }
         )
@@ -97,7 +97,7 @@ interface OptionTAsync<F> : Async<OptionTPartialOf<F>>, OptionTMonadDefer<F> {
   }
 
   override fun <A> asyncF(k: ProcF<OptionTPartialOf<F>, A>): OptionT<F, A> = AS().run {
-    OptionT.liftF(this, asyncF { cb -> k(cb).value().unit() })
+    OptionT.liftF(this, asyncF { cb -> k(cb).value().void() })
   }
 
   override fun <A> OptionTOf<F, A>.continueOn(ctx: CoroutineContext): OptionT<F, A> = AS().run {
