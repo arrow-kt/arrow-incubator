@@ -56,14 +56,6 @@ class ReflectionTests : UnitSpec() {
       TypeClass(Bogus::class).supportedDataTypes().isEmpty() shouldBe true
     }
 
-    "A known instance is found in the data type extensions list" {
-      DataType(Either::class).extensions().contains(TypeClassExtension(
-        DataType(Either::class),
-        TypeClass(MonadError::class),
-        Extension(EitherMonadError::class)
-      )) shouldBe true
-    }
-
     "We can determine a known type class hierarchy" {
       TypeClass(Functor::class).hierarchy() shouldBe listOf(
         TypeClass(Functor::class).extends(TypeClass(Invariant::class))
