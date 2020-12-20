@@ -1,12 +1,8 @@
 package arrow.reflect.tests
 
-import arrow.core.Either
 import arrow.core.Option
-import arrow.core.extensions.EitherMonadError
 import arrow.reflect.DataType
-import arrow.reflect.Extension
 import arrow.reflect.TypeClass
-import arrow.reflect.TypeClassExtension
 import arrow.reflect.extends
 import arrow.reflect.extensions
 import arrow.reflect.hierarchy
@@ -15,7 +11,6 @@ import arrow.reflect.supportedTypeClasses
 import arrow.core.test.UnitSpec
 import arrow.typeclasses.Functor
 import arrow.typeclasses.Invariant
-import arrow.typeclasses.MonadError
 import io.kotlintest.shouldBe
 
 object Bogus
