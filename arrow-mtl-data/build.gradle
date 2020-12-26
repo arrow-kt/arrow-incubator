@@ -15,7 +15,6 @@ dependencies {
     testImplementation project(":arrow-fx-mtl")
     testImplementation project(":arrow-incubator-test")
     testImplementation "io.arrow-kt:arrow-fx-test:$VERSION_NAME"
-    testImplementation "io.arrow-kt:arrow-core-test:$VERSION_NAME"
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
     testRuntimeOnly "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION", excludeArrow
 }
