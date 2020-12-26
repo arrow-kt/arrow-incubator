@@ -13,10 +13,8 @@ dependencies {
     compile "io.arrow-kt:arrow-core:$VERSION_NAME"
     kapt "io.arrow-kt:arrow-meta:$VERSION_NAME"
     kaptTest "io.arrow-kt:arrow-meta:$VERSION_NAME"
-    compileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME"
-    testCompileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME"
-    testRuntime "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
-    testCompile "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION", excludeArrow
-    testCompile project(":arrow-incubator-test")
-    testCompile project(":arrow-recursion")
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
+    testImplementation "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION", excludeArrow
+    testImplementation project(":arrow-incubator-test")
+    testImplementation project(":arrow-recursion")
 }

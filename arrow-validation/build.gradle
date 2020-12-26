@@ -9,11 +9,11 @@ apply from: "$DOC_CREATION"
 
 dependencies {
     compileOnly "io.arrow-kt:arrow-core:$VERSION_NAME"
-    compileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME"
     kapt "io.arrow-kt:arrow-meta:$VERSION_NAME"
     kaptTest "io.arrow-kt:arrow-meta:$VERSION_NAME"
-    testCompile project(":arrow-incubator-test")
-    testCompileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME"
-    testCompile "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION", excludeArrow
-    testRuntime "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
+    testCompileOnly "io.arrow-kt:arrow-core:$VERSION_NAME"
+    testImplementation "io.arrow-kt:arrow-core-test:$VERSION_NAME"
+    testImplementation project(':arrow-incubator-test')
+    testCompileOnly "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION", excludeArrow
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
 }

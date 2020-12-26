@@ -10,14 +10,12 @@ apply from: "$DOC_CREATION"
 dependencies {
     compile "io.arrow-kt:arrow-core:$VERSION_NAME"
     kapt "io.arrow-kt:arrow-meta:$VERSION_NAME"
-    kaptTest "io.arrow-kt:arrow-meta:$VERSION_NAME"
-    compileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME"
-    testCompileOnly "io.arrow-kt:arrow-meta:$VERSION_NAME"
-    testCompile "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION", excludeArrow
-    testCompile project(":arrow-incubator-test")
-    testCompile "io.arrow-kt:arrow-syntax:$VERSION_NAME"
-    testCompile project(":arrow-mtl")
-    testCompile project(":arrow-fx-mtl")
-    testCompile "io.arrow-kt:arrow-fx-test:$VERSION_NAME"
-    testRuntime "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
+    testCompileOnly "io.arrow-kt:arrow-fx:$VERSION_NAME"
+    testImplementation project(":arrow-mtl")
+    testImplementation project(":arrow-fx-mtl")
+    testImplementation project(":arrow-incubator-test")
+    testImplementation "io.arrow-kt:arrow-fx-test:$VERSION_NAME"
+    testImplementation "io.arrow-kt:arrow-core-test:$VERSION_NAME"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
+    testRuntimeOnly "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION", excludeArrow
 }
