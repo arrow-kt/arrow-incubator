@@ -8,11 +8,11 @@ apply from: "$SUB_PROJECT"
 dependencies {
     api "io.arrow-kt:arrow-core-test:$VERSION_NAME", excludeArrow
 
-    compile project(":arrow-mtl-data")
-    compile project(":arrow-free-data")
-    compile project(":arrow-recursion-data")
-    compile "io.arrow-kt:arrow-fx:$VERSION_NAME"
-    compile "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION", excludeArrow
+    compileOnly project(":arrow-mtl-data")
+    compileOnly project(":arrow-free-data")
+    compileOnly project(":arrow-recursion-data")
+    compileOnly "io.arrow-kt:arrow-fx:$VERSION_NAME"
+    testCompileOnly "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION", excludeArrow
 
-    testRuntime "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
 }
