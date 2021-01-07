@@ -245,8 +245,8 @@ safe.
 #### Typeclasses
 
 - [Recursive]({{ '/recursion/recursive' | relative_url }})
-- [Corecursive]({{ '/recursion/recursive' | relative_url }})
-- [Birecursive]({{ '/recursion/recursive' | relative_url }})
+- [Corecursive]({{ '/recursion/corecursive' | relative_url }})
+- [Birecursive]({{ '/recursion/birecursive' | relative_url }})
 
 #### Datatypes
 
