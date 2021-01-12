@@ -1,11 +1,10 @@
 package arrow.free
 
-import arrow.core.ForFunction0
-import arrow.core.Function0
+import arrow.core.ForEval
+import arrow.core.Eval
 import arrow.core.FunctionK
-import arrow.core.extensions.function0.monad.monad
+import arrow.core.extensions.eval.monad.monad
 import arrow.core.fix
-import arrow.core.invoke
 
 /**
  * Trampoline is often used to emulate tail recursion. The idea is to have some step code that can be trampolined itself
@@ -14,17 +13,17 @@ import arrow.core.invoke
  * returned as the overall result value for the whole function chain. That means Trampoline emulates what tail recursion
  * does.
  */
-typealias TrampolineF<A> = Free<ForFunction0, A>
+typealias TrampolineF<A> = Free<ForEval, A>
 
 object Trampoline : TrampolineFunctions
 
 interface TrampolineFunctions {
 
-  fun <A> done(a: A): TrampolineF<A> = Free.just<ForFunction0, A>(a)
+  fun <A> done(a: A): TrampolineF<A> = Free.just(a)
 
   fun <A> defer(a: () -> TrampolineF<A>): TrampolineF<A> = Free.defer(a)
 
   fun <A> later(a: () -> A): TrampolineF<A> = defer { done(a()) }
 }
 
-fun <A> TrampolineF<A>.runT(): A = this.foldMap(FunctionK.id(), Function0.monad()).fix().invoke()
+fun <A> TrampolineF<A>.runT(): A = this.foldMap(FunctionK.id(), Eval.monad()).fix().value()
