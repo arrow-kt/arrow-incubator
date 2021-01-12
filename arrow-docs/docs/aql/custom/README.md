@@ -314,7 +314,7 @@ println(composition.value())
 Learn more about the `AQL` combinators
 
 - [_select_]({{'/aql/select/' | relative_url }})
-- [_from_]({{'/aql/select/' | relative_url }})
+- [_from_]({{'/aql/from/' | relative_url }})
 - [_where_]({{'/aql/where/' | relative_url }})
 - [_groupBy_]({{'/aql/groupby/' | relative_url }})
 - [_orderBy_]({{'/aql/orderby/' | relative_url }})
