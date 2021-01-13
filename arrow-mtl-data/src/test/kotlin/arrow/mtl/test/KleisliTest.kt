@@ -4,22 +4,20 @@ import arrow.Kind
 import arrow.core.Const
 import arrow.core.ConstPartialOf
 import arrow.core.ForConst
-import arrow.core.ForId
 import arrow.core.ForListK
 import arrow.core.ForOption
-import arrow.core.Id
 import arrow.core.ListK
 import arrow.core.Option
+import arrow.core.Some
 import arrow.core.extensions.const.divisible.divisible
 import arrow.core.extensions.const.eqK.eqK
 import arrow.core.extensions.eq
-import arrow.core.extensions.id.eqK.eqK
-import arrow.core.extensions.id.monad.monad
 import arrow.core.extensions.listk.eqK.eqK
 import arrow.core.extensions.listk.monadLogic.monadLogic
 import arrow.core.extensions.monoid
 import arrow.core.extensions.option.alternative.alternative
 import arrow.core.extensions.option.eqK.eqK
+import arrow.core.extensions.option.monad.monad
 import arrow.core.test.UnitSpec
 import arrow.core.test.generators.genK
 import arrow.core.test.laws.AlternativeLaws
@@ -98,32 +96,32 @@ class KleisliTest : UnitSpec() {
         Kleisli.genK<Int, ForListK>(ListK.genK()),
         Kleisli.eqK(ListK.eqK(), 0)
       ),
-      MonadReaderLaws.laws<KleisliPartialOf<Int, ForId>, Int>(
-        Kleisli.monadReader(Id.monad()),
-        Kleisli.genK(Id.genK()),
+      MonadReaderLaws.laws<KleisliPartialOf<Int, ForOption>, Int>(
+        Kleisli.monadReader(Option.monad()),
+        Kleisli.genK(Option.genK()),
         Gen.int(),
-        Kleisli.eqK(Id.eqK(), 1),
+        Kleisli.eqK(Option.eqK(), 1),
         Int.eq()
       ),
       MonadWriterLaws.laws(
-        Kleisli.monadWriter<Int, WriterTPartialOf<String, ForId>, String>(WriterT.monadWriter(Id.monad(), String.monoid())),
+        Kleisli.monadWriter<Int, WriterTPartialOf<String, ForOption>, String>(WriterT.monadWriter(Option.monad(), String.monoid())),
         String.monoid(), Gen.string(),
-        Kleisli.genK<Int, WriterTPartialOf<String, ForId>>(WriterT.genK(Id.genK(), Gen.string())),
-        Kleisli.eqK(WriterT.eqK(Id.eqK(), String.eq()), 1), String.eq()
+        Kleisli.genK<Int, WriterTPartialOf<String, ForOption>>(WriterT.genK(Option.genK(), Gen.string())),
+        Kleisli.eqK(WriterT.eqK(Option.eqK(), String.eq()), 1), String.eq()
       ),
       MonadStateLaws.laws(
-        Kleisli.monadState<Int, StateTPartialOf<Int, ForId>, Int>(StateT.monadState(Id.monad())),
-        Kleisli.genK<Int, StateTPartialOf<Int, ForId>>(StateT.genK(Id.genK(), Gen.int())),
-        Gen.int(), Kleisli.eqK(StateT.eqK(Id.eqK(), Int.eq(), 0), 1), Int.eq()
+        Kleisli.monadState<Int, StateTPartialOf<Int, ForOption>, Int>(StateT.monadState(Option.monad())),
+        Kleisli.genK<Int, StateTPartialOf<Int, ForOption>>(StateT.genK(Option.genK(), Gen.int())),
+        Gen.int(), Kleisli.eqK(StateT.eqK(Option.eqK(), Int.eq(), 0), 1), Int.eq()
       )
     )
 
     "andThen should continue sequence" {
-      val kleisli: Kleisli<Int, ForId, Int> = Kleisli { a: Int -> Id(a) }
+      val kleisli: Kleisli<Int, ForOption, Int> = Kleisli { a: Int -> Some(a) }
 
-      kleisli.andThen(Id.monad(), Id(3)).run(0) shouldBe Id(3)
+      kleisli.andThen(Option.monad(), Some(3)).run(0) shouldBe Some(3)
 
-      kleisli.andThen(Id.monad()) { b -> Id(b + 1) }.run(0) shouldBe Id(1)
+      kleisli.andThen(Option.monad()) { b -> Some(b + 1) }.run(0) shouldBe Some(1)
     }
   }
 }

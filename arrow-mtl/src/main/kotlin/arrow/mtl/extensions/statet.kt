@@ -6,24 +6,16 @@ import arrow.core.AndThen
 import arrow.core.Either
 import arrow.core.Eval
 import arrow.core.Eval.Now
-import arrow.core.ForId
-import arrow.core.Id
 import arrow.core.Option
 import arrow.core.Tuple2
-import arrow.core.extensions.id.monad.monad
 import arrow.core.left
 import arrow.core.right
 import arrow.core.toT
 import arrow.extension
 import arrow.mtl.ForStateT
-import arrow.mtl.State
-import arrow.mtl.StateApi
-import arrow.mtl.StatePartialOf
 import arrow.mtl.StateT
 import arrow.mtl.StateTOf
 import arrow.mtl.StateTPartialOf
-import arrow.mtl.extensions.statet.applicative.applicative
-import arrow.mtl.extensions.statet.functor.functor
 import arrow.mtl.extensions.statet.monad.monad
 import arrow.mtl.fix
 import arrow.mtl.run
@@ -217,26 +209,8 @@ interface StateTDecidableInstante<S, F> : Decidable<StateTPartialOf<S, F>>, Stat
     })
 }
 
-/**
- * Alias for[StateT.Companion.applicative]
- */
-fun <S> StateApi.applicative(): Applicative<StateTPartialOf<S, ForId>> = StateT.applicative(Id.monad())
-
-/**
- * Alias for [StateT.Companion.functor]
- */
-fun <S> StateApi.functor(): Functor<StateTPartialOf<S, ForId>> = StateT.functor(Id.monad())
-
-/**
- * Alias for [StateT.Companion.monad]
- */
-fun <S> StateApi.monad(): Monad<StateTPartialOf<S, ForId>> = StateT.monad(Id.monad())
-
 fun <S, F, A> StateT.Companion.fx(M: Monad<F>, c: suspend MonadSyntax<StateTPartialOf<S, F>>.() -> A): StateT<S, F, A> =
   StateT.monad<S, F>(M).fx.monad(c).fix()
-
-fun <S, A> StateApi.fx(c: suspend MonadSyntax<StatePartialOf<S>>.() -> A): State<S, A> =
-  StateApi.monad<S>().fx.monad(c).fix()
 
 @extension
 interface StateTMonadCombine<S, F> : MonadCombine<StateTPartialOf<S, F>>, StateTMonad<S, F>, StateTAlternative<S, F> {

@@ -1,8 +1,7 @@
 package arrow.free
 
 import arrow.Kind
-import arrow.core.ForId
-import arrow.core.Id
+import arrow.core.ForOption
 import arrow.core.NonEmptyList
 import arrow.core.Option
 import arrow.core.Some
@@ -11,6 +10,7 @@ import arrow.core.extensions.id.applicative.applicative
 import arrow.core.extensions.id.monad.monad
 import arrow.core.extensions.nonemptylist.applicative.applicative
 import arrow.core.extensions.option.applicative.applicative
+import arrow.core.extensions.option.monad.monad
 import arrow.core.fix
 import arrow.free.extensions.FreeApplicativeApplicative
 import arrow.free.extensions.FreeApplicativeEq
@@ -48,12 +48,12 @@ class FreeApplicativeTest : UnitSpec() {
 
   init {
 
-    val EQ: FreeApplicativeEq<OpsAp.F, ForId, Int> = FreeApplicative.eq(Id.monad(), idApInterpreter)
+    val EQ: FreeApplicativeEq<OpsAp.F, ForOption, Int> = FreeApplicative.eq(Option.monad(), optionApInterpreter)
 
     fun EQK() = object : EqK<FreeApplicativePartialOf<OpsAp.F>> {
       override fun <A> Kind<FreeApplicativePartialOf<OpsAp.F>, A>.eqK(other: Kind<FreeApplicativePartialOf<OpsAp.F>, A>, EQ: Eq<A>): Boolean =
         (this.fix() to other.fix()).let {
-          val EQ: FreeApplicativeEq<OpsAp.F, ForId, A> = FreeApplicative.eq(Id.monad(), idApInterpreter)
+          val EQ: FreeApplicativeEq<OpsAp.F, ForOption, A> = FreeApplicative.eq(Option.monad(), optionApInterpreter)
 
           EQ.run {
             it.first.eqv(it.second)
@@ -75,7 +75,6 @@ class FreeApplicativeTest : UnitSpec() {
     "Can interpret an ADT as FreeApplicative operations" {
       val result: Tuple3<Int, Int, Int> = Tuple3(1, 7, -1)
       program.foldMap(optionApInterpreter, Option.applicative()).fix() shouldBe Some(result)
-      program.foldMap(idApInterpreter, Id.applicative()).fix() shouldBe Id(result)
       program.foldMap(nonEmptyListApInterpreter, NonEmptyList.applicative()).fix() shouldBe NonEmptyList.of(result)
     }
 

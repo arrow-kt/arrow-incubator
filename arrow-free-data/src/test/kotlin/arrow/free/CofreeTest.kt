@@ -3,10 +3,8 @@ package arrow.free
 import arrow.Kind
 import arrow.core.Eval
 import arrow.core.ForEval
-import arrow.core.ForId
 import arrow.core.ForOption
 import arrow.core.FunctionK
-import arrow.core.Id
 import arrow.core.ListK
 import arrow.core.Nel
 import arrow.core.NonEmptyList
@@ -16,7 +14,6 @@ import arrow.core.Some
 import arrow.core.extensions.eval.applicative.applicative
 import arrow.core.extensions.eval.functor.functor
 import arrow.core.extensions.eval.monad.monad
-import arrow.core.extensions.id.functor.functor
 import arrow.core.extensions.listk.functor.functor
 import arrow.core.extensions.option.functor.functor
 import arrow.core.extensions.option.traverse.traverse
@@ -63,7 +60,7 @@ class CofreeTest : UnitSpec() {
 
     "tailForced should evaluate and return" {
       val sideEffect = SideEffect()
-      val start: Cofree<ForId, Int> = unfold(Id.functor(), sideEffect.counter) { sideEffect.increment(); Id(it + 1) }
+      val start: Cofree<ForEval, Int> = unfold(Eval.functor(), sideEffect.counter) { sideEffect.increment(); Eval.now(it + 1) }
       sideEffect.counter shouldBe 0
       start.tailForced()
       sideEffect.counter shouldBe 1
@@ -71,7 +68,7 @@ class CofreeTest : UnitSpec() {
 
     "runTail should run once and return" {
       val sideEffect = SideEffect()
-      val start: Cofree<ForId, Int> = unfold(Id.functor(), sideEffect.counter) { sideEffect.increment(); Id(it) }
+      val start: Cofree<ForEval, Int> = unfold(Eval.functor(), sideEffect.counter) { sideEffect.increment(); Eval.now(it) }
       sideEffect.counter shouldBe 0
       start.runTail()
       sideEffect.counter shouldBe 1

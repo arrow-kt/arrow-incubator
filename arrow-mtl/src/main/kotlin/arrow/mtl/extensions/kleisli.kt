@@ -6,21 +6,14 @@ import arrow.core.AndThen
 import arrow.core.Either
 import arrow.core.Eval
 import arrow.core.Eval.Now
-import arrow.core.Id
 import arrow.core.Option
 import arrow.core.Tuple2
-import arrow.core.extensions.id.applicative.applicative
-import arrow.core.extensions.id.functor.functor
 import arrow.core.toT
 import arrow.extension
 import arrow.mtl.ForKleisli
 import arrow.mtl.Kleisli
 import arrow.mtl.KleisliOf
 import arrow.mtl.KleisliPartialOf
-import arrow.mtl.ReaderApi
-import arrow.mtl.ReaderPartialOf
-import arrow.mtl.extensions.kleisli.applicative.applicative
-import arrow.mtl.extensions.kleisli.functor.functor
 import arrow.mtl.extensions.kleisli.monad.monad
 import arrow.mtl.fix
 import arrow.mtl.run
@@ -233,16 +226,6 @@ interface KleisliMonadState<D, F, S> : MonadState<KleisliPartialOf<D, F>, S>, Kl
   override fun get(): Kind<KleisliPartialOf<D, F>, S> = Kleisli.liftF(MS().get())
   override fun set(s: S): Kind<KleisliPartialOf<D, F>, Unit> = Kleisli.liftF(MS().set(s))
 }
-
-/**
- * Alias for [Kleisli] for [Id]
- */
-fun <D> ReaderApi.functor(): Functor<ReaderPartialOf<D>> = Kleisli.functor(Id.functor())
-
-/**
- * Alias for [Kleisli] for [Id]
- */
-fun <D> ReaderApi.applicative(): Applicative<ReaderPartialOf<D>> = Kleisli.applicative(Id.applicative())
 
 fun <D, F, A> Kleisli.Companion.fx(MF: Monad<F>, c: suspend MonadSyntax<KleisliPartialOf<D, F>>.() -> A): Kleisli<D, F, A> =
   Kleisli.monad<D, F>(MF).fx.monad(c).fix()

@@ -19,7 +19,7 @@ import arrow.aql.extensions.list.select.*
 import arrow.aql.extensions.list.where.*
 import arrow.aql.extensions.list.sum.*
 import arrow.aql.extensions.listk.select.selectAll
-import arrow.aql.extensions.id.select.value
+import arrow.aql.extensions.eval.select.value
 
 data class Student(val name: String, val age: Int)
 

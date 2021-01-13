@@ -2,18 +2,14 @@ package arrow.mtl.test
 
 import arrow.core.Const
 import arrow.core.ConstPartialOf
-import arrow.core.ForId
 import arrow.core.ForListK
 import arrow.core.ForOption
-import arrow.core.Id
 import arrow.core.ListK
 import arrow.core.Option
 import arrow.core.extensions.const.divisible.divisible
 import arrow.core.extensions.const.eqK.eqK
 import arrow.core.extensions.eq
 import arrow.core.extensions.listk.alternative.alternative
-import arrow.core.extensions.id.eqK.eqK
-import arrow.core.extensions.id.monad.monad
 import arrow.core.extensions.listk.eq.eq
 import arrow.core.extensions.listk.eqK.eqK
 import arrow.core.extensions.listk.monad.monad
@@ -36,20 +32,21 @@ import arrow.core.test.laws.MonadPlusLaws
 import arrow.core.test.laws.MonoidKLaws
 import arrow.fx.ForIO
 import arrow.fx.IO
-import arrow.fx.test.eq.eqK
-import arrow.mtl.Kleisli
-import arrow.mtl.KleisliPartialOf
-import arrow.mtl.StateT
-import arrow.mtl.StateTPartialOf
 import arrow.fx.extensions.io.applicative.applicative
 import arrow.fx.extensions.io.concurrent.concurrent
 import arrow.fx.extensions.io.functor.functor
 import arrow.fx.extensions.io.monad.monad
 import arrow.fx.mtl.concurrent
 import arrow.fx.mtl.timer
+import arrow.fx.test.eq.eqK
 import arrow.fx.test.generators.genK
 import arrow.fx.test.laws.ConcurrentLaws
+import arrow.mtl.Kleisli
+import arrow.mtl.KleisliPartialOf
+import arrow.mtl.StateT
+import arrow.mtl.StateTPartialOf
 import arrow.mtl.WriterT
+import arrow.mtl.WriterTPartialOf
 import arrow.mtl.extensions.WriterTEqK
 import arrow.mtl.extensions.kleisli.monadReader.monadReader
 import arrow.mtl.extensions.statet.monadState.monadState
@@ -73,7 +70,6 @@ import arrow.mtl.test.laws.MonadStateLaws
 import arrow.mtl.test.laws.MonadTransLaws
 import arrow.mtl.test.laws.MonadWriterLaws
 import io.kotlintest.properties.Gen
-import arrow.mtl.WriterTPartialOf
 
 class WriterTTest : UnitSpec() {
 
@@ -152,15 +148,15 @@ class WriterTTest : UnitSpec() {
         WriterT.eqK(ListK.eqK(), String.eq())
       ),
       MonadReaderLaws.laws(
-        WriterT.monadReader<String, KleisliPartialOf<Int, ForId>, Int>(Kleisli.monadReader(Id.monad()), String.monoid()),
-        WriterT.genK(Kleisli.genK<Int, ForId>(Id.genK()), Gen.string()), Gen.int(),
-        WriterT.eqK(Kleisli.eqK(Id.eqK(), 1), String.eq()), Int.eq()
+        WriterT.monadReader<String, KleisliPartialOf<Int, ForOption>, Int>(Kleisli.monadReader(Option.monad()), String.monoid()),
+        WriterT.genK(Kleisli.genK<Int, ForOption>(Option.genK()), Gen.string()), Gen.int(),
+        WriterT.eqK(Kleisli.eqK(Option.eqK(), 1), String.eq()), Int.eq()
       ),
 
       MonadStateLaws.laws(
-        WriterT.monadState<String, StateTPartialOf<Int, ForId>, Int>(StateT.monadState(Id.monad()), String.monoid()),
-        WriterT.genK(StateT.genK(Id.genK(), Gen.int()), Gen.string()), Gen.int(),
-        WriterT.eqK(StateT.eqK(Id.eqK(), Int.eq(), 1), String.eq()), Int.eq()
+        WriterT.monadState<String, StateTPartialOf<Int, ForOption>, Int>(StateT.monadState(Option.monad()), String.monoid()),
+        WriterT.genK(StateT.genK(Option.genK(), Gen.int()), Gen.string()), Gen.int(),
+        WriterT.eqK(StateT.eqK(Option.eqK(), Int.eq(), 1), String.eq()), Int.eq()
       )
     )
   }

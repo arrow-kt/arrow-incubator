@@ -1,9 +1,9 @@
 package arrow.aql
 
-import arrow.core.ForId
+import arrow.core.ForEval
 import arrow.core.identity
 import arrow.core.value
-import arrow.core.extensions.id.applicative.just
+import arrow.core.extensions.eval.applicative.just
 import arrow.typeclasses.Foldable
 import arrow.typeclasses.Order
 
@@ -27,7 +27,7 @@ interface OrderBy<F> {
     }
   }
 
-  infix fun <A, Z> Query<F, A, Z>.orderBy(ord: Ord<Z>): Query<ForId, List<Z>, List<Z>> =
+  infix fun <A, Z> Query<F, A, Z>.orderBy(ord: Ord<Z>): Query<ForEval, List<Z>, List<Z>> =
     foldable().run {
       Query(
         select = ::identity,
@@ -37,7 +37,7 @@ interface OrderBy<F> {
       )
     }
 
-  infix fun <X, Z> Query<ForId, Map<X, List<Z>>, Map<X, List<Z>>>.orderMap(ord: Ord<X>): Query<ForId, Map<X, List<Z>>, Map<X, List<Z>>> {
+  infix fun <X, Z> Query<ForEval, Map<X, List<Z>>, Map<X, List<Z>>>.orderMap(ord: Ord<X>): Query<ForEval, Map<X, List<Z>>, Map<X, List<Z>>> {
     val sortedMap = from.value().toSortedMap(kotlin.Comparator { o1, o2 ->
       val result = ord.order.run { o1.compareTo(o2) }
       when (ord) {
@@ -51,9 +51,9 @@ interface OrderBy<F> {
     )
   }
 
-  fun <Z> Query<ForId, List<Z>, List<Z>>.value(): List<Z> =
+  fun <Z> Query<ForEval, List<Z>, List<Z>>.value(): List<Z> =
     this@value.from.value()
 
-  fun <Z, X> Query<ForId, Map<X, List<Z>>, Map<X, List<Z>>>.value(dummy: Unit = Unit): Map<X, List<Z>> =
+  fun <Z, X> Query<ForEval, Map<X, List<Z>>, Map<X, List<Z>>>.value(dummy: Unit = Unit): Map<X, List<Z>> =
     this@value.from.value()
 }

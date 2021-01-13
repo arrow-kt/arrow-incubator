@@ -3,16 +3,13 @@ package arrow.mtl.test
 import arrow.Kind
 import arrow.core.Either
 import arrow.core.EitherPartialOf
-import arrow.core.ForId
-import arrow.core.Id
+import arrow.core.ForOption
 import arrow.core.Option
 import arrow.core.extensions.either.eqK.eqK
 import arrow.core.extensions.either.functor.functor
 import arrow.core.extensions.either.monad.monad
 import arrow.core.extensions.either.monadError.monadError
 import arrow.core.extensions.eq
-import arrow.core.extensions.id.eqK.eqK
-import arrow.core.extensions.id.monad.monad
 import arrow.core.extensions.monoid
 import arrow.core.extensions.option.alternative.alternative
 import arrow.core.extensions.option.eqK.eqK
@@ -71,10 +68,10 @@ class AccumTTest : UnitSpec() {
 
       MonadTransLaws.laws(
         AccumT.monadTrans(String.monoid()),
-        Id.monad(),
-        AccumT.monad(String.monoid(), Id.monad()),
-        Id.genK(),
-        AccumT.eqK(Id.eqK(), String.eq(), "hello")
+        Option.monad(),
+        AccumT.monad(String.monoid(), Option.monad()),
+        Option.genK(),
+        AccumT.eqK(Option.eqK(), String.eq(), "hello")
       ),
 
       AlternativeLaws.laws(
@@ -93,25 +90,25 @@ class AccumTTest : UnitSpec() {
       ),
 
       MonadStateLaws.laws(
-        AccumT.monadState<Int, Int, StateTPartialOf<Int, ForId>>(StateT.monadState(Id.monad()), Int.monoid()),
-        AccumT.genK(StateT.genK(Id.genK(), Gen.int()), Gen.int()),
+        AccumT.monadState<Int, Int, StateTPartialOf<Int, ForOption>>(StateT.monadState(Option.monad()), Int.monoid()),
+        AccumT.genK(StateT.genK(Option.genK(), Gen.int()), Gen.int()),
         Gen.int(),
-        AccumT.eqK(StateT.eqK(Id.eqK(), Int.eq(), 1), Int.eq(), 1),
+        AccumT.eqK(StateT.eqK(Option.eqK(), Int.eq(), 1), Int.eq(), 1),
         Int.eq()
       ),
 
       MonadWriterLaws.laws(
-        AccumT.monadWriter(WriterT.monadWriter(Id.monad(), String.monoid()), String.monoid()),
+        AccumT.monadWriter(WriterT.monadWriter(Option.monad(), String.monoid()), String.monoid()),
         String.monoid(), Gen.string(),
-        AccumT.genK(WriterT.genK(Id.genK(), Gen.string()), Gen.string()),
-        AccumT.eqK(WriterT.eqK(Id.eqK(), String.eq()), String.eq(), ""),
+        AccumT.genK(WriterT.genK(Option.genK(), Gen.string()), Gen.string()),
+        AccumT.eqK(WriterT.eqK(Option.eqK(), String.eq()), String.eq(), ""),
         String.eq()
       ),
 
       MonadReaderLaws.laws(
-        AccumT.monadReader(Kleisli.monadReader<String, ForId>(Id.monad()), String.monoid()),
-        AccumT.genK(Kleisli.genK<String, ForId>(Id.genK()), Gen.string()),
-        Gen.string(), AccumT.eqK(Kleisli.eqK(Id.eqK(), ""), String.eq(), ""), String.eq()
+        AccumT.monadReader(Kleisli.monadReader<String, ForOption>(Option.monad()), String.monoid()),
+        AccumT.genK(Kleisli.genK<String, ForOption>(Option.genK()), Gen.string()),
+        Gen.string(), AccumT.eqK(Kleisli.eqK(Option.eqK(), ""), String.eq(), ""), String.eq()
       ),
 
       MonadPlusLaws.laws(
@@ -124,20 +121,20 @@ class AccumTTest : UnitSpec() {
     "AccumT: flatMap combines State" {
       flatMapCombinesState(
         String.monoid(),
-        Id.monad(),
+        Option.monad(),
         Gen.string(),
         Gen.bool(),
-        Id.eqK().liftEq(String.eq())
+        Option.eqK().liftEq(String.eq())
       )
     }
 
     "AccumT: ap combines State" {
       apCombinesState(
         String.monoid(),
-        Id.monad(),
+        Option.monad(),
         Gen.string(),
         Gen.bool(),
-        Id.eqK().liftEq(String.eq())
+        Option.eqK().liftEq(String.eq())
       )
     }
 

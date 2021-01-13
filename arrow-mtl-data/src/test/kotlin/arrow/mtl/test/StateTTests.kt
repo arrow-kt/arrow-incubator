@@ -1,14 +1,10 @@
 package arrow.mtl.test
 
-import arrow.core.ForId
 import arrow.core.ForListK
 import arrow.core.ForOption
-import arrow.core.Id
 import arrow.core.ListK
 import arrow.core.Option
 import arrow.core.extensions.eq
-import arrow.core.extensions.id.eqK.eqK
-import arrow.core.extensions.id.monad.monad
 import arrow.core.extensions.listk.eqK.eqK
 import arrow.core.extensions.listk.monadLogic.monadLogic
 import arrow.core.extensions.monoid
@@ -99,16 +95,16 @@ class StateTTests : UnitSpec() {
       ),
 
       MonadReaderLaws.laws(
-        StateT.monadReader<Int, KleisliPartialOf<Int, ForId>, Int>(Kleisli.monadReader(Id.monad())),
-        StateT.genK(Kleisli.genK<Int, ForId>(Id.genK()), Gen.int()), Gen.int(),
-        StateT.eqK<Int, KleisliPartialOf<Int, ForId>>(Kleisli.eqK(Id.eqK(), 1), Int.eq(), 0), Int.eq()
+        StateT.monadReader<Int, KleisliPartialOf<Int, ForOption>, Int>(Kleisli.monadReader(Option.monad())),
+        StateT.genK(Kleisli.genK<Int, ForOption>(Option.genK()), Gen.int()), Gen.int(),
+        StateT.eqK<Int, KleisliPartialOf<Int, ForOption>>(Kleisli.eqK(Option.eqK(), 1), Int.eq(), 0), Int.eq()
       ),
 
       MonadWriterLaws.laws(
-        StateT.monadWriter<Int, WriterTPartialOf<String, ForId>, String>(WriterT.monadWriter(Id.monad(), String.monoid())),
+        StateT.monadWriter<Int, WriterTPartialOf<String, ForOption>, String>(WriterT.monadWriter(Option.monad(), String.monoid())),
         String.monoid(), Gen.string(),
-        StateT.genK(WriterT.genK(Id.genK(), Gen.string()), Gen.int()),
-        StateT.eqK(WriterT.eqK(Id.eqK(), String.eq()), Int.eq(), 1), String.eq()
+        StateT.genK(WriterT.genK(Option.genK(), Gen.string()), Gen.int()),
+        StateT.eqK(WriterT.eqK(Option.eqK(), String.eq()), Int.eq(), 1), String.eq()
       )
     )
   }
