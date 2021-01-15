@@ -17,7 +17,7 @@ apply from: "$SUB_PROJECT"
 apply from: "$DOC_VALIDATION"
 
 dependencies {
-    compileOnly "io.arrow-kt:arrow-optics-mtl:$VERSION_NAME"
+    compileOnly "io.arrow-kt:arrow-optics:$VERSION_NAME"
     compileOnly "io.arrow-kt:arrow-ui:$VERSION_NAME"
     compileOnly "io.arrow-kt:arrow-fx:$VERSION_NAME"
     compileOnly "io.arrow-kt:arrow-fx-reactor:$VERSION_NAME"
