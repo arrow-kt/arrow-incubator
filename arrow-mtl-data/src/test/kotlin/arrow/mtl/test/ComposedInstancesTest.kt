@@ -7,12 +7,10 @@ import arrow.core.ForListK
 import arrow.core.ForNonEmptyList
 import arrow.core.ForOption
 import arrow.core.ForTuple2
-import arrow.core.Function1
 import arrow.core.ListK
 import arrow.core.NonEmptyList
 import arrow.core.Option
 import arrow.core.Tuple2
-import arrow.core.extensions.function1.contravariant.contravariant
 import arrow.core.extensions.listk.eqK.eqK
 import arrow.core.extensions.listk.monoidK.monoidK
 import arrow.core.extensions.listk.semigroupK.semigroupK
@@ -35,7 +33,6 @@ import arrow.mtl.typeclasses.ComposedApplicative
 import arrow.mtl.typeclasses.ComposedBifunctor
 import arrow.mtl.typeclasses.ComposedFoldable
 import arrow.mtl.typeclasses.ComposedFunctor
-import arrow.mtl.typeclasses.ComposedInvariantContravariant
 import arrow.mtl.typeclasses.ComposedInvariantCovariant
 import arrow.mtl.typeclasses.ComposedMonoidK
 import arrow.mtl.typeclasses.ComposedSemigroupK
@@ -115,10 +112,6 @@ class ComposedInstancesTest : UnitSpec() {
 
     testLaws(
       InvariantLaws.laws(ComposedInvariantCovariant(Option.functor(), NonEmptyList.functor()), GENK_OPTION_NEL, EQK_OPTION_NEL)
-    )
-
-    testLaws(
-      InvariantLaws.laws(ComposedInvariantContravariant(Option.functor(), Function1.contravariant<Int>()), GENK_OPTION_FN1(Gen.int()), EQK_OPTION_FN1)
     )
 
     testLaws(
