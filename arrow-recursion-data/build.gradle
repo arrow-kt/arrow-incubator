@@ -5,14 +5,13 @@ plugins {
 }
 
 apply from: "$SUB_PROJECT"
-apply from: "$DOC_CREATION"
 
 dependencies {
     compile project(":arrow-free")
     compile project(":arrow-mtl") // For Composed and composing functors
-    compile "io.arrow-kt:arrow-core:$VERSION_NAME"
-    kapt "io.arrow-kt:arrow-meta:$VERSION_NAME"
-    kaptTest "io.arrow-kt:arrow-meta:$VERSION_NAME"
+    compile "io.arrow-kt:arrow-core:$ARROW_VERSION"
+    kapt "io.arrow-kt:arrow-meta:$ARROW_VERSION"
+    kaptTest "io.arrow-kt:arrow-meta:$ARROW_VERSION"
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
     testImplementation "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION", excludeArrow
     testImplementation project(":arrow-incubator-test")

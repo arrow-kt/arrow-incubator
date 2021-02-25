@@ -36,7 +36,7 @@ open class StackSafeMonadContinuation<F, A>(M: Monad<F>, override val context: C
 
   internal fun returnedMonad(): Free<F, A> = returnedMonad
 
-  override suspend fun <A> Kind<F, A>.invoke(): A =
+  override suspend fun <A> Kind<F, A>.bind(): A =
     Free.liftF(this).bind()
 
   override suspend fun <B> Free<F, B>.bind(): B = suspendCoroutineUninterceptedOrReturn { c ->

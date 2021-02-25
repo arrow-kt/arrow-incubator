@@ -6,12 +6,12 @@ plugins {
 apply from: "$SUB_PROJECT"
 
 dependencies {
-    api "io.arrow-kt:arrow-core-test:$VERSION_NAME", excludeArrow
+    api "io.arrow-kt:arrow-core-test:$ARROW_VERSION", excludeArrow
 
     compileOnly project(":arrow-mtl-data")
     compileOnly project(":arrow-free-data")
     compileOnly project(":arrow-recursion-data")
-    compileOnly "io.arrow-kt:arrow-fx:$VERSION_NAME"
+    compileOnly "io.arrow-kt:arrow-fx:$ARROW_VERSION"
     testCompileOnly "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION", excludeArrow
 
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
