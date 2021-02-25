@@ -5,13 +5,12 @@ plugins {
 }
 
 apply from: "$SUB_PROJECT"
-apply from: "$DOC_CREATION"
 
 dependencies {
     compileOnly project(":arrow-mtl")
-    compileOnly "io.arrow-kt:arrow-fx:$VERSION_NAME"
-    kapt "io.arrow-kt:arrow-meta:$VERSION_NAME"
-    kaptTest "io.arrow-kt:arrow-meta:$VERSION_NAME"
+    compileOnly "io.arrow-kt:arrow-fx:$ARROW_VERSION"
+    kapt "io.arrow-kt:arrow-meta:$ARROW_VERSION"
+    kaptTest "io.arrow-kt:arrow-meta:$ARROW_VERSION"
     testCompileOnly "io.kotlintest:kotlintest-runner-junit5:$KOTLIN_TEST_VERSION", excludeArrow
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine:$JUNIT_VINTAGE_VERSION"
 }
