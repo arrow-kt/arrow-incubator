@@ -1,16 +1,10 @@
 package arrow.recursion.pattern
 
-import arrow.Kind
-import arrow.higherkind
-import arrow.recursion.data.Fix
-import arrow.typeclasses.Functor
-
-@higherkind
-data class CofreeF<F, A, B>(val FF: Functor<F>, val head: A, val tail: Kind<F, B>) : CofreeFOf<F, A, B> {
-
-  fun <C> map(f: (B) -> C): CofreeF<F, A, C> = CofreeF(FF, head, FF.run { tail.map(f) })
-
-  companion object
+data class Cofree<A>(val head: A, val tail: suspend () -> A) {
+  fun <B> map(f: (A) -> B): Cofree<B> = Cofree<B>(f(head), { f(tail()) })
 }
 
-typealias CofreeR<F, A> = Fix<CofreeFPartialOf<F, A>>
+data class CofreeF<A, B>(val head: A, val tail: suspend () -> B) {
+  fun <C> map(f: (B) -> C): CofreeF<A, C> = CofreeF(head, { f(tail()) })
+}
+
