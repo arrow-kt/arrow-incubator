@@ -43,4 +43,4 @@ TypeClass(MonadTrans::class).dtMarkdownList()
 
 ank_macro_hierarchy(arrow.mtl.typeclasses.MonadTrans)
 
-[laws_source]: https://github.com/arrow-kt/arrow-core/blob/master/arrow-core/arrow-test/src/main/kotlin/arrow/test/laws/MonadTransLaws.kt
+[laws_source]: https://github.com/arrow-kt/arrow-incubator/blob/main/arrow-incubator-test/src/main/kotlin/arrow/mtl/test/laws/MonadTransLaws.kt
