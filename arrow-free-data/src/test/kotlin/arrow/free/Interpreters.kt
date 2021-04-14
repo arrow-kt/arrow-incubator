@@ -1,10 +1,8 @@
 package arrow.free
 
 import arrow.Kind
-import arrow.core.ForId
 import arrow.core.ForOption
 import arrow.core.FunctionK
-import arrow.core.Id
 import arrow.core.Option
 import arrow.core.Some
 import arrow.core.fix
@@ -80,29 +78,5 @@ val nonEmptyListApInterpreter: FunctionK<OpsAp.F, ForNonEmptyList> = object : Fu
       is OpsAp.Subtract -> NonEmptyList.of(op.a - op.y)
       is OpsAp.Value -> NonEmptyList.of(op.a)
     } as NonEmptyList<A>
-  }
-}
-
-@Suppress("UNCHECKED_CAST")
-val idInterpreter: FunctionK<ForOps, ForId> = object : FunctionK<ForOps, ForId> {
-  override fun <A> invoke(fa: Kind<ForOps, A>): Id<A> {
-    val op = fa.fix()
-    return when (op) {
-      is Ops.Add -> Id(op.a + op.y)
-      is Ops.Subtract -> Id(op.a - op.y)
-      is Ops.Value -> Id(op.a)
-    } as Id<A>
-  }
-}
-
-@Suppress("UNCHECKED_CAST")
-val idApInterpreter: FunctionK<OpsAp.F, ForId> = object : FunctionK<OpsAp.F, ForId> {
-  override fun <A> invoke(fa: Kind<OpsAp.F, A>): Id<A> {
-    val op = fa.fix()
-    return when (op) {
-      is OpsAp.Add -> Id(op.a + op.y)
-      is OpsAp.Subtract -> Id(op.a - op.y)
-      is OpsAp.Value -> Id(op.a)
-    } as Id<A>
   }
 }

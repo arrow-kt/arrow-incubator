@@ -1,18 +1,15 @@
 package arrow.free
 
 import arrow.Kind
-import arrow.core.ForId
+import arrow.core.ForOption
 import arrow.core.FunctionK
-import arrow.core.Id
 import arrow.core.NonEmptyList
 import arrow.core.Option
 import arrow.core.Some
-import arrow.core.extensions.id.foldable.foldable
-import arrow.core.extensions.id.monad.monad
-import arrow.core.extensions.id.traverse.traverse
 import arrow.core.extensions.nonemptylist.monad.monad
+import arrow.core.extensions.option.foldable.foldable
 import arrow.core.extensions.option.monad.monad
-import arrow.core.value
+import arrow.core.extensions.option.traverse.traverse
 import arrow.free.extensions.FreeEq
 import arrow.free.extensions.FreeMonad
 import arrow.free.extensions.free.applicative.applicative
@@ -63,9 +60,9 @@ class FreeTest : UnitSpec() {
   }.fix()
 
   init {
-    val IdMonad = Id.monad()
+    val optionMonad = Option.monad()
 
-    val EQ: FreeEq<ForOps, ForId, Int> = Free.eq(IdMonad, idInterpreter)
+    val EQ: FreeEq<ForOps, ForOption, Int> = Free.eq(optionMonad, optionInterpreter)
 
     fun <S> freeGENK() = object : GenK<FreePartialOf<S>> {
       override fun <A> genK(gen: Gen<A>): Gen<Kind<FreePartialOf<S>, A>> =
@@ -77,16 +74,16 @@ class FreeTest : UnitSpec() {
     val opsEQK = object : EqK<FreePartialOf<ForOps>> {
       override fun <A> Kind<FreePartialOf<ForOps>, A>.eqK(other: Kind<FreePartialOf<ForOps>, A>, EQ: Eq<A>): Boolean =
         (this.fix() to other.fix()).let {
-          Free.eq<ForOps, ForId, A>(IdMonad, idInterpreter).run {
+          Free.eq<ForOps, ForOption, A>(optionMonad, optionInterpreter).run {
             it.first.eqv(it.second)
           }
         }
     }
 
-    val idEQK = object : EqK<FreePartialOf<ForId>> {
-      override fun <A> Kind<FreePartialOf<ForId>, A>.eqK(other: Kind<FreePartialOf<ForId>, A>, EQ: Eq<A>): Boolean =
+    val optionEq = object : EqK<FreePartialOf<ForOption>> {
+      override fun <A> Kind<FreePartialOf<ForOption>, A>.eqK(other: Kind<FreePartialOf<ForOption>, A>, EQ: Eq<A>): Boolean =
         (this.fix() to other.fix()).let {
-          Free.eq<ForId, ForId, A>(Id.monad(), FunctionK.id()).run {
+          Free.eq<ForOption, ForOption, A>(Option.monad(), FunctionK.id()).run {
             it.first.eqv(it.second)
           }
         }
@@ -101,17 +98,13 @@ class FreeTest : UnitSpec() {
       EqLaws.laws(EQ, Gen.ops(Gen.int())),
       // TODO
       // MonadLaws.laws(Ops, opsGENK(), opsEQK),
-      MonadLaws.laws(Free.monad(), Free.functor(), Free.applicative(), Free.monad(), freeGENK(), idEQK),
-      FoldableLaws.laws(Free.foldable(Id.foldable()), freeGENK()),
-      TraverseLaws.laws(Free.traverse(Id.traverse()), freeGENK(), idEQK)
+      MonadLaws.laws(Free.monad(), Free.functor(), Free.applicative(), Free.monad(), freeGENK(), optionEq),
+      FoldableLaws.laws(Free.foldable(Option.foldable()), freeGENK()),
+      TraverseLaws.laws(Free.traverse(Option.traverse()), freeGENK(), optionEq)
     )
 
     "Can interpret an ADT as Free operations to Option" {
       program.foldMap(optionInterpreter, Option.monad()) shouldBe Some(-30)
-    }
-
-    "Can interpret an ADT as Free operations to Id" {
-      program.foldMap(idInterpreter, IdMonad) shouldBe Id(-30)
     }
 
     "Can interpret an ADT as Free operations to NonEmptyList" {
@@ -121,17 +114,17 @@ class FreeTest : UnitSpec() {
     "foldMap is stack safe" {
       val n = 50000
       val hugeProg = stackSafeTestProgram(0, n)
-      hugeProg.foldMap(idInterpreter, IdMonad).value() shouldBe n
+      hugeProg.foldMap(optionInterpreter, optionMonad) shouldBe Some(n)
     }
 
     "free should support fx syntax" {
       val n1 = 1
       val n2 = 2
-      Free.fx<ForId, Int> {
-        val v1 = Free.just<ForId, Int>(n1).bind()
-        val v2 = Free.just<ForId, Int>(n2).bind()
+      Free.fx<ForOption, Int> {
+        val v1 = Free.just<ForOption, Int>(n1).bind()
+        val v2 = Free.just<ForOption, Int>(n2).bind()
         v1 + v2
-      }.run(Id.monad()) shouldBe Id(n1 + n2)
+      }.run(Option.monad()) shouldBe Some(n1 + n2)
     }
   }
 }

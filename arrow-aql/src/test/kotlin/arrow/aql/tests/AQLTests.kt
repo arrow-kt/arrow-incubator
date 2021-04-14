@@ -23,6 +23,7 @@ import arrow.aql.extensions.option.select.query
 import arrow.aql.extensions.option.select.select
 import arrow.aql.extensions.option.select.value
 import arrow.core.Option
+import arrow.core.value
 import arrow.core.Some
 import arrow.core.None
 import arrow.core.extensions.order

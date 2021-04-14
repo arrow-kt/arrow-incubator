@@ -2,9 +2,8 @@ package arrow.mtl.test
 
 import arrow.Kind
 import arrow.core.Const
-import arrow.core.ForId
+import arrow.core.ForOption
 import arrow.core.ForNonEmptyList
-import arrow.core.Id
 import arrow.core.NonEmptyList
 import arrow.core.None
 import arrow.core.Option
@@ -12,8 +11,8 @@ import arrow.core.Some
 import arrow.core.extensions.const.divisible.divisible
 import arrow.core.extensions.const.eqK.eqK
 import arrow.core.extensions.eq
-import arrow.core.extensions.id.eqK.eqK
-import arrow.core.extensions.id.monad.monad
+import arrow.core.extensions.option.eqK.eqK
+import arrow.core.extensions.option.monad.monad
 import arrow.core.extensions.monoid
 import arrow.core.extensions.nonemptylist.eqK.eqK
 import arrow.core.extensions.nonemptylist.monad.monad
@@ -21,6 +20,7 @@ import arrow.core.extensions.option.eqK.eqK
 import arrow.core.extensions.option.monad.monad
 import arrow.core.extensions.option.traverseFilter.traverseFilter
 import arrow.core.test.UnitSpec
+import arrow.core.test.generators.GenK
 import arrow.core.test.generators.genK
 import arrow.core.test.laws.DivisibleLaws
 import arrow.core.test.laws.FunctorFilterLaws
@@ -86,9 +86,14 @@ class OptionTTest : UnitSpec() {
 
   val ioEQK = OptionT.eqK<ForIO>(IO.eqK())
 
+  fun someK() = object : GenK<ForOption> {
+    override fun <A> genK(gen: Gen<A>): Gen<Kind<ForOption, A>> =
+      gen.map(::Some) as Gen<Kind<ForOption, A>>
+  }
+
   init {
 
-    val nestedEQK = OptionT.eqK(Id.eqK()).nested(OptionT.eqK(NonEmptyList.eqK()))
+    val nestedEQK = OptionT.eqK(Option.eqK()).nested(OptionT.eqK(NonEmptyList.eqK()))
 
     testLaws(
       ConcurrentLaws.laws<OptionTPartialOf<ForIO>>(
@@ -107,9 +112,9 @@ class OptionTTest : UnitSpec() {
         OptionT.eqK(Option.eqK())),
 
       FunctorFilterLaws.laws(
-        ComposedFunctorFilter(OptionT.functorFilter(Id.monad()),
+        ComposedFunctorFilter(OptionT.functorFilter(Option.monad()),
           OptionT.functorFilter(NonEmptyList.monad())),
-        OptionT.genK(Id.genK()).nested(OptionT.genK(NonEmptyList.genK())),
+        OptionT.genK(Option.genK()).nested(OptionT.genK(NonEmptyList.genK())),
         nestedEQK),
 
       MonoidKLaws.laws(
@@ -139,34 +144,34 @@ class OptionTTest : UnitSpec() {
 
       MonadTransLaws.laws(
         OptionT.monadTrans(),
-        Id.monad(),
-        OptionT.monad(Id.monad()),
-        Id.genK(),
-        OptionT.eqK(Id.eqK())
+        Option.monad(),
+        OptionT.monad(Option.monad()),
+        Option.genK(),
+        OptionT.eqK(Option.eqK())
       ),
 
       MonadPlusLaws.laws(
-        OptionT.monadPlus(Id.monad()),
-        OptionT.genK(Id.genK()),
-        OptionT.eqK(Id.eqK())
+        OptionT.monadPlus(Option.monad()),
+        OptionT.genK(someK()),
+        OptionT.eqK(Option.eqK())
       ),
 
       MonadReaderLaws.laws(
-        OptionT.monadReader<KleisliPartialOf<Int, ForId>, Int>(Kleisli.monadReader(Id.monad())),
-        OptionT.genK(Kleisli.genK<Int, ForId>(Id.genK())), Gen.int(),
-        OptionT.eqK(Kleisli.eqK(Id.eqK(), 1)), Int.eq()
+        OptionT.monadReader<KleisliPartialOf<Int, ForOption>, Int>(Kleisli.monadReader(Option.monad())),
+        OptionT.genK(Kleisli.genK<Int, ForOption>(Option.genK())), Gen.int(),
+        OptionT.eqK(Kleisli.eqK(Option.eqK(), 1)), Int.eq()
       ),
 
       MonadWriterLaws.laws(
-        OptionT.monadWriter(WriterT.monadWriter(Id.monad(), String.monoid())), String.monoid(), Gen.string(),
-        OptionT.genK(WriterT.genK(Id.genK(), Gen.string())),
-        OptionT.eqK(WriterT.eqK(Id.eqK(), String.eq())), String.eq()
+        OptionT.monadWriter(WriterT.monadWriter(Option.monad(), String.monoid())), String.monoid(), Gen.string(),
+        OptionT.genK(WriterT.genK(Option.genK(), Gen.string())),
+        OptionT.eqK(WriterT.eqK(Option.eqK(), String.eq())), String.eq()
       ),
 
       MonadStateLaws.laws(
-        OptionT.monadState<StateTPartialOf<Int, ForId>, Int>(StateT.monadState(Id.monad())),
-        OptionT.genK(StateT.genK(Id.genK(), Gen.int())), Gen.int(),
-        OptionT.eqK(StateT.eqK(Id.eqK(), Int.eq(), 1)), Int.eq()
+        OptionT.monadState<StateTPartialOf<Int, ForOption>, Int>(StateT.monadState(Option.monad())),
+        OptionT.genK(StateT.genK(Option.genK(), Gen.int())), Gen.int(),
+        OptionT.eqK(StateT.eqK(Option.eqK(), Int.eq(), 1)), Int.eq()
       )
     )
 

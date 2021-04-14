@@ -5,20 +5,18 @@ import arrow.core.Const
 import arrow.core.ConstPartialOf
 import arrow.core.Either
 import arrow.core.ForConst
-import arrow.core.ForId
-import arrow.core.Id
+import arrow.core.ForOption
 import arrow.core.Left
 import arrow.core.Option
 import arrow.core.Right
 import arrow.core.extensions.const.divisible.divisible
 import arrow.core.extensions.const.eqK.eqK
 import arrow.core.extensions.eq
-import arrow.core.extensions.id.eqK.eqK
-import arrow.core.extensions.id.monad.monad
-import arrow.core.extensions.id.traverse.traverse
 import arrow.core.extensions.monoid
+import arrow.core.extensions.option.eqK.eqK
 import arrow.core.extensions.option.functor.functor
-import arrow.fx.IO
+import arrow.core.extensions.option.monad.monad
+import arrow.core.extensions.option.traverse.traverse
 import arrow.core.test.UnitSpec
 import arrow.core.test.generators.genK
 import arrow.core.test.generators.throwable
@@ -27,13 +25,13 @@ import arrow.core.test.laws.DivisibleLaws
 import arrow.core.test.laws.MonadErrorLaws
 import arrow.core.test.laws.TraverseLaws
 import arrow.fx.ForIO
-import arrow.fx.test.eq.eqK
-import arrow.fx.extensions.io.applicative.applicative
+import arrow.fx.IO
 import arrow.fx.extensions.io.concurrent.concurrent
 import arrow.fx.extensions.io.functor.functor
 import arrow.fx.extensions.io.monad.monad
 import arrow.fx.mtl.concurrent
 import arrow.fx.mtl.timer
+import arrow.fx.test.eq.eqK
 import arrow.fx.test.eq.throwableEq
 import arrow.fx.test.generators.genK
 import arrow.fx.test.laws.ConcurrentLaws
@@ -75,7 +73,7 @@ import io.kotlintest.properties.forAll
 class EitherTTest : UnitSpec() {
 
   init {
-    val idEQK: EqK<Kind<Kind<ForEitherT, Int>, ForId>> = EitherT.eqK(Id.eqK(), Int.eq())
+    val idEQK: EqK<Kind<Kind<ForEitherT, Int>, ForOption>> = EitherT.eqK(Option.eqK(), Int.eq())
 
     val ioEQK: EqK<EitherTPartialOf<String, ForIO>> = EitherT.eqK(IO.eqK(), Eq.any())
 
@@ -89,8 +87,8 @@ class EitherTTest : UnitSpec() {
       ),
 
       AlternativeLaws.laws(
-        EitherT.alternative(Id.monad(), Int.monoid()),
-        EitherT.genK(Id.genK(), Gen.int()),
+        EitherT.alternative(Option.monad(), Int.monoid()),
+        EitherT.genK(Option.genK(), Gen.int()),
         idEQK
       ),
 
@@ -104,36 +102,36 @@ class EitherTTest : UnitSpec() {
         ioEQK
       ),
 
-      TraverseLaws.laws(EitherT.traverse<Int, ForId>(Id.traverse()),
-        EitherT.genK(Id.genK(), Gen.int()),
+      TraverseLaws.laws(EitherT.traverse<Int, ForOption>(Option.traverse()),
+        EitherT.genK(Option.genK(), Gen.int()),
         idEQK
       ),
 
-      MonadErrorLaws.laws<EitherTPartialOf<Throwable, ForId>>(
-        EitherT.monadError(Id.monad()),
-        EitherT.functor(Id.monad()),
-        EitherT.apply(Id.monad()),
-        EitherT.monad(Id.monad()),
-        EitherT.genK(Id.genK(), Gen.throwable()),
-        EitherT.eqK(Id.eqK(), throwableEq())
+      MonadErrorLaws.laws<EitherTPartialOf<Throwable, ForOption>>(
+        EitherT.monadError(Option.monad()),
+        EitherT.functor(Option.monad()),
+        EitherT.apply(Option.monad()),
+        EitherT.monad(Option.monad()),
+        EitherT.genK(Option.genK(), Gen.throwable()),
+        EitherT.eqK(Option.eqK(), throwableEq())
       ),
 
       MonadReaderLaws.laws(
-        EitherT.monadReader<String, KleisliPartialOf<String, ForId>, String>(Kleisli.monadReader(Id.monad())),
-        EitherT.genK(Kleisli.genK<String, ForId>(Id.genK()), Gen.string()),
-        Gen.string(), EitherT.eqK(Kleisli.eqK(Id.eqK(), "H"), String.eq()), String.eq()
+        EitherT.monadReader<String, KleisliPartialOf<String, ForOption>, String>(Kleisli.monadReader(Option.monad())),
+        EitherT.genK(Kleisli.genK<String, ForOption>(Option.genK()), Gen.string()),
+        Gen.string(), EitherT.eqK(Kleisli.eqK(Option.eqK(), "H"), String.eq()), String.eq()
       ),
 
       MonadWriterLaws.laws(
-        EitherT.monadWriter<String, WriterTPartialOf<String, ForId>, String>(WriterT.monadWriter(Id.monad(), String.monoid())),
-        String.monoid(), Gen.string(), EitherT.genK(WriterT.genK(Id.genK(), Gen.string()), Gen.string()),
-        EitherT.eqK(WriterT.eqK(Id.eqK(), String.eq()), String.eq()), String.eq()
+        EitherT.monadWriter<String, WriterTPartialOf<String, ForOption>, String>(WriterT.monadWriter(Option.monad(), String.monoid())),
+        String.monoid(), Gen.string(), EitherT.genK(WriterT.genK(Option.genK(), Gen.string()), Gen.string()),
+        EitherT.eqK(WriterT.eqK(Option.eqK(), String.eq()), String.eq()), String.eq()
       ),
 
       MonadStateLaws.laws(
-        EitherT.monadState<String, StateTPartialOf<Int, ForId>, Int>(StateT.monadState(Id.monad())),
-        EitherT.genK(StateT.genK(Id.genK(), Gen.int()), Gen.string()), Gen.int(),
-        EitherT.eqK(StateT.eqK(Id.eqK(), Int.eq(), 1), String.eq()), Int.eq()
+        EitherT.monadState<String, StateTPartialOf<Int, ForOption>, Int>(StateT.monadState(Option.monad())),
+        EitherT.genK(StateT.genK(Option.genK(), Gen.int()), Gen.string()), Gen.int(),
+        EitherT.eqK(StateT.eqK(Option.eqK(), Int.eq(), 1), String.eq()), Int.eq()
       )
     )
 

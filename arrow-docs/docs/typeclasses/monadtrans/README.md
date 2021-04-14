@@ -10,13 +10,13 @@ MonadTrans is a typeclass that abstracts lifting arbitray monadic computations i
 
 ```kotlin:ank
 import arrow.mtl.extensions.optiont.monadTrans.monadTrans
-import arrow.core.extensions.id.monad.monad
+import arrow.core.extensions.eval.monad.monad
 import arrow.core.extensions.*
 import arrow.core.*
 import arrow.mtl.*
 
 OptionT.monadTrans().run {
-  Id.just("hello").liftT(Id.monad())
+  Eval.just("hello").liftT(Eval.monad())
 }
 ```
 

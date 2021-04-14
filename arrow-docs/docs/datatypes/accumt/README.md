@@ -9,19 +9,19 @@ permalink: /arrow/mtl/accumt/
 `AccumT` is a monad transformer, which adds accumulation capabilities to a given monad.
 
 ```kotlin:ank
-import arrow.core.extensions.id.monad.monad
+import arrow.core.extensions.eval.monad.monad
 import arrow.core.extensions.*
 import arrow.core.*
 import arrow.mtl.*
 
-val accumT1: AccumT<String, ForId, Int> = AccumT {
-    s: String -> Id.just("#1" toT 1)
+val accumT1: AccumT<String, ForEval, Int> = AccumT {
+    s: String -> Eval.just("#1" toT 1)
 }
-val accumT2: AccumT<String, ForId, Int> = AccumT {
-    s: String -> Id.just("#2" toT 2)
+val accumT2: AccumT<String, ForEval, Int> = AccumT {
+    s: String -> Eval.just("#2" toT 2)
 }
 
-accumT1.flatMap(String.monoid(), Id.monad()) {
+accumT1.flatMap(String.monoid(), Eval.monad()) {
     accumT2
-}.execAccumT(Id.monad(), "a")
+}.execAccumT(Eval.monad(), "a")
 ```
